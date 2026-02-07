@@ -4,11 +4,12 @@ Monitor campsite availability on Recreation.gov and get notified when sites open
 
 ## Architecture
 
-- **Frontend** — React + Vite + TypeScript + SCSS Modules
-- **Backend** — Express + TypeScript + SQLite (better-sqlite3 + Drizzle ORM)
+- **Frontend** — React + Vite + TypeScript + SCSS Modules + React Router + TanStack Query
+- **Backend** — Express + TypeScript + SQLite (better-sqlite3 + Drizzle ORM) + Helmet + Compression
+- **HTTP** — Axios
 - **Auth** — Firebase Auth (Google sign-in)
 - **Notifications** — Resend (email)
-- **Scheduler** — node-cron (in-process, every 15 min)
+- **Scheduler** — node-cron (in-process, default every 15 min, configurable via `CHECK_INTERVAL`)
 - **Monorepo** — Nx
 
 ```
@@ -50,6 +51,10 @@ npx nx serve web
 
 # Build both
 npx nx run-many -t build
+
+# Run tests
+npx nx test web
+npx nx test api
 ```
 
 ### Environment Variables
@@ -60,9 +65,12 @@ See `.env.example` for the full list. Key variables:
 |---|---|---|
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | Backend | Firebase Admin service account JSON (single line) |
 | `RESEND_API_KEY` | Backend | Resend API key for email notifications |
+| `RESEND_FROM_EMAIL` | Backend | Sender address for notification emails |
 | `RIDB_API_KEY` | Backend | Recreation.gov RIDB API key |
 | `DATABASE_PATH` | Backend | Path to SQLite database file |
 | `CORS_ORIGIN` | Backend | Frontend URL for CORS |
+| `CHECK_INTERVAL` | Backend | Cron expression for availability checks (default: `*/15 * * * *`) |
+| `PORT` | Backend | API server port (default: `3333`) |
 | `VITE_FIREBASE_*` | Frontend | Firebase client configuration |
 | `VITE_API_URL` | Frontend | Backend API URL |
 
@@ -70,10 +78,8 @@ See `.env.example` for the full list. Key variables:
 
 ### Frontend (Netlify)
 
-1. Connect the repo to Netlify
-2. Build command: `npx nx build web`
-3. Publish directory: `dist/apps/web`
-4. Set `VITE_*` environment variables in Netlify dashboard
+1. Connect the repo to Netlify — `netlify.toml` configures the build command, publish directory, and SPA redirects automatically
+2. Set `VITE_*` environment variables in the Netlify dashboard
 
 ### Backend (Railway)
 
@@ -85,6 +91,8 @@ See `.env.example` for the full list. Key variables:
 
 ## API Routes
 
+All routes except `/health` require a Firebase Auth bearer token.
+
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/health` | Health check (no auth) |
@@ -93,7 +101,7 @@ See `.env.example` for the full list. Key variables:
 | `PATCH` | `/api/watches/:id` | Update a watch |
 | `DELETE` | `/api/watches/:id` | Delete a watch |
 | `GET` | `/api/watches/:id/availability` | Get availability for a watch |
-| `GET` | `/api/campsites/search?q=` | Search campgrounds/campsites |
+| `GET` | `/api/campsites/search?q=&facilityId=` | Search campgrounds/campsites |
 
 ## License
 
