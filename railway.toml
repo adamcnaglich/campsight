@@ -1,5 +1,13 @@
 [build]
   buildCommand = "npx nx build api"
+  watchPatterns = [
+    "apps/api/**",
+    "libs/shared/**",
+    "package.json",
+    "package-lock.json",
+    "tsconfig.base.json",
+    "nx.json"
+  ]
 
 [deploy]
   startCommand = "node dist/apps/api/main.js"
