@@ -1,0 +1,121 @@
+import { z } from 'zod';
+
+// ─── User ──────────────────────────────────────────────────────────────────────
+
+export const userSchema = z.object({
+  id: z.string(), // Firebase UID
+  email: z.string().email(),
+  displayName: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type User = z.infer<typeof userSchema>;
+
+// ─── Watch ─────────────────────────────────────────────────────────────────────
+
+export const createWatchSchema = z.object({
+  campsiteId: z.string().min(1),
+  campsiteName: z.string().min(1),
+  campgroundName: z.string().min(1),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
+});
+
+export type CreateWatchDTO = z.infer<typeof createWatchSchema>;
+
+export const updateWatchSchema = z.object({
+  isActive: z.boolean().optional(),
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD')
+    .optional(),
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD')
+    .optional(),
+});
+
+export type UpdateWatchDTO = z.infer<typeof updateWatchSchema>;
+
+export const watchSchema = z.object({
+  id: z.number(),
+  userId: z.string(),
+  campsiteId: z.string(),
+  campsiteName: z.string(),
+  campgroundName: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+});
+
+export type Watch = z.infer<typeof watchSchema>;
+
+// ─── Availability ──────────────────────────────────────────────────────────────
+
+export const availabilityStatusEnum = z.enum([
+  'Available',
+  'Reserved',
+  'Not Available',
+  'Not Reservable',
+  'Not Reservable Management',
+  'Lottery',
+  'Open',
+]);
+
+export type AvailabilityStatus = z.infer<typeof availabilityStatusEnum>;
+
+export const availabilitySnapshotSchema = z.object({
+  id: z.number(),
+  watchId: z.number(),
+  date: z.string(), // ISO date YYYY-MM-DD
+  status: z.string(),
+  capturedAt: z.string(),
+});
+
+export type AvailabilitySnapshot = z.infer<typeof availabilitySnapshotSchema>;
+
+// Map of ISO date string -> status from recreation.gov API
+export type AvailabilityMap = Record<string, string>;
+
+// ─── Notification Log ──────────────────────────────────────────────────────────
+
+export const notificationLogSchema = z.object({
+  id: z.number(),
+  userId: z.string(),
+  watchId: z.number(),
+  sentAt: z.string(),
+  channel: z.enum(['email', 'push']),
+  payload: z.string(), // JSON string
+});
+
+export type NotificationLog = z.infer<typeof notificationLogSchema>;
+
+// ─── API Response Wrappers ─────────────────────────────────────────────────────
+
+export interface ApiResponse<T> {
+  data: T;
+  error?: never;
+}
+
+export interface ApiError {
+  data?: never;
+  error: {
+    message: string;
+    code?: string;
+  };
+}
+
+export type ApiResult<T> = ApiResponse<T> | ApiError;
+
+// ─── Campsite Search (proxy to RIDB) ──────────────────────────────────────────
+
+export interface CampsiteSearchResult {
+  campsiteId: string;
+  campsiteName: string;
+  campgroundName: string;
+  facilityId: string;
+  loop: string;
+  type: string;
+}

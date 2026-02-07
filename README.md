@@ -1,96 +1,100 @@
-# Campsight
+# CampSight
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Monitor campsite availability on Recreation.gov and get notified when sites open up.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Architecture
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Frontend** — React + Vite + TypeScript + SCSS Modules
+- **Backend** — Express + TypeScript + SQLite (better-sqlite3 + Drizzle ORM)
+- **Auth** — Firebase Auth (Google sign-in)
+- **Notifications** — Resend (email)
+- **Scheduler** — node-cron (in-process, every 15 min)
+- **Monorepo** — Nx
 
-## Run tasks
-
-To run tasks with Nx use:
-
-```sh
-npx nx <target> <project-name>
+```
+campsight/
+  apps/
+    web/         React SPA (Vite)
+    api/         Express REST API
+  libs/
+    shared/      Shared types, Zod schemas
 ```
 
-For example:
+## Getting Started
 
-```sh
-npx nx build myproject
+### Prerequisites
+
+- Node.js 18+
+- A Firebase project with Google Auth enabled
+- A Resend account (free tier: 3,000 emails/month)
+- An RIDB API key from https://ridb.recreation.gov
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Copy env file and fill in your values
+cp .env.example .env
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Development
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Start the API (http://localhost:3333)
+npx nx serve api
 
-## Add new projects
+# Start the web app (http://localhost:4200)
+npx nx serve web
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+# Build both
+npx nx run-many -t build
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+### Environment Variables
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
+See `.env.example` for the full list. Key variables:
 
-# Generate a library
-npx nx g @nx/react:lib some-lib
-```
+| Variable | Where | Description |
+|---|---|---|
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Backend | Firebase Admin service account JSON (single line) |
+| `RESEND_API_KEY` | Backend | Resend API key for email notifications |
+| `RIDB_API_KEY` | Backend | Recreation.gov RIDB API key |
+| `DATABASE_PATH` | Backend | Path to SQLite database file |
+| `CORS_ORIGIN` | Backend | Frontend URL for CORS |
+| `VITE_FIREBASE_*` | Frontend | Firebase client configuration |
+| `VITE_API_URL` | Frontend | Backend API URL |
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Deployment
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Frontend (Netlify)
 
-## Set up CI!
+1. Connect the repo to Netlify
+2. Build command: `npx nx build web`
+3. Publish directory: `dist/apps/web`
+4. Set `VITE_*` environment variables in Netlify dashboard
 
-### Step 1
+### Backend (Railway)
 
-To connect to Nx Cloud, run the following command:
+1. Connect the repo to Railway
+2. Railway's Railpack builder auto-detects Node.js (no Dockerfile needed)
+3. `railway.toml` configures build/start commands
+4. Mount a volume in the Railway UI (e.g. at `/data`)
+5. Set `DATABASE_PATH=/data/campsight.db` and other env vars in Railway dashboard
 
-```sh
-npx nx connect
-```
+## API Routes
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Health check (no auth) |
+| `GET` | `/api/watches` | List user's watches |
+| `POST` | `/api/watches` | Create a new watch |
+| `PATCH` | `/api/watches/:id` | Update a watch |
+| `DELETE` | `/api/watches/:id` | Delete a watch |
+| `GET` | `/api/watches/:id/availability` | Get availability for a watch |
+| `GET` | `/api/campsites/search?q=` | Search campgrounds/campsites |
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## License
 
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Private

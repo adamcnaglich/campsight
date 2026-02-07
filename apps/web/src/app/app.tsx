@@ -1,0 +1,76 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext';
+import { Layout } from '../components/Layout/Layout';
+import { Login } from '../pages/Login/Login';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
+import { AddWatch } from '../pages/AddWatch/AddWatch';
+import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
+import { Settings } from '../pages/Settings/Settings';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuthContext();
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
+export function App() {
+  const { user, loading } = useAuthContext();
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          loading ? null : user ? <Navigate to="/" replace /> : <Login />
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/add"
+        element={
+          <ProtectedRoute>
+            <AddWatch />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/watch/:id"
+        element={
+          <ProtectedRoute>
+            <WatchDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default App;
