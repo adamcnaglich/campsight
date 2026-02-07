@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 
+import { log } from './lib/logger';
+import { requestLogger } from './middleware/request-logger';
 import { runMigrations } from './db/migrate';
 import { authMiddleware } from './middleware/auth';
 import watchesRouter from './routes/watches';
@@ -25,6 +27,11 @@ app.use(
 );
 app.use(express.json());
 
+// Request logging — placed after body parsing so it captures response times.
+// It runs before auth so unauthenticated requests are logged too.
+// Authenticated userId/email are attached later via customProps.
+app.use(requestLogger);
+
 // Health check (no auth)
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -37,10 +44,12 @@ app.use('/api/campsites', authMiddleware, campsitesRouter);
 // Start server
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
-  console.log(`[API] Listening at http://localhost:${port}`);
+  log.api.info({ port: Number(port) }, `Server listening at http://localhost:${port}`);
 
   // Start the availability check scheduler
   startScheduler();
 });
 
-server.on('error', console.error);
+server.on('error', (err) => {
+  log.api.fatal({ err }, 'Server error');
+});

@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { format, parseISO } from 'date-fns';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
+import { log } from '../lib/logger';
 
 const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
 
@@ -32,7 +33,7 @@ export async function sendAvailabilityNotification(
     .get();
 
   if (!user) {
-    console.error(`[NOTIFY] User not found: ${userId}`);
+    log.notify.error({ userId }, 'User not found for notification');
     return;
   }
 
@@ -51,7 +52,7 @@ export async function sendAvailabilityNotification(
   // Send email via Resend
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    console.warn('[NOTIFY] RESEND_API_KEY not set, skipping email');
+    log.notify.warn('RESEND_API_KEY not set, skipping email');
     return;
   }
 
@@ -85,7 +86,10 @@ export async function sendAvailabilityNotification(
       `,
     });
 
-    console.log(`[NOTIFY] Email sent to ${user.email} for watch ${watchId}`);
+    log.notify.info(
+      { userId, watchId, email: user.email, dates: newlyAvailableDates },
+      'Availability notification email sent',
+    );
 
     // Log the notification
     db.insert(schema.notificationsLog)
@@ -97,6 +101,6 @@ export async function sendAvailabilityNotification(
       })
       .run();
   } catch (error) {
-    console.error('[NOTIFY] Failed to send email:', error);
+    log.notify.error({ err: error, userId, watchId }, 'Failed to send notification email');
   }
 }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { firebaseAuth } from '../config/firebase';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
+import { log } from '../lib/logger';
 
 export interface AuthenticatedRequest extends Request {
   userId: string;
@@ -20,6 +21,7 @@ export async function authMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
+    log.auth.warn({ url: req.url }, 'Missing or invalid authorization header');
     return res.status(401).json({ error: { message: 'Missing or invalid authorization header' } });
   }
 
@@ -44,6 +46,7 @@ export async function authMiddleware(
           displayName: name || null,
         })
         .run();
+      log.auth.info({ userId: uid, email }, 'New user registered');
     } else {
       db.update(schema.users)
         .set({ updatedAt: new Date().toISOString() })
@@ -56,7 +59,7 @@ export async function authMiddleware(
 
     next();
   } catch (error) {
-    console.error('[AUTH] Token verification failed:', error);
+    log.auth.error({ err: error, url: req.url }, 'Token verification failed');
     return res.status(401).json({ error: { message: 'Invalid or expired token' } });
   }
 }

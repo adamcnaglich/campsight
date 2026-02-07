@@ -1,10 +1,16 @@
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { CampsiteSearchResult } from '@campsight/shared';
+import { log } from '../lib/logger';
 
 const router = Router();
 
 const RIDB_BASE = 'https://ridb.recreation.gov/api/v1';
+
+/** Helper to extract userId set by auth middleware */
+function getUserId(req: Request): string {
+  return (req as Request & { userId: string }).userId;
+}
 
 /**
  * GET /api/campsites/search?q=<query>&facilityId=<optional>
@@ -14,6 +20,7 @@ const RIDB_BASE = 'https://ridb.recreation.gov/api/v1';
  * We also support searching by facility ID for campground-level lookups.
  */
 router.get('/search', async (req, res: Response) => {
+  const userId = getUserId(req);
   const query = req.query.q as string;
   const facilityId = req.query.facilityId as string | undefined;
 
@@ -68,9 +75,13 @@ router.get('/search', async (req, res: Response) => {
       }));
     }
 
+    log.campsites.info(
+      { userId, query, facilityId, resultCount: results.length },
+      'Campsite search completed',
+    );
     res.json({ data: results });
   } catch (error) {
-    console.error('[CAMPSITES] Search error:', error);
+    log.campsites.error({ err: error, userId, query, facilityId }, 'Failed to search campsites');
     res.status(502).json({ error: { message: 'Failed to search campsites' } });
   }
 });

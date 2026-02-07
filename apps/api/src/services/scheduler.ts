@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { fetchAvailability, diffAvailability } from './availability';
 import { sendAvailabilityNotification } from './notification';
 import { AvailabilityMap } from '@campsight/shared';
+import { log } from '../lib/logger';
 
 const CRON_SCHEDULE = process.env.CHECK_INTERVAL || '*/15 * * * *'; // every 15 min
 
@@ -107,11 +108,11 @@ async function runCheck() {
   const groups = groupActiveWatches();
 
   if (groups.length === 0) {
-    console.log('[SCHEDULER] No active watches to check');
+    log.scheduler.debug('No active watches to check');
     return;
   }
 
-  console.log(`[SCHEDULER] Checking ${groups.length} campsite group(s)...`);
+  log.scheduler.info({ groupCount: groups.length }, 'Starting check cycle');
 
   for (const group of groups) {
     try {
@@ -133,8 +134,9 @@ async function runCheck() {
 
         // Notify if new dates became available
         if (newlyAvailable.length > 0) {
-          console.log(
-            `[SCHEDULER] Watch ${watch.id}: ${newlyAvailable.length} new date(s) available`
+          log.scheduler.info(
+            { watchId: watch.id, userId: watch.userId, newDates: newlyAvailable.length },
+            'New availability detected',
           );
           await sendAvailabilityNotification({
             userId: watch.userId,
@@ -150,34 +152,34 @@ async function runCheck() {
       // Small delay between API calls to be respectful
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error(
-        `[SCHEDULER] Error checking campsite ${group.campsiteId}:`,
-        error
+      log.scheduler.error(
+        { err: error, campsiteId: group.campsiteId },
+        'Error checking campsite availability',
       );
     }
   }
 
-  console.log('[SCHEDULER] Check cycle complete');
+  log.scheduler.info('Check cycle complete');
 }
 
 /**
  * Start the cron scheduler. Abstracted so it can be swapped for BullMQ later.
  */
 export function startScheduler() {
-  console.log(`[SCHEDULER] Starting with schedule: ${CRON_SCHEDULE}`);
+  log.scheduler.info({ schedule: CRON_SCHEDULE }, 'Scheduler started');
 
   cron.schedule(CRON_SCHEDULE, () => {
-    console.log(`[SCHEDULER] Running check at ${new Date().toISOString()}`);
+    log.scheduler.info('Running scheduled check');
     runCheck().catch((err) =>
-      console.error('[SCHEDULER] Unhandled error in check cycle:', err)
+      log.scheduler.error({ err }, 'Unhandled error in check cycle')
     );
   });
 
   // Also run once on startup (after a short delay to let everything initialize)
   setTimeout(() => {
-    console.log('[SCHEDULER] Running initial check...');
+    log.scheduler.info('Running initial check');
     runCheck().catch((err) =>
-      console.error('[SCHEDULER] Initial check error:', err)
+      log.scheduler.error({ err }, 'Initial check error')
     );
   }, 5000);
 }

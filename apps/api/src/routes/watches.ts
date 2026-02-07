@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { db, schema } from '../db';
 import { eq, and, desc } from 'drizzle-orm';
 import { createWatchSchema, updateWatchSchema } from '@campsight/shared';
+import { log } from '../lib/logger';
 
 const router = Router();
 
@@ -29,9 +30,10 @@ router.get('/', async (req, res: Response) => {
       isActive: Boolean(r.isActive),
     }));
 
+    log.watches.debug({ userId, count: data.length }, 'Listed watches');
     res.json({ data });
   } catch (error) {
-    console.error('[WATCHES] List error:', error);
+    log.watches.error({ err: error, userId }, 'Failed to list watches');
     res.status(500).json({ error: { message: 'Failed to list watches' } });
   }
 });
@@ -44,6 +46,7 @@ router.post('/', async (req, res: Response) => {
 
   const parsed = createWatchSchema.safeParse(req.body);
   if (!parsed.success) {
+    log.watches.warn({ userId, errors: parsed.error?.issues }, 'Watch validation failed');
     return res.status(400).json({
       error: { message: 'Validation failed', code: 'VALIDATION_ERROR' },
     });
@@ -59,9 +62,13 @@ router.post('/', async (req, res: Response) => {
       .returning()
       .get();
 
+    log.watches.info(
+      { userId, watchId: result.id, campsiteName: result.campsiteName, campgroundName: result.campgroundName },
+      'Watch created',
+    );
     res.status(201).json({ data: { ...result, isActive: Boolean(result.isActive) } });
   } catch (error) {
-    console.error('[WATCHES] Create error:', error);
+    log.watches.error({ err: error, userId }, 'Failed to create watch');
     res.status(500).json({ error: { message: 'Failed to create watch' } });
   }
 });
@@ -79,6 +86,7 @@ router.patch('/:id', async (req, res: Response) => {
 
   const parsed = updateWatchSchema.safeParse(req.body);
   if (!parsed.success) {
+    log.watches.warn({ userId, watchId, errors: parsed.error?.issues }, 'Watch update validation failed');
     return res.status(400).json({
       error: { message: 'Validation failed', code: 'VALIDATION_ERROR' },
     });
@@ -93,6 +101,7 @@ router.patch('/:id', async (req, res: Response) => {
       .get();
 
     if (!existing) {
+      log.watches.warn({ userId, watchId }, 'Watch not found or not owned by user');
       return res.status(404).json({ error: { message: 'Watch not found' } });
     }
 
@@ -103,9 +112,10 @@ router.patch('/:id', async (req, res: Response) => {
       .returning()
       .get();
 
+    log.watches.info({ userId, watchId, changes: parsed.data }, 'Watch updated');
     res.json({ data: { ...result, isActive: Boolean(result.isActive) } });
   } catch (error) {
-    console.error('[WATCHES] Update error:', error);
+    log.watches.error({ err: error, userId, watchId }, 'Failed to update watch');
     res.status(500).json({ error: { message: 'Failed to update watch' } });
   }
 });
@@ -129,14 +139,19 @@ router.delete('/:id', async (req, res: Response) => {
       .get();
 
     if (!existing) {
+      log.watches.warn({ userId, watchId }, 'Delete attempted on non-existent or unowned watch');
       return res.status(404).json({ error: { message: 'Watch not found' } });
     }
 
     db.delete(schema.watches).where(eq(schema.watches.id, watchId)).run();
 
+    log.watches.info(
+      { userId, watchId, campsiteName: existing.campsiteName },
+      'Watch deleted',
+    );
     res.json({ data: { success: true } });
   } catch (error) {
-    console.error('[WATCHES] Delete error:', error);
+    log.watches.error({ err: error, userId, watchId }, 'Failed to delete watch');
     res.status(500).json({ error: { message: 'Failed to delete watch' } });
   }
 });
@@ -180,6 +195,10 @@ router.get('/:id/availability', async (req, res: Response) => {
       }
     }
 
+    log.watches.debug(
+      { userId, watchId, snapshotCount: latestByDate.size },
+      'Fetched availability',
+    );
     res.json({
       data: {
         watch: { ...watch, isActive: Boolean(watch.isActive) },
@@ -190,7 +209,7 @@ router.get('/:id/availability', async (req, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[WATCHES] Availability error:', error);
+    log.watches.error({ err: error, userId, watchId }, 'Failed to get availability');
     res
       .status(500)
       .json({ error: { message: 'Failed to get availability' } });

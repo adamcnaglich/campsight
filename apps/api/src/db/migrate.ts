@@ -1,5 +1,6 @@
 import { db } from './index';
 import { sql } from 'drizzle-orm';
+import { log } from '../lib/logger';
 
 /**
  * Run migrations using raw SQL.
@@ -69,5 +70,5 @@ export function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications_log(user_id)
   `);
 
-  console.log('[DB] Migrations complete');
+  log.db.info('Migrations complete');
 }
