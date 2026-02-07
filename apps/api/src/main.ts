@@ -37,7 +37,7 @@ app.use('/api/campsites', authMiddleware, campsitesRouter);
 // Start server
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
-  console.log(`🏕️ [API] Listening at http://localhost:${port}`);
+  console.log(`[API] Listening at http://localhost:${port}`);
 
   // Start the availability check scheduler
   startScheduler();
