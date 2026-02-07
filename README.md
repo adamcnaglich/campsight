@@ -77,18 +77,25 @@ See `.env.example` for the full list. Key variables:
 
 ## Deployment
 
-### Frontend (Netlify)
+The app is split across two services:
 
-1. Connect the repo to Netlify — `netlify.toml` configures the build command, publish directory, and SPA redirects automatically
-2. Set `VITE_*` environment variables in the Netlify dashboard
+| Service | Platform | Dashboard |
+|---|---|---|
+| Frontend (React SPA) | Netlify | [camp-sight on Netlify](https://app.netlify.com/projects/camp-sight/overview) |
+| Backend (Express API) | Railway | [campsight on Railway](https://railway.com/project/5b3289c7-0c08-44e4-b61b-a1d5f5d87534) |
 
-### Backend (Railway)
+### Frontend — Netlify
 
-1. Connect the repo to Railway
-2. Railway's Railpack builder auto-detects Node.js (no Dockerfile needed)
-3. `railway.toml` configures build/start commands
-4. Mount a volume in the Railway UI (e.g. at `/data`)
-5. Set `DATABASE_PATH=/data/campsight.db` and other env vars in Railway dashboard
+- **Config** — `netlify.toml` configures the build command (`npx nx build web`), publish directory (`dist/apps/web`), and the SPA catch-all redirect
+- **Deploys** — automatic on push; only triggers when `apps/web/` or `libs/shared/` change (via the `ignore` directive)
+- **Env vars** — set all `VITE_*` variables in the Netlify dashboard → *Site configuration → Environment variables*
+
+### Backend — Railway
+
+- **Config** — `railway.toml` configures the build (`npx nx build api`), start command (`node dist/apps/api/main.js`), health check (`/health`), restart policy, and watch patterns
+- **Deploys** — automatic on push; Railway's Railpack builder auto-detects Node.js (no Dockerfile needed), and only rebuilds when watched paths change (`apps/api/`, `libs/shared/`, root config files)
+- **Volume** — mount a persistent volume in the Railway UI (e.g. at `/data`) for the SQLite database
+- **Env vars** — set `DATABASE_PATH=/data/campsight.db` and other backend env vars in the Railway dashboard → *Variables*
 
 ## Logging
 
