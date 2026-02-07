@@ -44,7 +44,7 @@ app.use('/api/campsites', authMiddleware, campsitesRouter);
 // Start server
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
-  log.api.info('Starting Campsight API 🏕️');
+  log.api.info('🏕️ Starting Campsight API');
   log.api.info(
     { port: Number(port) },
     `Server listening at http://localhost:${port}`,
