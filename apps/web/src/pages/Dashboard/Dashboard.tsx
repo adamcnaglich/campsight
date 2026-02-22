@@ -49,7 +49,7 @@ export function Dashboard() {
             campsite{watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Link to="/add" className={styles.addBtn}>
+        <Link to="/new" className={styles.addBtn}>
           + Add Watch
         </Link>
       </div>
@@ -59,7 +59,7 @@ export function Dashboard() {
           <span className={styles.emptyIcon}>🔭</span>
           <h2>No watches yet</h2>
           <p>Start monitoring campsites to get notified when they become available.</p>
-          <Link to="/add" className={styles.emptyBtn}>
+          <Link to="/new" className={styles.emptyBtn}>
             Add your first watch
           </Link>
         </div>

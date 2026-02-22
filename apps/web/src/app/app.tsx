@@ -48,7 +48,7 @@ export function App() {
         }
       />
       <Route
-        path="/add"
+        path="/new"
         element={
           <ProtectedRoute>
             <AddWatch />

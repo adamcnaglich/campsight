@@ -13,7 +13,7 @@ export function Home() {
           at your fingertips
         </h1>
         <div className={styles.buttons}>
-          <Link to="/add" className={styles.primaryBtn}>
+          <Link to="/new" className={styles.primaryBtn}>
             Start your first watch
           </Link>
           <a href="#learn-more" className={styles.secondaryBtn}>
@@ -115,7 +115,7 @@ export function Home() {
         <div className={styles.ctaInner}>
           <h2>Ready to find your perfect campsite?</h2>
           <p>Start monitoring availability in minutes—completely free.</p>
-          <Link to="/add" className={styles.ctaButton}>
+          <Link to="/new" className={styles.ctaButton}>
             Create Your First Watch
           </Link>
         </div>

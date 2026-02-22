@@ -45,7 +45,7 @@ export function Navbar() {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/add', label: 'Add Watch' },
+    { path: '/new', label: 'New Watch' },
     { path: '/settings', label: 'Settings' },
   ];
 
@@ -90,10 +90,7 @@ export function Navbar() {
                 )}
               </nav>
 
-              <div
-                className={styles.userSection}
-                ref={avatarMenuRef}
-              >
+              <div className={styles.userSection} ref={avatarMenuRef}>
                 <button
                   type="button"
                   className={styles.avatarButton}

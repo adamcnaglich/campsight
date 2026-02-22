@@ -5,16 +5,12 @@
  */
 export function isAdmin(userEmail: string | null | undefined): boolean {
   if (!userEmail) {
-    console.log('[Admin Check] No user email provided');
     return false;
   }
 
   const allowedEmails = import.meta.env.VITE_ADMIN_ALLOWED_EMAILS;
-  console.log('[Admin Check] VITE_ADMIN_ALLOWED_EMAILS:', allowedEmails);
-  console.log('[Admin Check] User email:', userEmail);
   
   if (!allowedEmails) {
-    console.log('[Admin Check] No admin emails configured');
     return false;
   }
 
@@ -25,11 +21,6 @@ export function isAdmin(userEmail: string | null | undefined): boolean {
     .split(',')
     .map((e: string) => e.trim().toLowerCase())
     .filter(Boolean);
-
-  console.log('[Admin Check] Parsed admin emails:', adminEmails);
   
-  const result = adminEmails.includes(userEmail.toLowerCase());
-  console.log('[Admin Check] Is admin?', result);
-  
-  return result;
+  return adminEmails.includes(userEmail.toLowerCase());
 }
