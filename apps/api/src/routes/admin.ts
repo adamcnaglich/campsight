@@ -447,11 +447,30 @@ router.get('/activity', async (req, res: Response) => {
       .limit(limit)
       .all();
 
+    // Get recent scheduler runs
+    const recentSchedulerRuns = db
+      .select({
+        type: sql<string>`'scheduler_run'`,
+        timestamp: schema.schedulerRuns.finishedAt,
+        userId: sql<string>`''`,
+        userEmail: sql<string>`'System'`,
+        details: sql<string>`json_object(
+          'status', ${schema.schedulerRuns.status},
+          'groupsChecked', ${schema.schedulerRuns.groupsChecked},
+          'errorMessage', ${schema.schedulerRuns.errorMessage}
+        )`,
+      })
+      .from(schema.schedulerRuns)
+      .orderBy(desc(schema.schedulerRuns.finishedAt))
+      .limit(limit)
+      .all();
+
     // Combine and sort by timestamp
     const allActivity = [
       ...recentWatches,
       ...recentUsers,
       ...recentNotifications,
+      ...recentSchedulerRuns,
     ].sort((a, b) => {
       return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
     }).slice(0, limit);

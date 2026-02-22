@@ -50,6 +50,18 @@ export const availabilitySnapshots = sqliteTable('availability_snapshots', {
     .$defaultFn(() => new Date().toISOString()),
 });
 
+// ─── Scheduler Runs ────────────────────────────────────────────────────────────
+
+export const schedulerRuns = sqliteTable('scheduler_runs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  finishedAt: text('finished_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  status: text('status').notNull(), // 'success' | 'error'
+  errorMessage: text('error_message'),
+  groupsChecked: integer('groups_checked'),
+});
+
 // ─── Notification Log ──────────────────────────────────────────────────────────
 
 export const notificationsLog = sqliteTable('notifications_log', {

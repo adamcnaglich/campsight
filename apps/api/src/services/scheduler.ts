@@ -129,6 +129,10 @@ async function runCheck() {
     if (groups.length === 0) {
       log.scheduler.debug('No active watches to check');
       lastRunStatus = 'success';
+      db.insert(schema.schedulerRuns).values({
+        status: 'success',
+        groupsChecked: 0,
+      }).run();
       return;
     }
 
@@ -181,10 +185,18 @@ async function runCheck() {
 
     log.scheduler.info('Check cycle complete');
     lastRunStatus = 'success';
+    db.insert(schema.schedulerRuns).values({
+      status: 'success',
+      groupsChecked: groups.length,
+    }).run();
   } catch (error) {
     log.scheduler.error({ err: error }, 'Unhandled error in check cycle');
     lastRunStatus = 'error';
     lastRunError = error instanceof Error ? error.message : 'Unknown error';
+    db.insert(schema.schedulerRuns).values({
+      status: 'error',
+      errorMessage: lastRunError,
+    }).run();
     throw error;
   } finally {
     isCheckInProgress = false;

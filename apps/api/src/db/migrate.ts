@@ -43,6 +43,16 @@ export function runMigrations() {
   `);
 
   db.run(sql`
+    CREATE TABLE IF NOT EXISTS scheduler_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      finished_at TEXT NOT NULL DEFAULT (datetime('now')),
+      status TEXT NOT NULL,
+      error_message TEXT,
+      groups_checked INTEGER
+    )
+  `);
+
+  db.run(sql`
     CREATE TABLE IF NOT EXISTS notifications_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -68,6 +78,10 @@ export function runMigrations() {
 
   db.run(sql`
     CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications_log(user_id)
+  `);
+
+  db.run(sql`
+    CREATE INDEX IF NOT EXISTS idx_scheduler_runs_finished_at ON scheduler_runs(finished_at)
   `);
 
   log.db.info('Migrations complete');

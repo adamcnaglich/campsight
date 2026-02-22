@@ -36,7 +36,7 @@ interface Watch {
 }
 
 interface Activity {
-  type: 'watch_created' | 'user_registered' | 'notification_sent';
+  type: 'watch_created' | 'user_registered' | 'notification_sent' | 'scheduler_run';
   timestamp: string;
   userId: string;
   userEmail: string;
@@ -245,6 +245,7 @@ function ActivityTab() {
   const { data: activities, isLoading, error } = useQuery<Activity[]>({
     queryKey: ['admin', 'activity'],
     queryFn: () => api.get('/admin/activity'),
+    refetchInterval: 5000,
   });
 
   if (isLoading) return <div className={styles.loading}>Loading activity...</div>;
@@ -265,8 +266,13 @@ function ActivityTab() {
                 {activity.type === 'watch_created' && '📍 Watch Created'}
                 {activity.type === 'user_registered' && '👤 User Registered'}
                 {activity.type === 'notification_sent' && '📧 Notification Sent'}
+                {activity.type === 'scheduler_run' && (
+                  <>⏱ Scheduler Run ({details.status === 'success' ? '✓ Success' : '✗ Error'})</>
+                )}
               </span>
-              <span className={styles.activityUser}>{activity.userEmail}</span>
+              {activity.userEmail && (
+                <span className={styles.activityUser}>{activity.userEmail}</span>
+              )}
               <div className={styles.activityDetails}>
                 {activity.type === 'watch_created' && (
                   <>
@@ -278,6 +284,14 @@ function ActivityTab() {
                 )}
                 {activity.type === 'notification_sent' && (
                   <>Channel: {details.channel}, Watch ID: {details.watchId}</>
+                )}
+                {activity.type === 'scheduler_run' && (
+                  <>
+                    {details.groupsChecked != null
+                      ? `${details.groupsChecked} watch groups checked`
+                      : ''}
+                    {details.errorMessage && ` — ${details.errorMessage}`}
+                  </>
                 )}
               </div>
             </div>
