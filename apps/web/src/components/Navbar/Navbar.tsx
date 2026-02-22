@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
+import { isAdmin } from '../../lib/admin';
 import styles from './Navbar.module.scss';
 
 export function Navbar() {
@@ -48,6 +49,8 @@ export function Navbar() {
     { path: '/settings', label: 'Settings' },
   ];
 
+  const userIsAdmin = isAdmin(user?.email);
+
   return (
     <>
       <header className={styles.header}>
@@ -73,6 +76,18 @@ export function Navbar() {
                     {item.label}
                   </Link>
                 ))}
+                {userIsAdmin && (
+                  <Link
+                    to="/admin"
+                    className={`${styles.navLink} ${
+                      location.pathname.startsWith('/admin')
+                        ? styles.navLinkActive
+                        : ''
+                    }`}
+                  >
+                    Admin
+                  </Link>
+                )}
               </nav>
 
               <div
@@ -156,6 +171,18 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            {userIsAdmin && (
+              <Link
+                to="/admin"
+                className={`${styles.mobileNavLink} ${
+                  location.pathname.startsWith('/admin')
+                    ? styles.mobileNavLinkActive
+                    : ''
+                }`}
+              >
+                Admin
+              </Link>
+            )}
           </nav>
           <div className={styles.mobileUserSection}>
             {user.photoURL && (

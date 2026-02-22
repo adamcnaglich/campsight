@@ -1,0 +1,459 @@
+.admin {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 32px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+
+  &:hover {
+    color: #0f172a;
+  }
+
+  &.tabActive {
+    color: #10b981;
+    border-bottom-color: #10b981;
+  }
+}
+
+.content {
+  min-height: 400px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 60px 24px;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.error {
+  color: #ef4444;
+}
+
+// ─── Overview Tab ─────────────────────────────────────────────────────────────
+
+.overview {
+  padding: 20px 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.statCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.statLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+// ─── Table Styles ─────────────────────────────────────────────────────────────
+
+.tableContainer {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    
+    th {
+      text-align: left;
+      padding: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: background-color 0.15s;
+      
+      &:hover {
+        background: #f8fafc;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+    
+    td {
+      padding: 16px;
+      font-size: 14px;
+      color: #0f172a;
+    }
+  }
+}
+
+.userEmail {
+  color: #3b82f6;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.dates {
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgeActive {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badgeInactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+// ─── Activity Tab ─────────────────────────────────────────────────────────────
+
+.activityList {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.activityItem {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 16px;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.activityTime {
+  font-size: 13px;
+  color: #64748b;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activityType {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.activityUser {
+  font-size: 13px;
+  color: #3b82f6;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+.activityDetails {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+// ─── Scheduler Tab ────────────────────────────────────────────────────────────
+
+.scheduler {
+  max-width: 800px;
+}
+
+.schedulerCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.schedulerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.schedulerTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.schedulerStatus {
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.schedulerStatusRunning {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.schedulerStatusStopped {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.schedulerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.infoLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  min-width: 120px;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: #0f172a;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+.statusSuccess {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.statusError {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.errorText {
+  font-size: 13px;
+  color: #ef4444;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
+.progressIndicator {
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 600;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.schedulerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.actionBtnPrimary {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+
+  &:hover:not(:disabled) {
+    background: #059669;
+    border-color: #059669;
+  }
+}
+
+.actionBtnDanger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+
+  &:hover:not(:disabled) {
+    background: #dc2626;
+    border-color: #dc2626;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .admin {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    font-size: 13px;
+    
+    th, td {
+      padding: 12px;
+    }
+  }
+
+  .activityItem {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .activityTime {
+    min-width: auto;
+  }
+}

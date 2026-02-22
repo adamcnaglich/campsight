@@ -7,8 +7,10 @@ import { log } from './lib/logger';
 import { requestLogger } from './middleware/request-logger';
 import { runMigrations } from './db/migrate';
 import { authMiddleware } from './middleware/auth';
+import { adminAuthMiddleware } from './middleware/admin-auth';
 import watchesRouter from './routes/watches';
 import campsitesRouter from './routes/campsites';
+import adminRouter from './routes/admin';
 import { startScheduler } from './services/scheduler';
 
 // Run DB migrations on startup
@@ -40,6 +42,9 @@ app.get('/health', (_req, res) => {
 // Authenticated API routes
 app.use('/api/watches', authMiddleware, watchesRouter);
 app.use('/api/campsites', authMiddleware, campsitesRouter);
+
+// Admin routes (requires admin authentication)
+app.use('/admin', adminAuthMiddleware, adminRouter);
 
 // Start server
 const port = process.env.PORT || 3333;

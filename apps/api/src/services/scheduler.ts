@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { fetchAvailability, diffAvailability } from './availability';
@@ -7,6 +7,14 @@ import { AvailabilityMap } from '@campsight/shared';
 import { log } from '../lib/logger';
 
 const CRON_SCHEDULE = process.env.CHECK_INTERVAL || '*/15 * * * *'; // every 15 min
+
+// Scheduler state
+let schedulerTask: ScheduledTask | null = null;
+let isSchedulerRunning = false;
+let lastRunTime: Date | null = null;
+let lastRunStatus: 'success' | 'error' | null = null;
+let lastRunError: string | null = null;
+let isCheckInProgress = false;
 
 interface WatchGroup {
   campsiteId: string;
@@ -105,75 +113,103 @@ function storeSnapshots(watchId: number, availability: AvailabilityMap) {
  * Run a single check cycle across all active watches.
  */
 async function runCheck() {
-  const groups = groupActiveWatches();
-
-  if (groups.length === 0) {
-    log.scheduler.debug('No active watches to check');
+  if (isCheckInProgress) {
+    log.scheduler.warn('Check already in progress, skipping');
     return;
   }
 
-  log.scheduler.info({ groupCount: groups.length }, 'Starting check cycle');
+  isCheckInProgress = true;
+  lastRunTime = new Date();
+  lastRunStatus = null;
+  lastRunError = null;
 
-  for (const group of groups) {
-    try {
-      const currentAvailability = await fetchAvailability(
-        group.campsiteId,
-        group.startDate,
-        group.endDate
-      );
+  try {
+    const groups = groupActiveWatches();
 
-      for (const watch of group.watches) {
-        const previousAvailability = getLatestSnapshot(watch.id);
-        const newlyAvailable = diffAvailability(
-          previousAvailability,
-          currentAvailability
+    if (groups.length === 0) {
+      log.scheduler.debug('No active watches to check');
+      lastRunStatus = 'success';
+      return;
+    }
+
+    log.scheduler.info({ groupCount: groups.length }, 'Starting check cycle');
+
+    for (const group of groups) {
+      try {
+        const currentAvailability = await fetchAvailability(
+          group.campsiteId,
+          group.startDate,
+          group.endDate
         );
 
-        // Store fresh snapshot
-        storeSnapshots(watch.id, currentAvailability);
-
-        // Notify if new dates became available
-        if (newlyAvailable.length > 0) {
-          log.scheduler.info(
-            { watchId: watch.id, userId: watch.userId, newDates: newlyAvailable.length },
-            'New availability detected',
+        for (const watch of group.watches) {
+          const previousAvailability = getLatestSnapshot(watch.id);
+          const newlyAvailable = diffAvailability(
+            previousAvailability,
+            currentAvailability
           );
-          await sendAvailabilityNotification({
-            userId: watch.userId,
-            watchId: watch.id,
-            campsiteId: group.campsiteId,
-            campsiteName: watch.campsiteName,
-            campgroundName: watch.campgroundName,
-            newlyAvailableDates: newlyAvailable,
-          });
+
+          // Store fresh snapshot
+          storeSnapshots(watch.id, currentAvailability);
+
+          // Notify if new dates became available
+          if (newlyAvailable.length > 0) {
+            log.scheduler.info(
+              { watchId: watch.id, userId: watch.userId, newDates: newlyAvailable.length },
+              'New availability detected',
+            );
+            await sendAvailabilityNotification({
+              userId: watch.userId,
+              watchId: watch.id,
+              campsiteId: group.campsiteId,
+              campsiteName: watch.campsiteName,
+              campgroundName: watch.campgroundName,
+              newlyAvailableDates: newlyAvailable,
+            });
+          }
         }
+
+        // Small delay between API calls to be respectful
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        log.scheduler.error(
+          { err: error, campsiteId: group.campsiteId },
+          'Error checking campsite availability',
+        );
       }
-
-      // Small delay between API calls to be respectful
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (error) {
-      log.scheduler.error(
-        { err: error, campsiteId: group.campsiteId },
-        'Error checking campsite availability',
-      );
     }
-  }
 
-  log.scheduler.info('Check cycle complete');
+    log.scheduler.info('Check cycle complete');
+    lastRunStatus = 'success';
+  } catch (error) {
+    log.scheduler.error({ err: error }, 'Unhandled error in check cycle');
+    lastRunStatus = 'error';
+    lastRunError = error instanceof Error ? error.message : 'Unknown error';
+    throw error;
+  } finally {
+    isCheckInProgress = false;
+  }
 }
 
 /**
  * Start the cron scheduler. Abstracted so it can be swapped for BullMQ later.
  */
 export function startScheduler() {
+  if (isSchedulerRunning) {
+    log.scheduler.warn('Scheduler already running');
+    return;
+  }
+
   log.scheduler.info({ schedule: CRON_SCHEDULE }, 'Scheduler started');
 
-  cron.schedule(CRON_SCHEDULE, () => {
+  schedulerTask = cron.schedule(CRON_SCHEDULE, () => {
     log.scheduler.info('Running scheduled check');
     runCheck().catch((err) =>
       log.scheduler.error({ err }, 'Unhandled error in check cycle')
     );
   });
+
+  isSchedulerRunning = true;
 
   // Also run once on startup (after a short delay to let everything initialize)
   setTimeout(() => {
@@ -182,4 +218,48 @@ export function startScheduler() {
       log.scheduler.error({ err }, 'Initial check error')
     );
   }, 5000);
+}
+
+/**
+ * Stop the scheduler.
+ */
+export function stopScheduler() {
+  if (!isSchedulerRunning || !schedulerTask) {
+    log.scheduler.warn('Scheduler not running');
+    return;
+  }
+
+  schedulerTask.stop();
+  isSchedulerRunning = false;
+  log.scheduler.info('Scheduler stopped');
+}
+
+/**
+ * Restart the scheduler.
+ */
+export function restartScheduler() {
+  stopScheduler();
+  startScheduler();
+}
+
+/**
+ * Manually trigger a check cycle (admin function).
+ */
+export async function triggerManualCheck() {
+  log.scheduler.info('Manual check triggered by admin');
+  await runCheck();
+}
+
+/**
+ * Get current scheduler status.
+ */
+export function getSchedulerStatus() {
+  return {
+    isRunning: isSchedulerRunning,
+    isCheckInProgress,
+    schedule: CRON_SCHEDULE,
+    lastRunTime: lastRunTime?.toISOString() || null,
+    lastRunStatus,
+    lastRunError,
+  };
 }

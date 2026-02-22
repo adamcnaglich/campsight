@@ -7,6 +7,7 @@ import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { AddWatch } from '../pages/AddWatch/AddWatch';
 import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
 import { Settings } from '../pages/Settings/Settings';
+import { Admin } from '../pages/Admin/Admin';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -67,6 +68,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Admin />
           </ProtectedRoute>
         }
       />
