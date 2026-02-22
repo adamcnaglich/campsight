@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
 import styles from './Navbar.module.scss';
@@ -7,11 +7,28 @@ export function Navbar() {
   const { user, signOut } = useAuthContext();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const avatarMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        avatarMenuRef.current &&
+        !avatarMenuRef.current.contains(e.target as Node)
+      ) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [avatarMenuOpen]);
 
   const logoHref = location.pathname === '/' ? '/' : '/dashboard';
 
   useEffect(() => {
     setMenuOpen(false);
+    setAvatarMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -58,21 +75,44 @@ export function Navbar() {
                 ))}
               </nav>
 
-              <div className={styles.userSection}>
-                {user.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt=""
-                    className={styles.avatar}
-                    referrerPolicy="no-referrer"
-                  />
-                )}
-                <span className={styles.userName}>
-                  {user.displayName || user.email}
-                </span>
-                <button onClick={signOut} className={styles.signOutBtn}>
-                  Sign out
+              <div
+                className={styles.userSection}
+                ref={avatarMenuRef}
+              >
+                <button
+                  type="button"
+                  className={styles.avatarButton}
+                  onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
+                  aria-label="User menu"
+                  aria-expanded={avatarMenuOpen}
+                  aria-haspopup="true"
+                >
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt=""
+                      className={styles.avatar}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className={styles.avatarPlaceholder}>
+                      {user.displayName?.[0] || user.email?.[0] || '?'}
+                    </span>
+                  )}
                 </button>
+                {avatarMenuOpen && (
+                  <div className={styles.avatarPopover}>
+                    <button
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        signOut();
+                      }}
+                      className={styles.popoverSignOutBtn}
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -126,10 +166,14 @@ export function Navbar() {
                 referrerPolicy="no-referrer"
               />
             )}
-            <span className={styles.mobileUserName}>
-              {user.displayName || user.email}
-            </span>
-            <button onClick={signOut} className={styles.mobileSignOutBtn}>
+            <button
+              type="button"
+              className={styles.mobileSignOutBtn}
+              onClick={() => {
+                setMenuOpen(false);
+                signOut();
+              }}
+            >
               Sign out
             </button>
           </div>

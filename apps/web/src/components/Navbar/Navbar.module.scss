@@ -43,6 +43,7 @@
   display: flex;
   gap: 4px;
   flex: 1;
+  justify-content: center;
 }
 
 .navLink {
@@ -68,34 +69,72 @@
 }
 
 .userSection {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
   flex-shrink: 0;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
+.avatarButton {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   border-radius: 50%;
+  line-height: 0;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
-.userName {
-  font-size: 14px;
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-bg);
   color: var(--color-text-secondary);
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
 }
 
-.signOutBtn {
-  padding: 6px 12px;
+.avatarPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  padding: 6px;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+}
+
+.popoverSignOutBtn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
+  text-align: left;
+  cursor: pointer;
   transition: all 0.15s ease;
 
   &:hover {
@@ -207,13 +246,6 @@
   border-top: 1px solid var(--color-border);
 }
 
-.mobileUserName {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  text-align: center;
-  word-break: break-word;
-}
-
 .mobileSignOutBtn {
   padding: 8px 20px;
   border: 1px solid var(--color-border);
@@ -241,9 +273,6 @@
     padding: 8px 10px;
   }
 
-  .userName {
-    display: none;
-  }
 }
 
 @media (max-width: 768px) {
