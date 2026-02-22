@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { Layout } from '../components/Layout/Layout';
 import { Login } from '../pages/Login/Login';
+import { Home } from '../pages/Home/Home';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { AddWatch } from '../pages/AddWatch/AddWatch';
 import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
@@ -33,11 +34,12 @@ export function App() {
       <Route
         path="/login"
         element={
-          loading ? null : user ? <Navigate to="/" replace /> : <Login />
+          loading ? null : user ? <Navigate to="/dashboard" replace /> : <Login />
         }
       />
+      <Route path="/" element={<Home />} />
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />

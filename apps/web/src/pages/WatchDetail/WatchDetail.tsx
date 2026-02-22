@@ -29,7 +29,7 @@ export function WatchDetail() {
     return (
       <div className={styles.error}>
         <p>Failed to load watch details.</p>
-        <Link to="/">Back to Dashboard</Link>
+        <Link to="/dashboard">Back to Dashboard</Link>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export function WatchDetail() {
 
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.backLink}>
+      <Link to="/dashboard" className={styles.backLink}>
         ← Back to Dashboard
       </Link>
 
