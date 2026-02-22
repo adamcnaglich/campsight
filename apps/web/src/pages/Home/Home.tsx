@@ -6,7 +6,6 @@ export function Home() {
   return (
     <div className={styles.hero}>
       <Navbar />
-      <div className={styles.overlay} />
       <div className={styles.content}>
         <h1 className={styles.heading}>
           All the best campsites,
