@@ -35,7 +35,9 @@ export function Campsites({
             {facility && (
               <h2 className={styles.heading}>{facility.campgroundName}</h2>
             )}
-            <ul className={styles.campsiteList}>
+            <ul
+              className={`${styles.campsiteList} ${hasSelection ? styles.campsiteListWithFooter : ''}`}
+            >
               {campsites.map((site) => {
                 const isSelected = selectedSites.some(
                   (s) => s.campsiteId === site.campsiteId,

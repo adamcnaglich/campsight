@@ -224,8 +224,10 @@ export function AddWatch() {
   const campgroundName =
     selectedFacility?.campgroundName || selectedSites[0]?.campgroundName || '';
 
+  const isFillLayout = currentStep === 2 || currentStep === 3;
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${isFillLayout ? styles.pageFill : ''}`}>
       {/* Step indicator */}
       <div className={styles.stepIndicator}>
         {STEPS.map((step, index) => {
@@ -264,7 +266,11 @@ export function AddWatch() {
       </div>
 
       {/* Step content with animation */}
-      <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className={`${styles.form} ${isFillLayout ? styles.formFill : ''}`}
+      >
         <div
           className={`${styles.stepContent} ${direction === 'forward' ? styles.slideFromRight : styles.slideFromLeft}`}
           key={currentStep}

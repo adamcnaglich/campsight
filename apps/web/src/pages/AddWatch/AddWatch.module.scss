@@ -2,6 +2,28 @@
   animation: fadeIn 0.2s ease;
 }
 
+/* When on Campgrounds or Campsites: fill viewport, no page scroll */
+.pageFill {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.formFill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  .stepContent {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
