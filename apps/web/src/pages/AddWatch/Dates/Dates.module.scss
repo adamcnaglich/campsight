@@ -11,14 +11,16 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-weight: 700;
-  font-size: 32px;
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--text-h1-line-height);
+  letter-spacing: var(--text-h1-letter-spacing);
   margin-bottom: 0px;
   padding-top: 40px;
 }
 
 .selected {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   display: flex;
   align-items: center;
   justify-content: center;

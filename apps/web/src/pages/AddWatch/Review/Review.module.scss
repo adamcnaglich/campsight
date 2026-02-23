@@ -27,8 +27,9 @@
 /* ─── Heading ────────────────────────────────────────────────────── */
 
 .heading {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-line-height);
   color: var(--color-text);
   margin: 0;
 }
@@ -88,8 +89,9 @@
 }
 
 .cardRowTitle {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-h5-size);
+  font-weight: var(--text-h5-weight);
+  line-height: var(--text-h5-line-height);
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,7 +101,7 @@
 }
 
 .cardRowLocation {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -111,7 +113,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
 }
 
@@ -122,18 +124,19 @@
 
 .star {
   color: var(--color-border);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   line-height: 1;
 }
 
 .cardRowLabel {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
 }
 
 .cardRowValue {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-h5-size);
+  font-weight: var(--text-h5-weight);
+  line-height: var(--text-h5-line-height);
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -179,14 +182,14 @@
 }
 
 .siteImageText {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
 .errorText {
   color: var(--color-danger);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
 }
 
 /* ─── Responsive ────────────────────────────────────────────────── */

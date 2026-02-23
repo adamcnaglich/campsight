@@ -5,8 +5,9 @@
 }
 
 .heading {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-line-height);
   color: var(--color-text);
   margin: 0 0 16px 0;
 }
@@ -16,13 +17,13 @@
   padding: 8px 12px;
   background: var(--color-primary-bg);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-primary-dark);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .hint {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
 }
 
@@ -128,8 +129,9 @@
 }
 
 .cardTitle {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-h5-size);
+  font-weight: var(--text-h5-weight);
+  line-height: var(--text-h5-line-height);
   color: var(--color-text);
   margin: 0;
   overflow: hidden;
@@ -140,7 +142,7 @@
 }
 
 .cardLocation {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin: 0;
   overflow: hidden;
@@ -156,15 +158,15 @@
 }
 
 .typeLabel {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .typeValue {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* ─── Map View ───────────────────────────────────────────────── */
@@ -190,7 +192,7 @@
 }
 
 .mapText {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin: 0;
 }
@@ -203,7 +205,7 @@
   padding: 8px 12px;
   background: var(--color-primary-bg);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
@@ -266,8 +268,8 @@
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-sm-size);
   cursor: pointer;
   transition: all 0.15s ease;
 

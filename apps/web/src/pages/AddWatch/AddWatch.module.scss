@@ -39,8 +39,8 @@
   border: 2px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-secondary);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--font-weight-bold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,16 +72,16 @@
 }
 
 .stepLabel {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-secondary);
   margin-top: 6px;
   text-align: center;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .stepLabelActive {
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .stepLabelDisabled {
@@ -155,8 +155,8 @@
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-sm-size);
   cursor: pointer;
   transition: all 0.15s ease;
 
@@ -172,8 +172,8 @@
   color: white;
   border: none;
   border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-sm-size);
   cursor: pointer;
   transition: background 0.15s ease;
 
@@ -190,13 +190,13 @@
 .changeBtn {
   margin-left: 12px;
   padding: 4px 10px;
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   background: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   &:hover {
     background: var(--color-primary-bg);
@@ -214,12 +214,12 @@
 
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--text-body-sm-size);
   }
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin-bottom: 32px;
 }
@@ -241,8 +241,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-h5-size);
   margin-bottom: 12px;
 }
 
@@ -255,8 +255,8 @@
   border-radius: 50%;
   background: var(--color-primary);
   color: white;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
 }
 
@@ -270,7 +270,7 @@
   padding: 10px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   outline: none;
   transition: border-color 0.15s ease;
   min-width: 0;
@@ -287,8 +287,8 @@
   color: white;
   border: none;
   border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-sm-size);
   white-space: nowrap;
   transition: background 0.15s ease;
 
@@ -320,7 +320,7 @@
   border: none;
   background: none;
   text-align: left;
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   transition: background 0.1s ease;
   gap: 8px;
 
@@ -340,7 +340,7 @@
 }
 
 .resultMeta {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-secondary);
   flex-shrink: 0;
 }
@@ -351,7 +351,7 @@
   padding: 8px 12px;
   background: var(--color-primary-bg);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
@@ -360,7 +360,7 @@
 }
 
 .hint {
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
 }
 
@@ -379,7 +379,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   transition: all 0.1s ease;
 
   &:hover {
@@ -395,11 +395,11 @@
 }
 
 .chipName {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .chipLoop {
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-secondary);
 }
 
@@ -414,7 +414,7 @@
 
 .dateLabel {
   display: block;
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin-bottom: 6px;
 }
@@ -432,8 +432,8 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-size);
   transition: background 0.15s ease;
 
   &:hover {
@@ -448,14 +448,14 @@
 
 .errorText {
   color: var(--color-danger);
-  font-size: 14px;
+  font-size: var(--text-body-sm-size);
 }
 
 /* ─── Responsive ──────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .title {
-    font-size: 24px;
+    font-size: var(--text-h2-size);
   }
 
   .subtitle {
@@ -473,7 +473,7 @@
 
 @media (max-width: 480px) {
   .title {
-    font-size: 22px;
+    font-size: var(--text-h3-size);
   }
 
   .searchRow {
