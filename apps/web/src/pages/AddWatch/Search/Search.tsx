@@ -30,6 +30,15 @@ export interface SearchProps {
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
 
+const TRENDING_CAMPGROUNDS = [
+  { id: '1', image: 'https://picsum.photos/seed/camp1/400/240', title: 'Yosemite Pines RV Resort', location: 'Groveland, CA' },
+  { id: '2', image: 'https://picsum.photos/seed/camp2/400/240', title: 'Upper Pines Campground', location: 'Yosemite Valley, CA' },
+  { id: '3', image: 'https://picsum.photos/seed/camp3/400/240', title: 'Tuolumne Meadows Campground', location: 'Tuolumne, CA' },
+  { id: '4', image: 'https://picsum.photos/seed/camp4/400/240', title: 'Crater Lake Mazama Village', location: 'Klamath Falls, OR' },
+  { id: '5', image: 'https://picsum.photos/seed/camp5/400/240', title: 'Jenny Lake Campground', location: 'Grand Teton, WY' },
+  { id: '6', image: 'https://picsum.photos/seed/camp6/400/240', title: 'Moraine Park Campground', location: 'Estes Park, CO' },
+] as const;
+
 export function Search({
   searchQuery,
   onSearchQueryChange,
@@ -187,6 +196,31 @@ export function Search({
             )}
           </ul>
         )}
+      </div>
+
+      <div className={styles.trendingSection}>
+        <h3 className={styles.trendingHeading}>Trending Campgrounds</h3>
+        <div className={styles.trendingGrid}>
+          {TRENDING_CAMPGROUNDS.map((campground) => (
+            <button
+              key={campground.id}
+              type="button"
+              className={styles.trendingCard}
+              onClick={() =>
+                onSelectCampground(campground.id, campground.title)
+              }
+            >
+              <div
+                className={styles.trendingCardImage}
+                style={{ backgroundImage: `url(${campground.image})` }}
+              />
+              <span className={styles.trendingCardTitle}>{campground.title}</span>
+              <span className={styles.trendingCardLocation}>
+                {campground.location}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
