@@ -145,38 +145,6 @@ export function Search({
             className={styles.input}
             autoComplete="off"
           />
-          {showDropdown && (
-            <ul className={styles.suggestionsList}>
-              {loadingSuggestions ? (
-                <li className={styles.suggestionItem}>Searching...</li>
-              ) : (
-                suggestions.map((s, i) => (
-                  <li key={`${s.entity_id || s.name}-${i}`}>
-                    <button
-                      type="button"
-                      className={`${styles.suggestionItem} ${i === highlightedIndex ? styles.suggestionItemHighlighted : ''}`}
-                      onClick={() => handleSelect(s)}
-                      onMouseEnter={() => setHighlightedIndex(i)}
-                    >
-                      <span className={styles.suggestionName}>
-                        {s.name || s.text}
-                      </span>
-                      {s.entity_type && (
-                        <span className={styles.suggestionMeta}>
-                          {s.entity_type === 'campground'
-                            ? 'Campground'
-                            : s.entity_type === 'recarea'
-                              ? 'Rec Area'
-                              : s.entity_type}
-                          {s.state_code && ` · ${s.state_code}`}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          )}
         </div>
         <button
           type="button"
@@ -186,6 +154,38 @@ export function Search({
         >
           {searching ? 'Searching...' : 'Search'}
         </button>
+        {showDropdown && (
+          <ul className={styles.suggestionsList}>
+            {loadingSuggestions ? (
+              <li className={styles.suggestionItem}>Searching...</li>
+            ) : (
+              suggestions.map((s, i) => (
+                <li key={`${s.entity_id || s.name}-${i}`}>
+                  <button
+                    type="button"
+                    className={`${styles.suggestionItem} ${i === highlightedIndex ? styles.suggestionItemHighlighted : ''}`}
+                    onClick={() => handleSelect(s)}
+                    onMouseEnter={() => setHighlightedIndex(i)}
+                  >
+                    <span className={styles.suggestionName}>
+                      {s.name || s.text}
+                    </span>
+                    {s.entity_type && (
+                      <span className={styles.suggestionMeta}>
+                        {s.entity_type === 'campground'
+                          ? 'Campground'
+                          : s.entity_type === 'recarea'
+                            ? 'Rec Area'
+                            : s.entity_type}
+                        {s.state_code && ` · ${s.state_code}`}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
       </div>
     </div>
   );
