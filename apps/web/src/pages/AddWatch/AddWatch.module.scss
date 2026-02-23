@@ -2,7 +2,7 @@
   animation: fadeIn 0.2s ease;
 }
 
-/* When on Campgrounds or Campsites: fill viewport, no page scroll */
+/* Flex fill chain when on Campgrounds or Campsites (data-fill-layout triggers Layout constrain) */
 .pageFill {
   display: flex;
   flex-direction: column;

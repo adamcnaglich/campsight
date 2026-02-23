@@ -227,7 +227,10 @@ export function AddWatch() {
   const isFillLayout = currentStep === 2 || currentStep === 3;
 
   return (
-    <div className={`${styles.page} ${isFillLayout ? styles.pageFill : ''}`}>
+    <div
+      className={`${styles.page} ${isFillLayout ? styles.pageFill : ''}`}
+      data-fill-layout={isFillLayout ? '' : undefined}
+    >
       {/* Step indicator */}
       <div className={styles.stepIndicator}>
         {STEPS.map((step, index) => {
