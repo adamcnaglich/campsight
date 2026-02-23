@@ -51,7 +51,8 @@ export function Search({
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (!query.trim() || query.length < MIN_QUERY_LENGTH) {
@@ -102,7 +103,10 @@ export function Search({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const inInput = dropdownRef.current?.contains(target);
+      const inSuggestions = suggestionsRef.current?.contains(target);
+      if (!inInput && !inSuggestions) {
         setIsOpen(false);
       }
     };
@@ -134,27 +138,29 @@ export function Search({
     isOpen && (suggestions.length > 0 || loadingSuggestions);
 
   return (
-    <div className={styles.root} ref={containerRef}>
+    <div className={styles.root}>
       <h2 className={styles.heading}>Where to?</h2>
       <p className={styles.subtext}>
         Search campgrounds, parks, National Forest and more
       </p>
       <div className={styles.searchRow}>
-        <div className={styles.inputWrapper}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              onSearchQueryChange(e.target.value);
-              setIsOpen(true);
-              setHighlightedIndex(-1);
-            }}
-            onFocus={() => setIsOpen(true)}
-            onKeyDown={handleKeyDown}
-            placeholder="e.g. Yosemite, Glacier Point..."
-            className={styles.input}
-            autoComplete="off"
-          />
+        <div ref={dropdownRef} className={styles.dropdownWrapper}>
+          <div className={styles.inputWrapper}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                onSearchQueryChange(e.target.value);
+                setIsOpen(true);
+                setHighlightedIndex(-1);
+              }}
+              onFocus={() => setIsOpen(true)}
+              onKeyDown={handleKeyDown}
+              placeholder="e.g. Yosemite, Glacier Point..."
+              className={styles.input}
+              autoComplete="off"
+            />
+          </div>
         </div>
         <button
           type="button"
@@ -165,7 +171,7 @@ export function Search({
           {searching ? 'Searching...' : 'Search'}
         </button>
         {showDropdown && (
-          <ul className={styles.suggestionsList}>
+          <ul ref={suggestionsRef} className={styles.suggestionsList}>
             {loadingSuggestions ? (
               <li className={styles.suggestionItem}>Searching...</li>
             ) : (

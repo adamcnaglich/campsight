@@ -33,9 +33,14 @@
   margin: 40px auto 0 auto;
 }
 
-.inputWrapper {
+.dropdownWrapper {
   flex: 1;
   position: relative;
+  min-width: 0;
+}
+
+.inputWrapper {
+  flex: 1;
   min-width: 0;
 }
 
