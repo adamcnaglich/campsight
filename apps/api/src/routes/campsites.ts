@@ -6,6 +6,7 @@ import { log } from '../lib/logger';
 const router = Router();
 
 const RIDB_BASE = 'https://ridb.recreation.gov/api/v1';
+const RECREATION_GOV_SUGGEST = 'https://www.recreation.gov/api/search/suggest';
 
 /** Helper to extract userId set by auth middleware */
 function getUserId(req: Request): string {
@@ -83,6 +84,34 @@ router.get('/search', async (req, res: Response) => {
   } catch (error) {
     log.campsites.error({ err: error, userId, query, facilityId }, 'Failed to search campsites');
     res.status(502).json({ error: { message: 'Failed to search campsites' } });
+  }
+});
+
+/**
+ * GET /api/campsites/suggest?q=<query>
+ *
+ * Proxies to Recreation.gov suggest API for typeahead suggestions.
+ */
+router.get('/suggest', async (req, res: Response) => {
+  const query = req.query.q as string;
+
+  if (!query || !query.trim()) {
+    return res.json({
+      content_suggestions: [],
+      inventory_suggestions: [],
+      merchandise_suggestions: null,
+      suggestions: [],
+    });
+  }
+
+  try {
+    const response = await axios.get(RECREATION_GOV_SUGGEST, {
+      params: { q: query.trim(), geocoder: true },
+    });
+    res.json(response.data);
+  } catch (error) {
+    log.campsites.error({ err: error, query }, 'Failed to fetch suggestions');
+    res.status(502).json({ error: { message: 'Failed to fetch suggestions' } });
   }
 });
 

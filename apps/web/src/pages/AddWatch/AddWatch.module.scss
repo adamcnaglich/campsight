@@ -1,5 +1,4 @@
 .page {
-  max-width: 720px;
   animation: fadeIn 0.2s ease;
 }
 
@@ -14,10 +13,209 @@
   }
 }
 
-.title {
-  font-size: 28px;
+/* ─── Step indicator ───────────────────────────────────────────── */
+
+.stepIndicator {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0;
+  margin-bottom: 32px;
+  padding: 0 4px;
+}
+
+.stepIndicatorItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.stepCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.stepCircleActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.stepCircleComplete {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.stepCircleDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.stepLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.stepLabelActive {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.stepLabelDisabled {
+  opacity: 0.5;
+}
+
+.stepConnector {
+  flex: 1;
+  min-width: 20px;
+  height: 2px;
+  margin-top: 17px;
+  background: var(--color-border);
+  align-self: flex-start;
+}
+
+.stepConnectorComplete {
+  background: var(--color-primary);
+}
+
+/* ─── Step content with slide animation ────────────────────────── */
+
+.stepContent {
+  overflow: visible; /* Allows dropdowns/popovers to extend outside */
+}
+
+.slideFromRight {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.slideFromLeft {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0.5;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0.5;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Navigation row ───────────────────────────────────────────── */
+
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.backBtn {
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.nextBtn {
+  padding: 10px 20px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.changeBtn {
+  margin-left: 12px;
+  padding: 4px 10px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    background: var(--color-primary-bg);
+  }
+}
+
+.reviewSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
 }
 
 .subtitle {
@@ -149,11 +347,16 @@
 
 .selected {
   margin-top: 12px;
+  margin-bottom: 12px;
   padding: 8px 12px;
   background: var(--color-primary-bg);
   border-radius: var(--radius-sm);
   font-size: 14px;
   color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .hint {

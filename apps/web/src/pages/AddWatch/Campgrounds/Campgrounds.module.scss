@@ -1,0 +1,126 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.selected {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.changeBtn {
+  padding: 4px 10px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    background: var(--color-primary-bg);
+  }
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.resultsList {
+  list-style: none;
+  margin-top: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.resultItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  transition: background 0.1s ease;
+  gap: 8px;
+
+  &:hover {
+    background: var(--color-primary-bg);
+  }
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.resultName {
+  font-weight: 500;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.resultMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.backBtn {
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+@media (max-width: 480px) {
+  .resultItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
