@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from 'react';
+import { useState, useCallback, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CampsiteSearchResult, CreateWatchDTO } from '@campsight/shared';
@@ -36,6 +36,7 @@ export function AddWatch() {
   const [selectedSites, setSelectedSites] = useState<CampsiteSearchResult[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
 
   const goToStep = useCallback((step: number) => {
     setCurrentStep((prev) => {
@@ -160,6 +161,22 @@ export function AddWatch() {
     goToStep(1);
   }, [goToStep]);
 
+  const handleStartOver = useCallback(() => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedFacility(null);
+    setCampsites([]);
+    setSelectedSites([]);
+    setStartDate('');
+    setEndDate('');
+    setHighestStepReached(1);
+    goToStep(1);
+  }, [goToStep]);
+
+  const handleConfirm = useCallback(() => {
+    formRef.current?.requestSubmit();
+  }, []);
+
   const createMutation = useMutation({
     mutationFn: (data: CreateWatchDTO) => api.post('/api/watches', data),
     onSuccess: () => {
@@ -232,7 +249,7 @@ export function AddWatch() {
       </div>
 
       {/* Step content with animation */}
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
         <div
           className={`${styles.stepContent} ${direction === 'forward' ? styles.slideFromRight : styles.slideFromLeft}`}
           key={currentStep}
@@ -288,11 +305,16 @@ export function AddWatch() {
 
           {currentStep === 5 && (
             <Review
-              selectedSite={selectedSites[0] || null}
+              selectedFacility={selectedFacility}
               campgroundName={campgroundName}
+              selectedSites={selectedSites}
               startDate={startDate}
               endDate={endDate}
-              onBack={() => goToStep(4)}
+              onEditCampground={() => goToStep(2)}
+              onEditCampsites={() => goToStep(3)}
+              onEditDates={() => goToStep(4)}
+              onStartOver={handleStartOver}
+              onConfirm={handleConfirm}
               isSubmitting={createMutation.isPending}
               hasError={createMutation.isError}
             />

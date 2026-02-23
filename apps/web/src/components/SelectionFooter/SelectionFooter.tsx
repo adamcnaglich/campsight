@@ -6,6 +6,7 @@ export interface SelectionFooterProps {
   onClear: () => void;
   onContinue: () => void;
   visible: boolean;
+  continueDisabled?: boolean;
 }
 
 export function SelectionFooter({
@@ -14,6 +15,7 @@ export function SelectionFooter({
   onClear,
   onContinue,
   visible,
+  continueDisabled = false,
 }: SelectionFooterProps) {
   if (!visible) return null;
 
@@ -23,7 +25,12 @@ export function SelectionFooter({
         <button type="button" className={styles.clearBtn} onClick={onClear}>
           {clearLabel}
         </button>
-        <button type="button" className={styles.continueBtn} onClick={onContinue}>
+        <button
+          type="button"
+          className={styles.continueBtn}
+          onClick={onContinue}
+          disabled={continueDisabled}
+        >
           {continueLabel}
         </button>
       </div>
