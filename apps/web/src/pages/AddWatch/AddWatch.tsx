@@ -53,7 +53,10 @@ export function AddWatch() {
     setSelectedFacility(null);
     setCampsites([]);
     setSelectedSites([]);
+    setStartDate('');
+    setEndDate('');
     setSelectedSearchName(searchQuery);
+    setHighestStepReached(1);
     try {
       const results = await api.get<CampsiteSearchResult[]>(
         `/api/campsites/search?q=${encodeURIComponent(searchQuery)}`,
@@ -78,6 +81,9 @@ export function AddWatch() {
       setSelectedFacility(null);
       setCampsites([]);
       setSelectedSites([]);
+      setStartDate('');
+      setEndDate('');
+      setHighestStepReached(1);
       try {
         const results = await api.get<CampsiteSearchResult[]>(
           `/api/campsites/search?q=${encodeURIComponent(query)}`,
@@ -152,6 +158,11 @@ export function AddWatch() {
         loop: '',
         type: 'facility',
       };
+      setSearchResults([]);
+      setSelectedSites([]);
+      setStartDate('');
+      setEndDate('');
+      setHighestStepReached(1);
       selectFacility(facility);
     },
     [selectFacility],
