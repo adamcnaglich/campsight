@@ -2,7 +2,7 @@ import { CampsiteSearchResult } from '@campsight/shared';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
-  searchQuery: string;
+  searchDisplayName: string;
   searchResults: CampsiteSearchResult[];
   selectedFacility: CampsiteSearchResult | null;
   onSelectFacility: (facility: CampsiteSearchResult) => void;
@@ -11,11 +11,10 @@ export interface CampgroundsProps {
 }
 
 export function Campgrounds({
-  searchQuery,
+  searchDisplayName,
   searchResults,
   selectedFacility,
   onSelectFacility,
-  onChange,
   onBack,
 }: CampgroundsProps) {
   return (
@@ -23,7 +22,11 @@ export function Campgrounds({
       {searchResults.length > 0 ? (
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
-            {searchQuery && <h2 className={styles.heading}>{searchQuery}</h2>}
+            {(selectedFacility?.campgroundName || searchDisplayName) && (
+              <h2 className={styles.heading}>
+                {selectedFacility?.campgroundName || searchDisplayName}
+              </h2>
+            )}
             <ul className={styles.resultsList}>
               {searchResults.map((facility, i) => {
                 const isSelected =

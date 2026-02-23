@@ -27,6 +27,7 @@ export function AddWatch() {
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSearchName, setSelectedSearchName] = useState('');
   const [searchResults, setSearchResults] = useState<CampsiteSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedFacility, setSelectedFacility] =
@@ -52,6 +53,7 @@ export function AddWatch() {
     setSelectedFacility(null);
     setCampsites([]);
     setSelectedSites([]);
+    setSelectedSearchName(searchQuery);
     try {
       const results = await api.get<CampsiteSearchResult[]>(
         `/api/campsites/search?q=${encodeURIComponent(searchQuery)}`,
@@ -68,9 +70,10 @@ export function AddWatch() {
   }, [searchQuery, goToStep]);
 
   const searchForQuery = useCallback(
-    async (query: string) => {
+    async (query: string, displayName?: string) => {
       if (!query.trim()) return;
       setSearchQuery(query);
+      setSelectedSearchName(displayName ?? query);
       setSearching(true);
       setSelectedFacility(null);
       setCampsites([]);
@@ -163,6 +166,7 @@ export function AddWatch() {
 
   const handleStartOver = useCallback(() => {
     setSearchQuery('');
+    setSelectedSearchName('');
     setSearchResults([]);
     setSelectedFacility(null);
     setCampsites([]);
@@ -267,7 +271,7 @@ export function AddWatch() {
 
           {currentStep === 2 && (
             <Campgrounds
-              searchQuery={searchQuery}
+              searchDisplayName={selectedSearchName}
               searchResults={searchResults}
               selectedFacility={selectedFacility}
               onSelectFacility={selectFacility}

@@ -22,7 +22,7 @@ export interface SearchProps {
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
   onSearch: () => void;
-  onSearchForQuery: (query: string) => void;
+  onSearchForQuery: (query: string, displayName?: string) => void;
   onSelectCampground: (facilityId: string, campgroundName: string) => void;
   searching: boolean;
 }
@@ -81,8 +81,9 @@ export function Search({
         onSelectCampground(suggestion.entity_id, suggestion.name);
       } else {
         const query = suggestion.name || suggestion.text || '';
+        const displayName = suggestion.name || suggestion.text || '';
         onSearchQueryChange(query);
-        onSearchForQuery(query);
+        onSearchForQuery(query, displayName);
       }
       setIsOpen(false);
       setSuggestions([]);
