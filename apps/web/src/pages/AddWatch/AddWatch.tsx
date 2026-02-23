@@ -33,9 +33,7 @@ export function AddWatch() {
     useState<CampsiteSearchResult | null>(null);
   const [campsites, setCampsites] = useState<CampsiteSearchResult[]>([]);
   const [loadingCampsites, setLoadingCampsites] = useState(false);
-  const [selectedSite, setSelectedSite] = useState<CampsiteSearchResult | null>(
-    null,
-  );
+  const [selectedSites, setSelectedSites] = useState<CampsiteSearchResult[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -52,7 +50,7 @@ export function AddWatch() {
     setSearching(true);
     setSelectedFacility(null);
     setCampsites([]);
-    setSelectedSite(null);
+    setSelectedSites([]);
     try {
       const results = await api.get<CampsiteSearchResult[]>(
         `/api/campsites/search?q=${encodeURIComponent(searchQuery)}`,
@@ -75,7 +73,7 @@ export function AddWatch() {
       setSearching(true);
       setSelectedFacility(null);
       setCampsites([]);
-      setSelectedSite(null);
+      setSelectedSites([]);
       try {
         const results = await api.get<CampsiteSearchResult[]>(
           `/api/campsites/search?q=${encodeURIComponent(query)}`,
@@ -96,7 +94,6 @@ export function AddWatch() {
   const selectFacility = useCallback(
     async (facility: CampsiteSearchResult) => {
       setSelectedFacility(facility);
-      setSearchResults([]);
       setLoadingCampsites(true);
       try {
         const sites = await api.get<CampsiteSearchResult[]>(
@@ -113,13 +110,24 @@ export function AddWatch() {
     [goToStep],
   );
 
-  const selectSite = useCallback(
-    (site: CampsiteSearchResult) => {
-      setSelectedSite(site);
-      goToStep(4);
-    },
-    [goToStep],
-  );
+  const toggleSite = useCallback((site: CampsiteSearchResult) => {
+    setSelectedSites((prev) => {
+      const isAlreadySelected = prev.some((s) => s.campsiteId === site.campsiteId);
+      if (isAlreadySelected) {
+        return prev.filter((s) => s.campsiteId !== site.campsiteId);
+      } else {
+        return [...prev, site];
+      }
+    });
+  }, []);
+
+  const clearSiteSelection = useCallback(() => {
+    setSelectedSites([]);
+  }, []);
+
+  const continueToDates = useCallback(() => {
+    goToStep(4);
+  }, [goToStep]);
 
   const handleSelectCampground = useCallback(
     (facilityId: string, campgroundName: string) => {
@@ -139,7 +147,7 @@ export function AddWatch() {
   const handleCampgroundChange = useCallback(() => {
     setSelectedFacility(null);
     setCampsites([]);
-    setSelectedSite(null);
+    setSelectedSites([]);
     goToStep(1);
   }, [goToStep]);
 
@@ -153,13 +161,16 @@ export function AddWatch() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSite || !startDate || !endDate) return;
+    if (selectedSites.length === 0 || !startDate || !endDate) return;
 
+    // For now, just submit the first selected site
+    // TODO: Update backend to support multiple campsites
+    const firstSite = selectedSites[0];
     createMutation.mutate({
-      campsiteId: selectedSite.campsiteId,
-      campsiteName: selectedSite.campsiteName,
+      campsiteId: firstSite.campsiteId,
+      campsiteName: firstSite.campsiteName,
       campgroundName:
-        selectedFacility?.campgroundName || selectedSite.campgroundName,
+        selectedFacility?.campgroundName || firstSite.campgroundName,
       startDate,
       endDate,
     });
@@ -170,7 +181,7 @@ export function AddWatch() {
   const canGoToStep = (step: number) => step <= highestStepReached;
 
   const campgroundName =
-    selectedFacility?.campgroundName || selectedSite?.campgroundName || '';
+    selectedFacility?.campgroundName || selectedSites[0]?.campgroundName || '';
 
   return (
     <div className={styles.page}>
@@ -230,6 +241,7 @@ export function AddWatch() {
 
           {currentStep === 2 && (
             <Campgrounds
+              searchQuery={searchQuery}
               searchResults={searchResults}
               selectedFacility={selectedFacility}
               onSelectFacility={selectFacility}
@@ -242,16 +254,18 @@ export function AddWatch() {
             <Campsites
               facility={selectedFacility}
               campsites={campsites}
-              selectedSite={selectedSite}
+              selectedSites={selectedSites}
               loading={loadingCampsites}
-              onSelectSite={selectSite}
+              onToggleSite={toggleSite}
+              onClearSelection={clearSiteSelection}
+              onContinue={continueToDates}
               onBack={() => goToStep(2)}
             />
           )}
 
           {currentStep === 4 && (
             <Dates
-              selectedSite={selectedSite}
+              selectedSite={selectedSites[0] || null}
               campgroundName={campgroundName}
               startDate={startDate}
               endDate={endDate}
@@ -264,7 +278,7 @@ export function AddWatch() {
 
           {currentStep === 5 && (
             <Review
-              selectedSite={selectedSite}
+              selectedSite={selectedSites[0] || null}
               campgroundName={campgroundName}
               startDate={startDate}
               endDate={endDate}

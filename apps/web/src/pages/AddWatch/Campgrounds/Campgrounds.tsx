@@ -2,6 +2,7 @@ import { CampsiteSearchResult } from '@campsight/shared';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
+  searchQuery: string;
   searchResults: CampsiteSearchResult[];
   selectedFacility: CampsiteSearchResult | null;
   onSelectFacility: (facility: CampsiteSearchResult) => void;
@@ -10,6 +11,7 @@ export interface CampgroundsProps {
 }
 
 export function Campgrounds({
+  searchQuery,
   searchResults,
   selectedFacility,
   onSelectFacility,
@@ -18,40 +20,64 @@ export function Campgrounds({
 }: CampgroundsProps) {
   return (
     <div className={styles.root}>
-      <label className={styles.label}>Select a campground</label>
-      {selectedFacility ? (
-        <div className={styles.selected}>
-          Selected: <strong>{selectedFacility.campgroundName}</strong>
-          <button type="button" className={styles.changeBtn} onClick={onChange}>
-            Change
-          </button>
+      {searchResults.length > 0 ? (
+        <div className={styles.twoColumnLayout}>
+          <div className={styles.listColumn}>
+            {searchQuery && <h2 className={styles.heading}>{searchQuery}</h2>}
+            <ul className={styles.resultsList}>
+              {searchResults.map((facility, i) => {
+                const isSelected =
+                  selectedFacility?.facilityId === facility.facilityId;
+                return (
+                  <li key={`${facility.facilityId}-${i}`}>
+                    <button
+                      type="button"
+                      className={`${styles.resultCard} ${isSelected ? styles.resultCardSelected : ''}`}
+                      onClick={() => onSelectFacility(facility)}
+                    >
+                      <div className={styles.cardPhoto}>
+                        <div className={styles.photoPlaceholder}>📷</div>
+                      </div>
+                      <div className={styles.cardContent}>
+                        <h3 className={styles.cardTitle}>
+                          {facility.campgroundName}
+                        </h3>
+                        <p className={styles.cardLocation}>
+                          {facility.facilityId
+                            ? `Facility ID: ${facility.facilityId}`
+                            : 'Location not available'}
+                        </p>
+                        <div className={styles.cardRating}>
+                          <div className={styles.stars}>
+                            {'★'
+                              .repeat(5)
+                              .split('')
+                              .map((star, idx) => (
+                                <span key={idx} className={styles.star}>
+                                  {star}
+                                </span>
+                              ))}
+                          </div>
+                          <span className={styles.ratingNumber}>N/A</span>
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className={styles.mapColumn}>
+            <div className={styles.mapPlaceholder}>
+              <span className={styles.mapIcon}>🗺️</span>
+              <p className={styles.mapText}>Map view coming soon</p>
+            </div>
+          </div>
         </div>
       ) : (
         <p className={styles.hint}>
-          {searchResults.length > 0
-            ? 'Select a campground from your search results.'
-            : 'Run a search in step 1 to see campgrounds.'}
+          Run a search in step 1 to see campgrounds.
         </p>
-      )}
-      {searchResults.length > 0 && !selectedFacility && (
-        <ul className={styles.resultsList}>
-          {searchResults.map((facility, i) => (
-            <li key={`${facility.facilityId}-${i}`}>
-              <button
-                type="button"
-                className={styles.resultItem}
-                onClick={() => onSelectFacility(facility)}
-              >
-                <span className={styles.resultName}>
-                  {facility.campgroundName}
-                </span>
-                <span className={styles.resultMeta}>
-                  ID: {facility.facilityId}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
       )}
       <div className={styles.navRow}>
         <button type="button" className={styles.backBtn} onClick={onBack}>

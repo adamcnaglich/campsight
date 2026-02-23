@@ -4,58 +4,111 @@ import styles from './Campsites.module.scss';
 export interface CampsitesProps {
   facility: CampsiteSearchResult | null;
   campsites: CampsiteSearchResult[];
-  selectedSite: CampsiteSearchResult | null;
+  selectedSites: CampsiteSearchResult[];
   loading: boolean;
-  onSelectSite: (site: CampsiteSearchResult) => void;
+  onToggleSite: (site: CampsiteSearchResult) => void;
+  onClearSelection: () => void;
+  onContinue: () => void;
   onBack: () => void;
 }
 
 export function Campsites({
   facility,
   campsites,
-  selectedSite,
+  selectedSites,
   loading,
-  onSelectSite,
+  onToggleSite,
+  onClearSelection,
+  onContinue,
   onBack,
 }: CampsitesProps) {
+  const hasSelection = selectedSites.length > 0;
+
   return (
     <div className={styles.root}>
       <label className={styles.label}>Select a campsite</label>
-      {facility && (
-        <div className={styles.selected}>{facility.campgroundName}</div>
-      )}
       {loading ? (
         <p className={styles.hint}>Loading campsites...</p>
       ) : campsites.length > 0 ? (
-        <div className={styles.campsiteGrid}>
-          {campsites.map((site) => (
-            <button
-              key={site.campsiteId}
-              type="button"
-              className={`${styles.campsiteChip} ${
-                selectedSite?.campsiteId === site.campsiteId
-                  ? styles.campsiteChipSelected
-                  : ''
-              }`}
-              onClick={() => onSelectSite(site)}
-            >
-              <span className={styles.chipName}>{site.campsiteName}</span>
-              {site.loop && (
-                <span className={styles.chipLoop}>{site.loop}</span>
-              )}
-            </button>
-          ))}
+        <div className={styles.twoColumnLayout}>
+          <div className={styles.listColumn}>
+            {facility && (
+              <h2 className={styles.heading}>{facility.campgroundName}</h2>
+            )}
+            <ul className={styles.campsiteList}>
+              {campsites.map((site) => {
+                const isSelected = selectedSites.some(
+                  (s) => s.campsiteId === site.campsiteId
+                );
+                return (
+                  <li key={site.campsiteId}>
+                    <button
+                      type="button"
+                      className={`${styles.campsiteCard} ${isSelected ? styles.campsiteCardSelected : ''}`}
+                      onClick={() => onToggleSite(site)}
+                    >
+                      <div className={styles.cardPhoto}>
+                        <div className={styles.photoPlaceholder}>🏕️</div>
+                      </div>
+                      <div className={styles.cardContent}>
+                        <h3 className={styles.cardTitle}>
+                          {site.campsiteName}
+                        </h3>
+                        <p className={styles.cardLocation}>
+                          {site.loop
+                            ? `Loop: ${site.loop}`
+                            : 'Loop not specified'}
+                        </p>
+                        <div className={styles.cardType}>
+                          <span className={styles.typeLabel}>Type:</span>
+                          <span className={styles.typeValue}>
+                            {site.type || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className={styles.mapColumn}>
+            <div className={styles.mapPlaceholder}>
+              <span className={styles.mapIcon}>🗺️</span>
+              <p className={styles.mapText}>Map view coming soon</p>
+            </div>
+          </div>
         </div>
       ) : (
-        <p className={styles.hint}>
-          No campsites found for this campground.
-        </p>
+        <p className={styles.hint}>No campsites found for this campground.</p>
       )}
       <div className={styles.navRow}>
         <button type="button" className={styles.backBtn} onClick={onBack}>
           Back
         </button>
       </div>
+      
+      {/* Selection Footer */}
+      {hasSelection && (
+        <div className={styles.selectionFooter}>
+          <div className={styles.footerContent}>
+            <button
+              type="button"
+              className={styles.clearBtn}
+              onClick={onClearSelection}
+            >
+              Clear selection
+            </button>
+            <button
+              type="button"
+              className={styles.continueBtn}
+              onClick={onContinue}
+            >
+              Continue with {selectedSites.length} {selectedSites.length === 1 ? 'Site' : 'Sites'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
