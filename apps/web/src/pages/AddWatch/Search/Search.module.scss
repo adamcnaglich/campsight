@@ -25,6 +25,7 @@
 }
 
 .searchRow {
+  margin-top: 40px;
   display: flex;
   gap: 8px;
   width: 100%;
@@ -38,16 +39,16 @@
 
 .input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 16px 24px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm-size);
+  border-radius: 16px;
+  font-size: var(--text-body-size);
   outline: none;
   transition: border-color 0.15s ease;
   min-width: 0;
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: #008234;
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
   }
 }
@@ -108,13 +109,13 @@
 }
 
 .searchBtn {
-  padding: 10px 20px;
-  background: var(--color-primary);
+  padding: 0 32px;
+  background: #008234;
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--text-body-sm-size);
+  border-radius: 16px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body-size);
   white-space: nowrap;
   transition: background 0.15s ease;
 
