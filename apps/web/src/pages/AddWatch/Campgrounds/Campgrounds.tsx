@@ -82,11 +82,6 @@ export function Campgrounds({
           Run a search in step 1 to see campgrounds.
         </p>
       )}
-      <div className={styles.navRow}>
-        <button type="button" className={styles.backBtn} onClick={onBack}>
-          Back
-        </button>
-      </div>
     </div>
   );
 }

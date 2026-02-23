@@ -82,11 +82,6 @@ export function Campsites({
       ) : (
         <p className={styles.hint}>No campsites found for this campground.</p>
       )}
-      <div className={styles.navRow}>
-        <button type="button" className={styles.backBtn} onClick={onBack}>
-          Back
-        </button>
-      </div>
 
       <SelectionFooter
         continueLabel={`Continue with ${selectedSites.length} ${selectedSites.length === 1 ? 'Site' : 'Sites'}`}
