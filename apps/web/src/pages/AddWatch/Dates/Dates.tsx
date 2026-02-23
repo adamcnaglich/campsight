@@ -1,11 +1,26 @@
+import { useMemo } from 'react';
+import { DayPicker } from 'react-day-picker';
+import type { DateRange } from 'react-day-picker';
 import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Dates.module.scss';
 
+function toISODateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseISODateString(str: string): Date {
+  const [year, month, day] = str.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 function formatDateRange(start: string, end: string): string {
   if (!start || !end) return '';
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const startDate = parseISODateString(start);
+  const endDate = parseISODateString(end);
   const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
   const startStr = startDate.toLocaleDateString('en-US', options);
   const endStr = endDate.toLocaleDateString('en-US', options);
@@ -38,44 +53,57 @@ export function Dates({
   onClearSelection,
   onContinue,
 }: DatesProps) {
+  const selected: DateRange | undefined = useMemo(() => {
+    if (!startDate) return undefined;
+    return {
+      from: parseISODateString(startDate),
+      to: endDate ? parseISODateString(endDate) : undefined,
+    };
+  }, [startDate, endDate]);
+
+  const handleSelect = (range: DateRange | undefined) => {
+    if (!range?.from) {
+      onStartDateChange('');
+      onEndDateChange('');
+      return;
+    }
+    onStartDateChange(toISODateString(range.from));
+    onEndDateChange(range.to ? toISODateString(range.to) : '');
+  };
+
   const canProceed = !!startDate && !!endDate;
-  const continueLabel = canProceed
-    ? `Continue with ${formatDateRange(startDate, endDate)}`
-    : '';
+  const today = useMemo(() => new Date(), []);
 
   return (
     <div className={styles.root}>
-      <label className={styles.label}>Select your timeframe</label>
-      {selectedSite && (
-        <div className={styles.selected}>
-            {campgroundName} • {selectedSitesCount} {selectedSitesCount === 1 ? 'Site' : 'Sites'}
+      <div>
+        <label className={styles.label}>Select your timeframe</label>
+        {selectedSite && (
+          <div className={styles.selected}>
+            {campgroundName} • {selectedSitesCount}{' '}
+            {selectedSitesCount === 1 ? 'Site' : 'Sites'}
           </div>
-      )}
-      <div className={styles.dateRow}>
-        <div className={styles.dateField}>
-          <label className={styles.dateLabel}>Start date</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => onStartDateChange(e.target.value)}
-            className={styles.input}
-            required
-          />
-        </div>
-        <div className={styles.dateField}>
-          <label className={styles.dateLabel}>End date</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => onEndDateChange(e.target.value)}
-            className={styles.input}
-            min={startDate}
-            required
-          />
-        </div>
+        )}
+      </div>
+      <div className={styles.pickerWrapper}>
+        <DayPicker
+          mode="range"
+          selected={selected}
+          onSelect={handleSelect}
+          numberOfMonths={2}
+          pagedNavigation
+          navLayout="around"
+          disabled={{ before: today }}
+          defaultMonth={today}
+          className={styles.dayPicker}
+        />
       </div>
       <SelectionFooter
-        continueLabel={continueLabel}
+        continueLabel={
+          canProceed
+            ? `Continue with ${formatDateRange(startDate, endDate)}`
+            : ''
+        }
         onClear={onClearSelection}
         onContinue={onContinue}
         visible={canProceed}

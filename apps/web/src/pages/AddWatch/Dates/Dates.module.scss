@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 48px;
   max-width: 904px;
   margin: 0 auto;
 }
@@ -13,7 +13,8 @@
   gap: 10px;
   font-weight: 700;
   font-size: 32px;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
+  padding-top: 40px;
 }
 
 .selected {
@@ -23,43 +24,22 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
+  color: #506172;
 }
 
-.dateRow {
+.pickerWrapper {
   display: flex;
-  gap: 16px;
-}
-
-.dateField {
-  flex: 1;
-}
-
-.dateLabel {
-  display: block;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-bottom: 6px;
-}
-
-.input {
-  width: 100%;
-  padding: 10px 14px;
+  justify-content: center;
+  padding: 24px;
+  background-color: white;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s ease;
-  min-width: 0;
-
-  &:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-  }
+  border-radius: 32px;
 }
 
-@media (max-width: 480px) {
-  .dateRow {
-    flex-direction: column;
-    gap: 12px;
-  }
+.dayPicker {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-primary-light);
+  --rdp-months-gap: 104px;
+  --rdp-day_button-width: 52px;
+  --rdp-day_button-height: 52px;
 }

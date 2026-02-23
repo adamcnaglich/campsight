@@ -27,7 +27,6 @@ export function Campsites({
 
   return (
     <div className={styles.root}>
-      <label className={styles.label}>Select a campsite</label>
       {loading ? (
         <p className={styles.hint}>Loading campsites...</p>
       ) : campsites.length > 0 ? (
@@ -39,7 +38,7 @@ export function Campsites({
             <ul className={styles.campsiteList}>
               {campsites.map((site) => {
                 const isSelected = selectedSites.some(
-                  (s) => s.campsiteId === site.campsiteId
+                  (s) => s.campsiteId === site.campsiteId,
                 );
                 return (
                   <li key={site.campsiteId}>
