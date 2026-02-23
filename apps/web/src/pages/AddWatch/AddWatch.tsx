@@ -125,8 +125,17 @@ export function AddWatch() {
     setSelectedSites([]);
   }, []);
 
+  const clearDatesSelection = useCallback(() => {
+    setStartDate('');
+    setEndDate('');
+  }, []);
+
   const continueToDates = useCallback(() => {
     goToStep(4);
+  }, [goToStep]);
+
+  const continueToReview = useCallback(() => {
+    goToStep(5);
   }, [goToStep]);
 
   const handleSelectCampground = useCallback(
@@ -266,13 +275,14 @@ export function AddWatch() {
           {currentStep === 4 && (
             <Dates
               selectedSite={selectedSites[0] || null}
+              selectedSitesCount={selectedSites.length}
               campgroundName={campgroundName}
               startDate={startDate}
               endDate={endDate}
               onStartDateChange={setStartDate}
               onEndDateChange={setEndDate}
-              onBack={() => goToStep(3)}
-              onNext={() => goToStep(5)}
+              onClearSelection={clearDatesSelection}
+              onContinue={continueToReview}
             />
           )}
 

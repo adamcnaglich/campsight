@@ -1,4 +1,5 @@
 import { CampsiteSearchResult } from '@campsight/shared';
+import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Campsites.module.scss';
 
 export interface CampsitesProps {
@@ -87,28 +88,13 @@ export function Campsites({
           Back
         </button>
       </div>
-      
-      {/* Selection Footer */}
-      {hasSelection && (
-        <div className={styles.selectionFooter}>
-          <div className={styles.footerContent}>
-            <button
-              type="button"
-              className={styles.clearBtn}
-              onClick={onClearSelection}
-            >
-              Clear selection
-            </button>
-            <button
-              type="button"
-              className={styles.continueBtn}
-              onClick={onContinue}
-            >
-              Continue with {selectedSites.length} {selectedSites.length === 1 ? 'Site' : 'Sites'}
-            </button>
-          </div>
-        </div>
-      )}
+
+      <SelectionFooter
+        continueLabel={`Continue with ${selectedSites.length} ${selectedSites.length === 1 ? 'Site' : 'Sites'}`}
+        onClear={onClearSelection}
+        onContinue={onContinue}
+        visible={hasSelection}
+      />
     </div>
   );
 }

@@ -1,36 +1,55 @@
 import { CampsiteSearchResult } from '@campsight/shared';
+import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Dates.module.scss';
+
+function formatDateRange(start: string, end: string): string {
+  if (!start || !end) return '';
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
+  const startStr = startDate.toLocaleDateString('en-US', options);
+  const endStr = endDate.toLocaleDateString('en-US', options);
+  if (startDate.getMonth() === endDate.getMonth()) {
+    return `${startStr} - ${endDate.getDate()}`;
+  }
+  return `${startStr} - ${endStr}`;
+}
 
 export interface DatesProps {
   selectedSite: CampsiteSearchResult | null;
+  selectedSitesCount: number;
   campgroundName: string;
   startDate: string;
   endDate: string;
   onStartDateChange: (value: string) => void;
   onEndDateChange: (value: string) => void;
-  onBack: () => void;
-  onNext: () => void;
+  onClearSelection: () => void;
+  onContinue: () => void;
 }
 
 export function Dates({
   selectedSite,
+  selectedSitesCount,
   campgroundName,
   startDate,
   endDate,
   onStartDateChange,
   onEndDateChange,
-  onBack,
-  onNext,
+  onClearSelection,
+  onContinue,
 }: DatesProps) {
   const canProceed = !!startDate && !!endDate;
+  const continueLabel = canProceed
+    ? `Continue with ${formatDateRange(startDate, endDate)}`
+    : '';
 
   return (
     <div className={styles.root}>
-      <label className={styles.label}>Set your date range</label>
+      <label className={styles.label}>Select your timeframe</label>
       {selectedSite && (
         <div className={styles.selected}>
-          {selectedSite.campsiteName} at {campgroundName}
-        </div>
+            {campgroundName} • {selectedSitesCount} {selectedSitesCount === 1 ? 'Site' : 'Sites'}
+          </div>
       )}
       <div className={styles.dateRow}>
         <div className={styles.dateField}>
@@ -55,19 +74,12 @@ export function Dates({
           />
         </div>
       </div>
-      <div className={styles.navRow}>
-        <button type="button" className={styles.backBtn} onClick={onBack}>
-          Back
-        </button>
-        <button
-          type="button"
-          className={styles.nextBtn}
-          onClick={() => canProceed && onNext()}
-          disabled={!canProceed}
-        >
-          Next
-        </button>
-      </div>
+      <SelectionFooter
+        continueLabel={continueLabel}
+        onClear={onClearSelection}
+        onContinue={onContinue}
+        visible={canProceed}
+      />
     </div>
   );
 }
