@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import styles from './SelectionFooter.module.scss';
 
 export interface SelectionFooterProps {
@@ -17,9 +18,9 @@ export function SelectionFooter({
   visible,
   continueDisabled = false,
 }: SelectionFooterProps) {
-  if (!visible) return null;
+  if (!visible || typeof document === 'undefined') return null;
 
-  return (
+  const footer = (
     <div className={styles.footer}>
       <div className={styles.content}>
         <button type="button" className={styles.clearBtn} onClick={onClear}>
@@ -36,4 +37,6 @@ export function SelectionFooter({
       </div>
     </div>
   );
+
+  return createPortal(footer, document.body);
 }
