@@ -58,7 +58,7 @@
   text-align: center;
   padding: 80px 24px;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   border: 2px dashed var(--color-border);
 
   h2 {
@@ -93,7 +93,7 @@
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   padding: 20px;
   transition: box-shadow 0.15s ease;
 
@@ -167,7 +167,7 @@
   padding: 6px 14px;
   background: var(--color-primary-bg);
   color: var(--color-primary-dark);
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;

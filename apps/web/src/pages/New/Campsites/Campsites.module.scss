@@ -81,7 +81,7 @@
   width: 100%;
   padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   background: var(--color-surface);
   text-align: left;
   cursor: pointer;
@@ -104,7 +104,7 @@
   flex-shrink: 0;
   width: 100px;
   height: 100px;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   overflow: hidden;
   background: var(--color-primary-bg);
 }
@@ -171,7 +171,7 @@
   height: 100%;
   min-height: 0;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
