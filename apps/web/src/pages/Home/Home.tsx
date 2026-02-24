@@ -22,6 +22,7 @@ export const Home = () => {
               </Link>
             )}
             variant="primary"
+            size="large"
           >
             Start your first watch
           </Button>
@@ -32,6 +33,7 @@ export const Home = () => {
               </a>
             )}
             variant="outline"
+            size="large"
           >
             Learn more
           </Button>

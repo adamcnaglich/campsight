@@ -69,9 +69,9 @@ export const Dashboard = () => {
               </Link>
             )}
             variant="primary"
-            size="compact"
+            size="small"
           >
-            Add Watch
+            New Watch
           </Button>
         </div>
       </div>
