@@ -7,7 +7,6 @@ export interface CampgroundsProps {
   selectedFacility: CampsiteSearchResult | null;
   onSelectFacility: (facility: CampsiteSearchResult) => void;
   onChange: () => void;
-  onBack: () => void;
 }
 
 export function Campgrounds({
@@ -15,7 +14,6 @@ export function Campgrounds({
   searchResults,
   selectedFacility,
   onSelectFacility,
-  onBack,
 }: CampgroundsProps) {
   return (
     <div className={styles.root}>

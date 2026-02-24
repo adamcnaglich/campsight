@@ -10,7 +10,6 @@ export interface CampsitesProps {
   onToggleSite: (site: CampsiteSearchResult) => void;
   onClearSelection: () => void;
   onContinue: () => void;
-  onBack: () => void;
 }
 
 export function Campsites({
@@ -21,7 +20,6 @@ export function Campsites({
   onToggleSite,
   onClearSelection,
   onContinue,
-  onBack,
 }: CampsitesProps) {
   const hasSelection = selectedSites.length > 0;
 

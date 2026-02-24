@@ -296,7 +296,6 @@ export function New() {
               selectedFacility={selectedFacility}
               onSelectFacility={selectFacility}
               onChange={handleCampgroundChange}
-              onBack={() => goToStep(1)}
             />
           )}
 
@@ -309,7 +308,6 @@ export function New() {
               onToggleSite={toggleSite}
               onClearSelection={clearSiteSelection}
               onContinue={continueToDates}
-              onBack={() => goToStep(2)}
             />
           )}
 
