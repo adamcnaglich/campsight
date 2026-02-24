@@ -43,8 +43,6 @@
   background: white;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--text-body-sm-size);
 
   &:hover:not(:disabled) {
     border-color: var(--color-primary);
@@ -53,13 +51,9 @@
 }
 
 .subtle {
-  display: block;
-  width: 100%;
   background: transparent;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
-  font-size: 14px;
-  text-align: left;
 
   &:hover:not(:disabled) {
     background: var(--color-bg);
@@ -91,7 +85,6 @@
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   font-weight: var(--font-weight-medium);
-  font-size: 13px;
 
   &:hover:not(:disabled) {
     color: var(--color-danger);

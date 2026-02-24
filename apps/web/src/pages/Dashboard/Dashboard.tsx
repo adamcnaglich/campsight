@@ -139,9 +139,22 @@ export const Dashboard = () => {
               </div>
 
               <div className={styles.cardActions}>
-                <Link to={`/watch/${watch.id}`} className={styles.viewBtn}>
+                <Button
+                  as={({ children, className, ...props }) => (
+                    <Link
+                      to={`/watch/${watch.id}`}
+                      className={className}
+                      {...props}
+                    >
+                      {children}
+                    </Link>
+                  )}
+                  variant="subtle"
+                  size="compact"
+                >
                   View Availability
-                </Link>
+                </Button>
+
                 <Button
                   className={styles.cardActionBtn}
                   variant="outline"
