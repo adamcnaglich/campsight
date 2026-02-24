@@ -10,16 +10,6 @@
   margin: 0 0 16px 0;
 }
 
-.facilityName {
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: var(--color-primary-bg);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm-size);
-  color: var(--color-primary-dark);
-  font-weight: var(--font-weight-medium);
-}
-
 .hint {
   font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
@@ -199,61 +189,6 @@
   font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   margin: 0;
-}
-
-/* ─── Old styles to remove ───────────────────────────────────────── */
-
-.selected {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  background: var(--color-primary-bg);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body-sm-size);
-  color: var(--color-primary-dark);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.campsiteGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.campsiteChip {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  font-size: 13px;
-  transition: all 0.1s ease;
-
-  &:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary-bg);
-  }
-}
-
-.campsiteChipSelected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-bg);
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
-}
-
-.chipName {
-  font-weight: 600;
-}
-
-.chipLoop {
-  font-size: 11px;
-  color: var(--color-text-secondary);
 }
 
 @media (max-width: 480px) {

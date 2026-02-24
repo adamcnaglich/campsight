@@ -157,10 +157,6 @@
   color: var(--color-border);
   font-size: var(--text-body-sm-size);
   line-height: 1;
-
-  &:nth-child(-n + 0) {
-    color: #fbbf24;
-  }
 }
 
 .ratingNumber {
