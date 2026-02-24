@@ -41,31 +41,16 @@
 
 .nav {
   display: flex;
-  gap: 4px;
+  gap: 12px;
   flex: 1;
   justify-content: center;
 }
 
 .navLink {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.15s ease;
-  text-decoration: none;
+  display: inline-flex;
+  width: auto;
   white-space: nowrap;
-
-  &:hover {
-    background: var(--color-bg);
-    color: var(--color-text);
-    text-decoration: none;
-  }
-}
-
-.navLinkActive {
-  background: var(--color-primary-bg);
-  color: var(--color-primary-dark);
+  text-decoration: none;
 }
 
 .userSection {
@@ -216,27 +201,6 @@
   gap: 4px;
 }
 
-.mobileNavLink {
-  display: block;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-weight: 500;
-  font-size: 16px;
-  text-decoration: none;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--color-bg);
-    text-decoration: none;
-  }
-}
-
-.mobileNavLinkActive {
-  background: var(--color-primary-bg);
-  color: var(--color-primary-dark);
-}
-
 .mobileUserSection {
   display: flex;
   flex-direction: column;
@@ -267,10 +231,6 @@
 @media (max-width: 800px) {
   .headerInner {
     gap: 16px;
-  }
-
-  .navLink {
-    padding: 8px 10px;
   }
 }
 

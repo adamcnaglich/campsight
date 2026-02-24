@@ -1,5 +1,6 @@
 import { useAuthContext } from '../../context/AuthContext';
 import { Text } from '../../components/Text';
+import { Button } from '../../components/Button';
 import styles from './Login.module.scss';
 
 export const Login = () => {
@@ -17,7 +18,7 @@ export const Login = () => {
           </Text>
         </div>
 
-        <button onClick={signInWithGoogle} className={styles.googleBtn}>
+        <Button variant="outline" fullWidth onClick={signInWithGoogle}>
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path
               d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
@@ -37,7 +38,7 @@ export const Login = () => {
             />
           </svg>
           Sign in with Google
-        </button>
+        </Button>
 
         <Text variant="caption" className={styles.footer} as="p">
           By signing in, you agree to our terms of service.

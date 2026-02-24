@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { Button } from '../Button';
 import styles from './SelectionFooter.module.scss';
 
 export interface SelectionFooterProps {
@@ -23,17 +24,17 @@ export const SelectionFooter = ({
   const footer = (
     <div className={styles.footer}>
       <div className={styles.content}>
-        <button type="button" className={styles.clearBtn} onClick={onClear}>
+        <Button variant="outline" fullWidthOnMobile onClick={onClear}>
           {clearLabel}
-        </button>
-        <button
-          type="button"
-          className={styles.continueBtn}
+        </Button>
+        <Button
+          variant="primary"
+          fullWidthOnMobile
           onClick={onContinue}
           disabled={continueDisabled}
         >
           {continueLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );

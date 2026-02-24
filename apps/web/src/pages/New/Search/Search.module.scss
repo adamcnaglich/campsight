@@ -111,27 +111,6 @@ x .heading {
   color: var(--color-text-secondary);
 }
 
-.searchBtn {
-  padding: 0 32px;
-  background: #008234;
-  color: white;
-  border: none;
-  border-radius: 16px;
-  font-weight: var(--font-weight-bold);
-  font-size: var(--text-body-size);
-  white-space: nowrap;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--color-primary-dark);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
 .trendingSection {
   margin-top: 48px;
   width: 100%;
@@ -204,10 +183,6 @@ x .heading {
 @media (max-width: 480px) {
   .searchRow {
     flex-direction: column;
-  }
-
-  .searchBtn {
-    width: 100%;
   }
 
   .input {

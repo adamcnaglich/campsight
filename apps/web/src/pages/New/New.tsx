@@ -30,7 +30,6 @@ export const New = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchName, setSelectedSearchName] = useState('');
   const [searchResults, setSearchResults] = useState<CampsiteSearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
   const [selectedFacility, setSelectedFacility] =
     useState<CampsiteSearchResult | null>(null);
   const [campsites, setCampsites] = useState<CampsiteSearchResult[]>([]);
@@ -50,7 +49,6 @@ export const New = () => {
 
   const searchFacilities = useCallback(async () => {
     if (!searchQuery.trim()) return;
-    setSearching(true);
     setSelectedFacility(null);
     setCampsites([]);
     setSelectedSites([]);
@@ -68,8 +66,6 @@ export const New = () => {
       }
     } catch (err) {
       console.error('Search failed:', err);
-    } finally {
-      setSearching(false);
     }
   }, [searchQuery, goToStep]);
 
@@ -78,7 +74,6 @@ export const New = () => {
       if (!query.trim()) return;
       setSearchQuery(query);
       setSelectedSearchName(displayName ?? query);
-      setSearching(true);
       setSelectedFacility(null);
       setCampsites([]);
       setSelectedSites([]);
@@ -95,8 +90,6 @@ export const New = () => {
         }
       } catch (err) {
         console.error('Search failed:', err);
-      } finally {
-        setSearching(false);
       }
     },
     [goToStep],
@@ -288,7 +281,6 @@ export const New = () => {
               onSearch={searchFacilities}
               onSearchForQuery={searchForQuery}
               onSelectCampground={handleSelectCampground}
-              searching={searching}
             />
           )}
 

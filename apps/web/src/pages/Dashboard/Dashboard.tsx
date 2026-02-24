@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { Watch } from '@campsight/shared';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
+import { Button } from '../../components/Button';
 import styles from './Dashboard.module.scss';
 
 export const Dashboard = () => {
@@ -48,7 +50,9 @@ export const Dashboard = () => {
     <div className={styles.dashboard}>
       <div className={styles.header}>
         <div>
-          <Text variant="h1" className={styles.title}>Your Watches</Text>
+          <Text variant="h1" className={styles.title}>
+            Your Watches
+          </Text>
         </div>
 
         <div className={styles.headerContent}>
@@ -56,9 +60,19 @@ export const Dashboard = () => {
             Monitoring {watches?.filter((w) => w.isActive).length || 0} active
             campsite{watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
           </Text>
-          <Link to="/new" className={styles.addBtn}>
-            + Add Watch
-          </Link>
+          <Button
+            className={styles.addBtn}
+            icon={<Plus size={16} aria-hidden />}
+            as={({ children, className, ...props }) => (
+              <Link to="/new" className={className} {...props}>
+                {children}
+              </Link>
+            )}
+            variant="primary"
+            size="compact"
+          >
+            Add Watch
+          </Button>
         </div>
       </div>
 
@@ -70,9 +84,18 @@ export const Dashboard = () => {
             Start monitoring campsites to get notified when they become
             available.
           </Text>
-          <Link to="/new" className={styles.emptyBtn}>
+          <Button
+            className={styles.emptyBtn}
+            icon={<Plus size={16} aria-hidden />}
+            as={({ children, className, ...props }) => (
+              <Link to="/new" className={className} {...props}>
+                {children}
+              </Link>
+            )}
+            variant="primary"
+          >
             Add your first watch
-          </Link>
+          </Button>
         </div>
       ) : (
         <div className={styles.grid}>
@@ -85,8 +108,14 @@ export const Dashboard = () => {
             >
               <div className={styles.cardHeader}>
                 <div>
-                  <Text variant="h3" className={styles.campsiteName}>{watch.campsiteName}</Text>
-                  <Text variant="body-sm" className={styles.campgroundName} as="p">
+                  <Text variant="h3" className={styles.campsiteName}>
+                    {watch.campsiteName}
+                  </Text>
+                  <Text
+                    variant="body-sm"
+                    className={styles.campgroundName}
+                    as="p"
+                  >
                     {watch.campgroundName}
                   </Text>
                 </div>
@@ -100,33 +129,41 @@ export const Dashboard = () => {
               </div>
 
               <div className={styles.dates}>
-                <Text variant="body-sm" as="span">{watch.startDate}</Text>
+                <Text variant="body-sm" as="span">
+                  {watch.startDate}
+                </Text>
                 <span className={styles.dateArrow}>→</span>
-                <Text variant="body-sm" as="span">{watch.endDate}</Text>
+                <Text variant="body-sm" as="span">
+                  {watch.endDate}
+                </Text>
               </div>
 
               <div className={styles.cardActions}>
                 <Link to={`/watch/${watch.id}`} className={styles.viewBtn}>
                   View Availability
                 </Link>
-                <button
+                <Button
+                  className={styles.cardActionBtn}
+                  variant="outline"
+                  size="compact"
                   onClick={() => toggleMutation.mutate(watch)}
-                  className={styles.toggleBtn}
                   disabled={toggleMutation.isPending}
                 >
                   {watch.isActive ? 'Pause' : 'Resume'}
-                </button>
-                <button
+                </Button>
+                <Button
+                  className={styles.cardActionBtn}
+                  variant="outlineDanger"
+                  size="compact"
                   onClick={() => {
                     if (confirm('Delete this watch?')) {
                       deleteMutation.mutate(watch.id);
                     }
                   }}
-                  className={styles.deleteBtn}
                   disabled={deleteMutation.isPending}
                 >
                   Delete
-                </button>
+                </Button>
               </div>
             </div>
           ))}

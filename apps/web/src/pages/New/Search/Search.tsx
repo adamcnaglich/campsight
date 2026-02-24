@@ -25,19 +25,48 @@ export interface SearchProps {
   onSearch: () => void;
   onSearchForQuery: (query: string, displayName?: string) => void;
   onSelectCampground: (facilityId: string, campgroundName: string) => void;
-  searching: boolean;
 }
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
 
 const TRENDING_CAMPGROUNDS = [
-  { id: '1', image: 'https://picsum.photos/seed/camp1/400/240', title: 'Yosemite Pines RV Resort', location: 'Groveland, CA' },
-  { id: '2', image: 'https://picsum.photos/seed/camp2/400/240', title: 'Upper Pines Campground', location: 'Yosemite Valley, CA' },
-  { id: '3', image: 'https://picsum.photos/seed/camp3/400/240', title: 'Tuolumne Meadows Campground', location: 'Tuolumne, CA' },
-  { id: '4', image: 'https://picsum.photos/seed/camp4/400/240', title: 'Crater Lake Mazama Village', location: 'Klamath Falls, OR' },
-  { id: '5', image: 'https://picsum.photos/seed/camp5/400/240', title: 'Jenny Lake Campground', location: 'Grand Teton, WY' },
-  { id: '6', image: 'https://picsum.photos/seed/camp6/400/240', title: 'Moraine Park Campground', location: 'Estes Park, CO' },
+  {
+    id: '1',
+    image: 'https://picsum.photos/seed/camp1/400/240',
+    title: 'Yosemite Pines RV Resort',
+    location: 'Groveland, CA',
+  },
+  {
+    id: '2',
+    image: 'https://picsum.photos/seed/camp2/400/240',
+    title: 'Upper Pines Campground',
+    location: 'Yosemite Valley, CA',
+  },
+  {
+    id: '3',
+    image: 'https://picsum.photos/seed/camp3/400/240',
+    title: 'Tuolumne Meadows Campground',
+    location: 'Tuolumne, CA',
+  },
+  {
+    id: '4',
+    image: 'https://picsum.photos/seed/camp4/400/240',
+    title: 'Crater Lake Mazama Village',
+    location: 'Klamath Falls, OR',
+  },
+  {
+    id: '5',
+    image: 'https://picsum.photos/seed/camp5/400/240',
+    title: 'Jenny Lake Campground',
+    location: 'Grand Teton, WY',
+  },
+  {
+    id: '6',
+    image: 'https://picsum.photos/seed/camp6/400/240',
+    title: 'Moraine Park Campground',
+    location: 'Estes Park, CO',
+  },
 ] as const;
 
 export const Search = ({
@@ -46,7 +75,6 @@ export const Search = ({
   onSearch,
   onSearchForQuery,
   onSelectCampground,
-  searching,
 }: SearchProps) => {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -63,11 +91,11 @@ export const Search = ({
     setLoadingSuggestions(true);
     try {
       const data = await api.get<SuggestResponse>(
-        `/api/campsites/suggest?q=${encodeURIComponent(query)}`
+        `/api/campsites/suggest?q=${encodeURIComponent(query)}`,
       );
       const campgrounds =
         data.inventory_suggestions?.filter(
-          (s) => s.entity_type === 'campground'
+          (s) => s.entity_type === 'campground',
         ) || [];
       const recAreas =
         data.suggestions?.filter((s) => s.entity_type === 'recarea') || [];
@@ -99,7 +127,7 @@ export const Search = ({
       setIsOpen(false);
       setSuggestions([]);
     },
-    [onSelectCampground, onSearchQueryChange, onSearchForQuery]
+    [onSelectCampground, onSearchQueryChange, onSearchForQuery],
   );
 
   useEffect(() => {
@@ -135,12 +163,13 @@ export const Search = ({
     }
   };
 
-  const showDropdown =
-    isOpen && (suggestions.length > 0 || loadingSuggestions);
+  const showDropdown = isOpen && (suggestions.length > 0 || loadingSuggestions);
 
   return (
     <div className={styles.root}>
-      <Text variant="h1" className={styles.heading}>Where to?</Text>
+      <Text variant="h1" className={styles.heading}>
+        Where to?
+      </Text>
       <Text variant="body-sm" className={styles.subtext} as="p">
         Search campgrounds, parks, National Forest and more
       </Text>
@@ -163,14 +192,6 @@ export const Search = ({
             />
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onSearch}
-          disabled={searching || !searchQuery.trim()}
-          className={styles.searchBtn}
-        >
-          {searching ? 'Searching...' : 'Search'}
-        </button>
         {showDropdown && (
           <ul ref={suggestionsRef} className={styles.suggestionsList}>
             {loadingSuggestions ? (
@@ -206,7 +227,9 @@ export const Search = ({
       </div>
 
       <div className={styles.trendingSection}>
-        <Text variant="h3" className={styles.trendingHeading}>Trending Campgrounds</Text>
+        <Text variant="h3" className={styles.trendingHeading}>
+          Trending Campgrounds
+        </Text>
         <div className={styles.trendingGrid}>
           {TRENDING_CAMPGROUNDS.map((campground) => (
             <button
@@ -221,7 +244,9 @@ export const Search = ({
                 className={styles.trendingCardImage}
                 style={{ backgroundImage: `url(${campground.image})` }}
               />
-              <span className={styles.trendingCardTitle}>{campground.title}</span>
+              <span className={styles.trendingCardTitle}>
+                {campground.title}
+              </span>
               <span className={styles.trendingCardLocation}>
                 {campground.location}
               </span>

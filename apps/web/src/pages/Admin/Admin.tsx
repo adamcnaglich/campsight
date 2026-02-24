@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { Button } from '../../components/Button';
 import { isAdmin } from '../../lib/admin';
 import { useAuthContext } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -406,34 +407,38 @@ const SchedulerTab = () => {
         </div>
 
         <div className={styles.schedulerActions}>
-          <button
+          <Button
+            variant="outline"
+            size="small"
             onClick={() => startMutation.mutate()}
-            className={styles.actionBtn}
             disabled={status.isRunning || startMutation.isPending}
           >
             {startMutation.isPending ? 'Starting...' : 'Start'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
+            size="small"
             onClick={() => stopMutation.mutate()}
-            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
             disabled={!status.isRunning || stopMutation.isPending}
           >
             {stopMutation.isPending ? 'Stopping...' : 'Stop'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="small"
             onClick={() => restartMutation.mutate()}
-            className={styles.actionBtn}
             disabled={restartMutation.isPending}
           >
             {restartMutation.isPending ? 'Restarting...' : 'Restart'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="small"
             onClick={() => triggerMutation.mutate()}
-            className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
             disabled={status.isCheckInProgress || triggerMutation.isPending}
           >
             {triggerMutation.isPending ? 'Triggering...' : 'Run Check Now'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

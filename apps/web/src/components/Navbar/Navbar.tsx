@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
 import { isAdmin } from '../../lib/admin';
 import { Text } from '../Text';
+import { Button } from '../Button';
 import styles from './Navbar.module.scss';
 
 export const Navbar = () => {
@@ -65,29 +66,35 @@ export const Navbar = () => {
             <>
               <nav className={styles.nav}>
                 {navItems.map((item) => (
-                  <Link
+                  <Button
                     key={item.path}
-                    to={item.path}
-                    className={`${styles.navLink} ${
-                      location.pathname === item.path
-                        ? styles.navLinkActive
-                        : ''
-                    }`}
+                    className={styles.navLink}
+                    size="compact"
+                    as={({ children, className, ...props }) => (
+                      <Link to={item.path} className={className} {...props}>
+                        {children}
+                      </Link>
+                    )}
+                    variant="subtle"
+                    active={location.pathname === item.path}
                   >
                     {item.label}
-                  </Link>
+                  </Button>
                 ))}
                 {userIsAdmin && (
-                  <Link
-                    to="/admin"
-                    className={`${styles.navLink} ${
-                      location.pathname.startsWith('/admin')
-                        ? styles.navLinkActive
-                        : ''
-                    }`}
+                  <Button
+                    className={styles.navLink}
+                    size="compact"
+                    as={({ children, className, ...props }) => (
+                      <Link to="/admin" className={className} {...props}>
+                        {children}
+                      </Link>
+                    )}
+                    variant="subtle"
+                    active={location.pathname.startsWith('/admin')}
                   >
                     Admin
-                  </Link>
+                  </Button>
                 )}
               </nav>
 
@@ -115,15 +122,15 @@ export const Navbar = () => {
                 </button>
                 {avatarMenuOpen && (
                   <div className={styles.avatarPopover}>
-                    <button
+                    <Button
+                      variant="subtle"
                       onClick={() => {
                         setAvatarMenuOpen(false);
                         signOut();
                       }}
-                      className={styles.popoverSignOutBtn}
                     >
                       Sign out
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -157,29 +164,35 @@ export const Navbar = () => {
         >
           <nav className={styles.mobileNav}>
             {navItems.map((item) => (
-              <Link
+              <Button
                 key={item.path}
-                to={item.path}
-                className={`${styles.mobileNavLink} ${
-                  location.pathname === item.path
-                    ? styles.mobileNavLinkActive
-                    : ''
-                }`}
+                className={styles.navLink}
+                size="compact"
+                as={({ children, className, ...props }) => (
+                  <Link to={item.path} className={className} {...props}>
+                    {children}
+                  </Link>
+                )}
+                variant="subtle"
+                active={location.pathname === item.path}
               >
                 {item.label}
-              </Link>
+              </Button>
             ))}
             {userIsAdmin && (
-              <Link
-                to="/admin"
-                className={`${styles.mobileNavLink} ${
-                  location.pathname.startsWith('/admin')
-                    ? styles.mobileNavLinkActive
-                    : ''
-                }`}
+              <Button
+                className={styles.navLink}
+                size="compact"
+                as={({ children, className, ...props }) => (
+                  <Link to="/admin" className={className} {...props}>
+                    {children}
+                  </Link>
+                )}
+                variant="subtle"
+                active={location.pathname.startsWith('/admin')}
               >
                 Admin
-              </Link>
+              </Button>
             )}
           </nav>
           <div className={styles.mobileUserSection}>
@@ -191,16 +204,15 @@ export const Navbar = () => {
                 referrerPolicy="no-referrer"
               />
             )}
-            <button
-              type="button"
-              className={styles.mobileSignOutBtn}
+            <Button
+              variant="subtle"
               onClick={() => {
                 setMenuOpen(false);
                 signOut();
               }}
             >
               Sign out
-            </button>
+            </Button>
           </div>
         </aside>
       )}
