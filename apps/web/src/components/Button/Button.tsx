@@ -34,6 +34,11 @@ const VARIANT_STYLE: Record<ButtonVariant, string> = {
   outlineDanger: styles.outlineDanger,
 };
 
+const SIZE_STYLE: Partial<Record<NonNullable<ButtonProps['size']>, string>> = {
+  small: styles.small,
+  compact: styles.compact,
+};
+
 export const Button = ({
   variant = 'primary',
   size = 'default',
@@ -48,12 +53,7 @@ export const Button = ({
   ...rest
 }: ButtonProps) => {
   const variantClass = VARIANT_STYLE[variant];
-  const sizeClass =
-    size === 'small'
-      ? styles.small
-      : size === 'compact'
-        ? styles.compact
-        : undefined;
+  const sizeClass = SIZE_STYLE[size];
   const widthClass = fullWidth
     ? styles.fullWidth
     : fullWidthOnMobile

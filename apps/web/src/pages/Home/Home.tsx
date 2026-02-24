@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Text } from '../../components/Text';
+import { Button } from '../../components/Button';
 import styles from './Home.module.scss';
 
 export const Home = () => {
@@ -14,12 +15,26 @@ export const Home = () => {
           at your fingertips
         </Text>
         <div className={styles.buttons}>
-          <Link to="/new" className={styles.primaryBtn}>
+          <Button
+            as={({ children, className, ...props }) => (
+              <Link to="/new" className={className} {...props}>
+                {children}
+              </Link>
+            )}
+            variant="primary"
+          >
             Start your first watch
-          </Link>
-          <a href="#learn-more" className={styles.secondaryBtn}>
+          </Button>
+          <Button
+            as={({ children, className, ...props }) => (
+              <a href="#learn-more" className={className} {...props}>
+                {children}
+              </a>
+            )}
+            variant="outline"
+          >
             Learn more
-          </a>
+          </Button>
         </div>
       </div>
       <section id="learn-more" className={styles.learnMore}>
@@ -135,9 +150,18 @@ export const Home = () => {
           <Text variant="body">
             Start monitoring availability in minutes—completely free.
           </Text>
-          <Link to="/new" className={styles.ctaButton}>
+          <Button
+            as={({ children, className, ...props }) => (
+              <Link to="/new" className={className} {...props}>
+                {children}
+              </Link>
+            )}
+            variant="primary"
+            size="large"
+            className={styles.ctaSectionBtn}
+          >
             Create Your First Watch
-          </Link>
+          </Button>
         </div>
       </section>
     </div>

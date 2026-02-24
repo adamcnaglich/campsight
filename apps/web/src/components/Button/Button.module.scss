@@ -40,7 +40,7 @@
 }
 
 .outline {
-  background: transparent;
+  background: white;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   font-weight: var(--font-weight-semibold);
@@ -110,7 +110,6 @@
   }
 }
 
-/* Size-based padding only – no overrides from variants or consumers */
 .small {
   padding: 8px 16px;
   font-size: var(--text-body-sm-size);
