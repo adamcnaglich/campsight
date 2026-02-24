@@ -1,4 +1,5 @@
 import { CampsiteSearchResult } from '@campsight/shared';
+import classNames from 'classnames';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
 import styles from './Campsites.module.scss';
@@ -27,15 +28,21 @@ export const Campsites = ({
   return (
     <div className={styles.root}>
       {loading ? (
-        <Text variant="body-sm" className={styles.hint} as="p">Loading campsites...</Text>
+        <Text variant="body-sm" className={styles.hint} as="p">
+          Loading campsites...
+        </Text>
       ) : campsites.length > 0 ? (
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
             {facility && (
-              <Text variant="h3" className={styles.heading}>{facility.campgroundName}</Text>
+              <Text variant="h3" className={styles.heading}>
+                {facility.campgroundName}
+              </Text>
             )}
             <ul
-              className={`${styles.campsiteList} ${hasSelection ? styles.campsiteListWithFooter : ''}`}
+              className={classNames(styles.campsiteList, {
+                [styles.campsiteListWithFooter]: hasSelection,
+              })}
             >
               {campsites.map((site) => {
                 const isSelected = selectedSites.some(
@@ -45,7 +52,9 @@ export const Campsites = ({
                   <li key={site.campsiteId}>
                     <button
                       type="button"
-                      className={`${styles.campsiteCard} ${isSelected ? styles.campsiteCardSelected : ''}`}
+                      className={classNames(styles.campsiteCard, {
+                        [styles.campsiteCardSelected]: isSelected,
+                      })}
                       onClick={() => onToggleSite(site)}
                     >
                       <div className={styles.cardPhoto}>
@@ -55,7 +64,11 @@ export const Campsites = ({
                         <Text variant="h5" className={styles.cardTitle}>
                           {site.campsiteName}
                         </Text>
-                        <Text variant="body-sm" className={styles.cardLocation} as="p">
+                        <Text
+                          variant="body-sm"
+                          className={styles.cardLocation}
+                          as="p"
+                        >
                           {site.loop
                             ? `Loop: ${site.loop}`
                             : 'Loop not specified'}
@@ -76,12 +89,16 @@ export const Campsites = ({
           <div className={styles.mapColumn}>
             <div className={styles.mapPlaceholder}>
               <span className={styles.mapIcon}>🗺️</span>
-              <Text variant="body-sm" className={styles.mapText} as="p">Map view coming soon</Text>
+              <Text variant="body-sm" className={styles.mapText} as="p">
+                Map view coming soon
+              </Text>
             </div>
           </div>
         </div>
       ) : (
-        <Text variant="body-sm" className={styles.hint} as="p">No campsites found for this campground.</Text>
+        <Text variant="body-sm" className={styles.hint} as="p">
+          No campsites found for this campground.
+        </Text>
       )}
 
       <SelectionFooter

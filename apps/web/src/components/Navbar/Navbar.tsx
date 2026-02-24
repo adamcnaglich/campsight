@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import classNames from 'classnames';
 import { useAuthContext } from '../../context/AuthContext';
 import { isAdmin } from '../../lib/admin';
 import { Text } from '../Text';
@@ -59,7 +60,9 @@ export const Navbar = () => {
         <div className={styles.headerInner}>
           <Link to={logoHref} className={styles.logo}>
             <span className={styles.logoIcon}>🏕️</span>
-            <Text variant="h2" className={styles.logoText}>CampSight</Text>
+            <Text variant="h2" className={styles.logoText}>
+              CampSight
+            </Text>
           </Link>
 
           {user ? (
@@ -143,7 +146,9 @@ export const Navbar = () => {
 
           {user && (
             <button
-              className={`${styles.menuToggle} ${menuOpen ? styles.menuToggleOpen : ''}`}
+              className={classNames(styles.menuToggle, {
+                [styles.menuToggleOpen]: menuOpen,
+              })}
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             >
@@ -160,7 +165,9 @@ export const Navbar = () => {
       )}
       {user && (
         <aside
-          className={`${styles.mobileMenu} ${menuOpen ? styles.mobileMenuOpen : ''}`}
+          className={classNames(styles.mobileMenu, {
+            [styles.mobileMenuOpen]: menuOpen,
+          })}
         >
           <nav className={styles.mobileNav}>
             {navItems.map((item) => (

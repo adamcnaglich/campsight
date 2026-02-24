@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Watch, AvailabilitySnapshot } from '@campsight/shared';
 import { format, parseISO, eachDayOfInterval } from 'date-fns';
+import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import styles from './WatchDetail.module.scss';
@@ -33,7 +34,9 @@ export const WatchDetail = () => {
   if (error || !data) {
     return (
       <div className={styles.error}>
-        <Text variant="body" as="p">Failed to load watch details.</Text>
+        <Text variant="body" as="p">
+          Failed to load watch details.
+        </Text>
         <Link to="/dashboard">Back to Dashboard</Link>
       </div>
     );
@@ -71,13 +74,18 @@ export const WatchDetail = () => {
 
       <div className={styles.header}>
         <div>
-          <Text variant="h1" className={styles.title}>{watch.campsiteName}</Text>
-          <Text variant="body" className={styles.campground} as="p">{watch.campgroundName}</Text>
+          <Text variant="h1" className={styles.title}>
+            {watch.campsiteName}
+          </Text>
+          <Text variant="body" className={styles.campground} as="p">
+            {watch.campgroundName}
+          </Text>
         </div>
         <span
-          className={`${styles.badge} ${
-            watch.isActive ? styles.badgeActive : styles.badgeInactive
-          }`}
+          className={classNames(
+            styles.badge,
+            watch.isActive ? styles.badgeActive : styles.badgeInactive,
+          )}
         >
           {watch.isActive ? 'Active' : 'Paused'}
         </span>
@@ -88,7 +96,9 @@ export const WatchDetail = () => {
       </div>
 
       <div className={styles.calendarSection}>
-        <Text variant="h2" className={styles.sectionTitle}>Availability Calendar</Text>
+        <Text variant="h2" className={styles.sectionTitle}>
+          Availability Calendar
+        </Text>
 
         {dateRange.length === 0 ? (
           <Text variant="body" className={styles.noData} as="p">
@@ -98,18 +108,28 @@ export const WatchDetail = () => {
           <>
             <div className={styles.legend}>
               <span className={styles.legendItem}>
-                <span className={`${styles.legendDot} ${styles.available}`} />
-                <Text variant="body-sm" as="span">Available</Text>
-              </span>
-              <span className={styles.legendItem}>
-                <span className={`${styles.legendDot} ${styles.reserved}`} />
-                <Text variant="body-sm" as="span">Reserved</Text>
+                <span
+                  className={classNames(styles.legendDot, styles.available)}
+                />
+                <Text variant="body-sm" as="span">
+                  Available
+                </Text>
               </span>
               <span className={styles.legendItem}>
                 <span
-                  className={`${styles.legendDot} ${styles.notAvailable}`}
+                  className={classNames(styles.legendDot, styles.reserved)}
                 />
-                <Text variant="body-sm" as="span">Not Available</Text>
+                <Text variant="body-sm" as="span">
+                  Reserved
+                </Text>
+              </span>
+              <span className={styles.legendItem}>
+                <span
+                  className={classNames(styles.legendDot, styles.notAvailable)}
+                />
+                <Text variant="body-sm" as="span">
+                  Not Available
+                </Text>
               </span>
             </div>
 
@@ -126,7 +146,7 @@ export const WatchDetail = () => {
                 return (
                   <div
                     key={dateKey}
-                    className={`${styles.dayCell} ${statusColor(status)}`}
+                    className={classNames(styles.dayCell, statusColor(status))}
                     title={`${format(date, 'MMM d, yyyy')}: ${status}`}
                   >
                     <span className={styles.dayNum}>{format(date, 'd')}</span>

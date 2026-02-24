@@ -78,7 +78,9 @@ export const Dates = ({
   return (
     <div className={styles.root}>
       <div>
-        <Text variant="h1" className={styles.label} as="label">Select your timeframe</Text>
+        <Text variant="h1" className={styles.label} as="label">
+          Select your timeframe
+        </Text>
         {selectedSite && (
           <div className={styles.selected}>
             {campgroundName} • {selectedSitesCount}{' '}

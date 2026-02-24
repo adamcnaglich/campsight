@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import classNames from 'classnames';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
 import styles from './Search.module.scss';
@@ -201,7 +202,10 @@ export const Search = ({
                 <li key={`${s.entity_id || s.name}-${i}`}>
                   <button
                     type="button"
-                    className={`${styles.suggestionItem} ${i === highlightedIndex ? styles.suggestionItemHighlighted : ''}`}
+                    className={classNames(styles.suggestionItem, {
+                      [styles.suggestionItemHighlighted]:
+                        i === highlightedIndex,
+                    })}
                     onClick={() => handleSelect(s)}
                     onMouseEnter={() => setHighlightedIndex(i)}
                   >

@@ -9,18 +9,18 @@ export function isAdmin(userEmail: string | null | undefined): boolean {
   }
 
   const allowedEmails = import.meta.env.VITE_ADMIN_ALLOWED_EMAILS;
-  
+
   if (!allowedEmails) {
     return false;
   }
 
   // Strip surrounding quotes that some hosting platforms add
   const raw = allowedEmails.replace(/^["']|["']$/g, '');
-  
+
   const adminEmails = raw
     .split(',')
     .map((e: string) => e.trim().toLowerCase())
     .filter(Boolean);
-  
+
   return adminEmails.includes(userEmail.toLowerCase());
 }

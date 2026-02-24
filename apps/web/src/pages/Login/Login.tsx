@@ -11,7 +11,9 @@ export const Login = () => {
       <div className={styles.card}>
         <div className={styles.logoSection}>
           <span className={styles.logoIcon}>🏕️</span>
-          <Text variant="h1" className={styles.title}>CampSight</Text>
+          <Text variant="h1" className={styles.title}>
+            CampSight
+          </Text>
           <Text variant="body" className={styles.subtitle}>
             Never miss a campsite opening again. Monitor availability on
             Recreation.gov and get notified instantly.

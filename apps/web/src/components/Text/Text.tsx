@@ -1,4 +1,5 @@
 import { HTMLAttributes, ElementType } from 'react';
+import classNames from 'classnames';
 import styles from './Text.module.scss';
 
 export type TextVariant =
@@ -49,7 +50,7 @@ export const Text = ({
 }: TextProps) => {
   const Component = (as ?? VARIANT_ELEMENT[variant]) as ElementType;
   const variantClass = VARIANT_STYLE[variant];
-  const combinedClassName = [variantClass, className].filter(Boolean).join(' ');
+  const combinedClassName = classNames(variantClass, className) || undefined;
 
   return (
     <Component className={combinedClassName || undefined} {...rest}>

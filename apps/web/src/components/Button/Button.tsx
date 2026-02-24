@@ -1,4 +1,5 @@
 import { ElementType, ReactNode, ButtonHTMLAttributes } from 'react';
+import classNames from 'classnames';
 import styles from './Button.module.scss';
 
 export type ButtonVariant =
@@ -48,23 +49,24 @@ export const Button = ({
 }: ButtonProps) => {
   const variantClass = VARIANT_STYLE[variant];
   const sizeClass =
-    size === 'small' ? styles.small : size === 'compact' ? styles.compact : '';
+    size === 'small'
+      ? styles.small
+      : size === 'compact'
+        ? styles.compact
+        : undefined;
   const widthClass = fullWidth
     ? styles.fullWidth
     : fullWidthOnMobile
       ? styles.fullWidthOnMobile
-      : '';
-  const activeClass = active ? styles.active : '';
-  const combinedClassName = [
+      : undefined;
+  const combinedClassName = classNames(
     styles.button,
     variantClass,
     sizeClass,
     widthClass,
-    activeClass,
+    { [styles.active]: active },
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  );
 
   const componentProps =
     Component === 'button'

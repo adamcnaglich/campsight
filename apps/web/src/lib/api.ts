@@ -19,7 +19,9 @@ async function getHeaders(): Promise<HeadersInit> {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body?.error?.message || `Request failed: ${response.status}`);
+    throw new Error(
+      body?.error?.message || `Request failed: ${response.status}`,
+    );
   }
   const json = await response.json();
   return json.data !== undefined ? json.data : json;

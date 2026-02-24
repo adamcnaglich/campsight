@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CampsiteSearchResult, CreateWatchDTO } from '@campsight/shared';
+import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import { Search } from './Search';
@@ -29,12 +30,16 @@ export const New = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchName, setSelectedSearchName] = useState('');
-  const [searchResults, setSearchResults] = useState<CampsiteSearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<CampsiteSearchResult[]>(
+    [],
+  );
   const [selectedFacility, setSelectedFacility] =
     useState<CampsiteSearchResult | null>(null);
   const [campsites, setCampsites] = useState<CampsiteSearchResult[]>([]);
   const [loadingCampsites, setLoadingCampsites] = useState(false);
-  const [selectedSites, setSelectedSites] = useState<CampsiteSearchResult[]>([]);
+  const [selectedSites, setSelectedSites] = useState<CampsiteSearchResult[]>(
+    [],
+  );
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
@@ -116,7 +121,9 @@ export const New = () => {
 
   const toggleSite = useCallback((site: CampsiteSearchResult) => {
     setSelectedSites((prev) => {
-      const isAlreadySelected = prev.some((s) => s.campsiteId === site.campsiteId);
+      const isAlreadySelected = prev.some(
+        (s) => s.campsiteId === site.campsiteId,
+      );
       if (isAlreadySelected) {
         return prev.filter((s) => s.campsiteId !== site.campsiteId);
       } else {
@@ -222,7 +229,7 @@ export const New = () => {
 
   return (
     <div
-      className={`${styles.page} ${isFillLayout ? styles.pageFill : ''}`}
+      className={classNames(styles.page, { [styles.pageFill]: isFillLayout })}
       data-fill-layout={isFillLayout ? '' : undefined}
     >
       {/* Step indicator */}
@@ -239,7 +246,11 @@ export const New = () => {
               <div className={styles.stepIndicatorItem}>
                 <button
                   type="button"
-                  className={`${styles.stepCircle} ${isActive ? styles.stepCircleActive : ''} ${complete ? styles.stepCircleComplete : ''} ${!accessible ? styles.stepCircleDisabled : ''}`}
+                  className={classNames(styles.stepCircle, {
+                    [styles.stepCircleActive]: isActive,
+                    [styles.stepCircleComplete]: complete,
+                    [styles.stepCircleDisabled]: !accessible,
+                  })}
                   onClick={() => accessible && goToStep(step.id)}
                   disabled={!accessible}
                   aria-current={isActive ? 'step' : undefined}
@@ -249,14 +260,19 @@ export const New = () => {
                 <Text
                   variant="body-sm"
                   as="span"
-                  className={`${styles.stepLabel} ${isActive ? styles.stepLabelActive : ''} ${!accessible ? styles.stepLabelDisabled : ''}`}
+                  className={classNames(styles.stepLabel, {
+                    [styles.stepLabelActive]: isActive,
+                    [styles.stepLabelDisabled]: !accessible,
+                  })}
                 >
                   {step.label}
                 </Text>
               </div>
               {!isLast && (
                 <div
-                  className={`${styles.stepConnector} ${connectorComplete ? styles.stepConnectorComplete : ''}`}
+                  className={classNames(styles.stepConnector, {
+                    [styles.stepConnectorComplete]: connectorComplete,
+                  })}
                 />
               )}
             </Fragment>
@@ -268,10 +284,15 @@ export const New = () => {
       <form
         ref={formRef}
         onSubmit={handleSubmit}
-        className={`${styles.form} ${isFillLayout ? styles.formFill : ''}`}
+        className={classNames(styles.form, { [styles.formFill]: isFillLayout })}
       >
         <div
-          className={`${styles.stepContent} ${direction === 'forward' ? styles.slideFromRight : styles.slideFromLeft}`}
+          className={classNames(
+            styles.stepContent,
+            direction === 'forward'
+              ? styles.slideFromRight
+              : styles.slideFromLeft,
+          )}
           key={currentStep}
         >
           {currentStep === 1 && (

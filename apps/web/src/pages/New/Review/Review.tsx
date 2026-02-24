@@ -77,7 +77,9 @@ export const Review = ({
       <div className={styles.twoColumnLayout}>
         {/* Left column: heading + edit cards */}
         <div className={styles.leftColumn}>
-          <Text variant="h3" className={styles.heading}>Review & submit</Text>
+          <Text variant="h3" className={styles.heading}>
+            Review & submit
+          </Text>
 
           <div className={styles.cardList}>
             {/* Card 1: Campground (image, text, edit) */}
@@ -98,11 +100,14 @@ export const Review = ({
                 </span>
                 <span className={styles.cardRowRating}>
                   <span className={styles.stars}>
-                    {'★'.repeat(5).split('').map((star, idx) => (
-                      <span key={idx} className={styles.star}>
-                        {star}
-                      </span>
-                    ))}
+                    {'★'
+                      .repeat(5)
+                      .split('')
+                      .map((star, idx) => (
+                        <span key={idx} className={styles.star}>
+                          {star}
+                        </span>
+                      ))}
                   </span>
                   <span>N/A</span>
                 </span>
@@ -155,7 +160,9 @@ export const Review = ({
         <div className={styles.rightColumn}>
           <div className={styles.siteImagePlaceholder}>
             <span className={styles.siteImageIcon}>🏕️</span>
-            <Text variant="body-sm" className={styles.siteImageText} as="p">Site photo</Text>
+            <Text variant="body-sm" className={styles.siteImageText} as="p">
+              Site photo
+            </Text>
           </div>
         </div>
       </div>

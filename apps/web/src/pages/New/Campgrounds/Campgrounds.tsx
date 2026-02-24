@@ -1,4 +1,5 @@
 import { CampsiteSearchResult } from '@campsight/shared';
+import classNames from 'classnames';
 import { Text } from '../../../components/Text';
 import styles from './Campgrounds.module.scss';
 
@@ -34,7 +35,9 @@ export const Campgrounds = ({
                   <li key={`${facility.facilityId}-${i}`}>
                     <button
                       type="button"
-                      className={`${styles.resultCard} ${isSelected ? styles.resultCardSelected : ''}`}
+                      className={classNames(styles.resultCard, {
+                        [styles.resultCardSelected]: isSelected,
+                      })}
                       onClick={() => onSelectFacility(facility)}
                     >
                       <div className={styles.cardPhoto}>
@@ -44,7 +47,11 @@ export const Campgrounds = ({
                         <Text variant="h5" className={styles.cardTitle}>
                           {facility.campgroundName}
                         </Text>
-                        <Text variant="body-sm" className={styles.cardLocation} as="p">
+                        <Text
+                          variant="body-sm"
+                          className={styles.cardLocation}
+                          as="p"
+                        >
                           {facility.facilityId
                             ? `Facility ID: ${facility.facilityId}`
                             : 'Location not available'}
@@ -72,7 +79,9 @@ export const Campgrounds = ({
           <div className={styles.mapColumn}>
             <div className={styles.mapPlaceholder}>
               <span className={styles.mapIcon}>🗺️</span>
-              <Text variant="body-sm" className={styles.mapText} as="p">Map view coming soon</Text>
+              <Text variant="body-sm" className={styles.mapText} as="p">
+                Map view coming soon
+              </Text>
             </div>
           </div>
         </div>

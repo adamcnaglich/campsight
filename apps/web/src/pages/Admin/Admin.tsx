@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { isAdmin } from '../../lib/admin';
@@ -38,7 +39,11 @@ interface Watch {
 }
 
 interface Activity {
-  type: 'watch_created' | 'user_registered' | 'notification_sent' | 'scheduler_run';
+  type:
+    | 'watch_created'
+    | 'user_registered'
+    | 'notification_sent'
+    | 'scheduler_run';
   timestamp: string;
   userId: string;
   userEmail: string;
@@ -67,37 +72,51 @@ export const Admin = () => {
   return (
     <div className={styles.admin}>
       <div className={styles.header}>
-        <Text variant="h1" className={styles.title}>Admin Panel</Text>
-        <Text variant="body-sm" className={styles.subtitle} as="p">System administration and monitoring</Text>
+        <Text variant="h1" className={styles.title}>
+          Admin Panel
+        </Text>
+        <Text variant="body-sm" className={styles.subtitle} as="p">
+          System administration and monitoring
+        </Text>
       </div>
 
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${activeTab === 'overview' ? styles.tabActive : ''}`}
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'overview',
+          })}
           onClick={() => setActiveTab('overview')}
         >
           Overview
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'users' ? styles.tabActive : ''}`}
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'users',
+          })}
           onClick={() => setActiveTab('users')}
         >
           Users
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'watches' ? styles.tabActive : ''}`}
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'watches',
+          })}
           onClick={() => setActiveTab('watches')}
         >
           Watches
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'scheduler' ? styles.tabActive : ''}`}
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'scheduler',
+          })}
           onClick={() => setActiveTab('scheduler')}
         >
           Scheduler
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'activity' ? styles.tabActive : ''}`}
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'activity',
+          })}
           onClick={() => setActiveTab('activity')}
         >
           Activity
@@ -116,37 +135,71 @@ export const Admin = () => {
 };
 
 const OverviewTab = () => {
-  const { data: stats, isLoading, error } = useQuery<Stats>({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery<Stats>({
     queryKey: ['admin', 'overview'],
     queryFn: () => api.get('/admin'),
   });
 
-  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading...</Text></div>;
-  if (error) return <div className={styles.error}><Text variant="body">Failed to load stats</Text></div>;
+  if (isLoading)
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.error}>
+        <Text variant="body">Failed to load stats</Text>
+      </div>
+    );
   if (!stats) return null;
 
   return (
     <div className={styles.overview}>
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">Total Users</Text>
-          <Text variant="h1" className={styles.statValue} as="p">{stats.users.total}</Text>
+          <Text variant="caption" className={styles.statLabel} as="h3">
+            Total Users
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.users.total}
+          </Text>
         </div>
         <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">Total Watches</Text>
-          <Text variant="h1" className={styles.statValue} as="p">{stats.watches.total}</Text>
+          <Text variant="caption" className={styles.statLabel} as="h3">
+            Total Watches
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.watches.total}
+          </Text>
         </div>
         <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">Active Watches</Text>
-          <Text variant="h1" className={styles.statValue} as="p">{stats.watches.active}</Text>
+          <Text variant="caption" className={styles.statLabel} as="h3">
+            Active Watches
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.watches.active}
+          </Text>
         </div>
         <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">Availability Snapshots</Text>
-          <Text variant="h1" className={styles.statValue} as="p">{stats.snapshots.total}</Text>
+          <Text variant="caption" className={styles.statLabel} as="h3">
+            Availability Snapshots
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.snapshots.total}
+          </Text>
         </div>
         <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">Notifications Sent</Text>
-          <Text variant="h1" className={styles.statValue} as="p">{stats.notifications.total}</Text>
+          <Text variant="caption" className={styles.statLabel} as="h3">
+            Notifications Sent
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.notifications.total}
+          </Text>
         </div>
       </div>
     </div>
@@ -154,13 +207,27 @@ const OverviewTab = () => {
 };
 
 const UsersTab = () => {
-  const { data: users, isLoading, error } = useQuery<User[]>({
+  const {
+    data: users,
+    isLoading,
+    error,
+  } = useQuery<User[]>({
     queryKey: ['admin', 'users'],
     queryFn: () => api.get('/admin/users'),
   });
 
-  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading users...</Text></div>;
-  if (error) return <div className={styles.error}><Text variant="body">Failed to load users</Text></div>;
+  if (isLoading)
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading users...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.error}>
+        <Text variant="body">Failed to load users</Text>
+      </div>
+    );
   if (!users) return null;
 
   return (
@@ -192,13 +259,27 @@ const UsersTab = () => {
 };
 
 const WatchesTab = () => {
-  const { data: watches, isLoading, error } = useQuery<Watch[]>({
+  const {
+    data: watches,
+    isLoading,
+    error,
+  } = useQuery<Watch[]>({
     queryKey: ['admin', 'watches'],
     queryFn: () => api.get('/admin/watches'),
   });
 
-  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading watches...</Text></div>;
-  if (error) return <div className={styles.error}><Text variant="body">Failed to load watches</Text></div>;
+  if (isLoading)
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading watches...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.error}>
+        <Text variant="body">Failed to load watches</Text>
+      </div>
+    );
   if (!watches) return null;
 
   return (
@@ -227,9 +308,10 @@ const WatchesTab = () => {
               </td>
               <td>
                 <span
-                  className={`${styles.badge} ${
-                    watch.isActive ? styles.badgeActive : styles.badgeInactive
-                  }`}
+                  className={classNames(
+                    styles.badge,
+                    watch.isActive ? styles.badgeActive : styles.badgeInactive,
+                  )}
                 >
                   {watch.isActive ? 'Active' : 'Paused'}
                 </span>
@@ -244,14 +326,28 @@ const WatchesTab = () => {
 };
 
 const ActivityTab = () => {
-  const { data: activities, isLoading, error } = useQuery<Activity[]>({
+  const {
+    data: activities,
+    isLoading,
+    error,
+  } = useQuery<Activity[]>({
     queryKey: ['admin', 'activity'],
     queryFn: () => api.get('/admin/activity'),
     refetchInterval: 5000,
   });
 
-  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading activity...</Text></div>;
-  if (error) return <div className={styles.error}><Text variant="body">Failed to load activity</Text></div>;
+  if (isLoading)
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading activity...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.error}>
+        <Text variant="body">Failed to load activity</Text>
+      </div>
+    );
   if (!activities) return null;
 
   return (
@@ -267,13 +363,19 @@ const ActivityTab = () => {
               <span className={styles.activityType}>
                 {activity.type === 'watch_created' && '📍 Watch Created'}
                 {activity.type === 'user_registered' && '👤 User Registered'}
-                {activity.type === 'notification_sent' && '📧 Notification Sent'}
+                {activity.type === 'notification_sent' &&
+                  '📧 Notification Sent'}
                 {activity.type === 'scheduler_run' && (
-                  <>⏱ Scheduler Run ({details.status === 'success' ? '✓ Success' : '✗ Error'})</>
+                  <>
+                    ⏱ Scheduler Run (
+                    {details.status === 'success' ? '✓ Success' : '✗ Error'})
+                  </>
                 )}
               </span>
               {activity.userEmail && (
-                <span className={styles.activityUser}>{activity.userEmail}</span>
+                <span className={styles.activityUser}>
+                  {activity.userEmail}
+                </span>
               )}
               <div className={styles.activityDetails}>
                 {activity.type === 'watch_created' && (
@@ -285,7 +387,9 @@ const ActivityTab = () => {
                   <>Display name: {details.displayName || 'Not set'}</>
                 )}
                 {activity.type === 'notification_sent' && (
-                  <>Channel: {details.channel}, Watch ID: {details.watchId}</>
+                  <>
+                    Channel: {details.channel}, Watch ID: {details.watchId}
+                  </>
                 )}
                 {activity.type === 'scheduler_run' && (
                   <>
@@ -306,8 +410,12 @@ const ActivityTab = () => {
 
 const SchedulerTab = () => {
   const queryClient = useQueryClient();
-  
-  const { data: status, isLoading, error } = useQuery<SchedulerStatus>({
+
+  const {
+    data: status,
+    isLoading,
+    error,
+  } = useQuery<SchedulerStatus>({
     queryKey: ['admin', 'scheduler', 'status'],
     queryFn: () => api.get('/admin/scheduler/status'),
     refetchInterval: 5000, // Auto-refresh every 5 seconds
@@ -316,44 +424,67 @@ const SchedulerTab = () => {
   const startMutation = useMutation({
     mutationFn: () => api.post('/admin/scheduler/start', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'scheduler', 'status'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'scheduler', 'status'],
+      });
     },
   });
 
   const stopMutation = useMutation({
     mutationFn: () => api.post('/admin/scheduler/stop', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'scheduler', 'status'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'scheduler', 'status'],
+      });
     },
   });
 
   const restartMutation = useMutation({
     mutationFn: () => api.post('/admin/scheduler/restart', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'scheduler', 'status'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'scheduler', 'status'],
+      });
     },
   });
 
   const triggerMutation = useMutation({
     mutationFn: () => api.post('/admin/scheduler/trigger', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'scheduler', 'status'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'scheduler', 'status'],
+      });
     },
   });
 
-  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading scheduler status...</Text></div>;
-  if (error) return <div className={styles.error}><Text variant="body">Failed to load scheduler status</Text></div>;
+  if (isLoading)
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading scheduler status...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.error}>
+        <Text variant="body">Failed to load scheduler status</Text>
+      </div>
+    );
   if (!status) return null;
 
   return (
     <div className={styles.scheduler}>
       <div className={styles.schedulerCard}>
         <div className={styles.schedulerHeader}>
-          <Text variant="h2" className={styles.schedulerTitle}>Availability Check Scheduler</Text>
+          <Text variant="h2" className={styles.schedulerTitle}>
+            Availability Check Scheduler
+          </Text>
           <span
-            className={`${styles.schedulerStatus} ${
-              status.isRunning ? styles.schedulerStatusRunning : styles.schedulerStatusStopped
-            }`}
+            className={classNames(
+              styles.schedulerStatus,
+              status.isRunning
+                ? styles.schedulerStatusRunning
+                : styles.schedulerStatusStopped,
+            )}
           >
             {status.isRunning ? 'Running' : 'Stopped'}
           </span>
@@ -364,7 +495,7 @@ const SchedulerTab = () => {
             <span className={styles.infoLabel}>Schedule:</span>
             <span className={styles.infoValue}>{status.schedule}</span>
           </div>
-          
+
           {status.lastRunTime && (
             <>
               <div className={styles.infoRow}>
@@ -376,13 +507,10 @@ const SchedulerTab = () => {
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Last Status:</span>
                 <span
-                  className={`${styles.infoValue} ${
-                    status.lastRunStatus === 'success'
-                      ? styles.statusSuccess
-                      : status.lastRunStatus === 'error'
-                      ? styles.statusError
-                      : ''
-                  }`}
+                  className={classNames(styles.infoValue, {
+                    [styles.statusSuccess]: status.lastRunStatus === 'success',
+                    [styles.statusError]: status.lastRunStatus === 'error',
+                  })}
                 >
                   {status.lastRunStatus === 'success' && '✓ Success'}
                   {status.lastRunStatus === 'error' && '✗ Error'}
@@ -401,7 +529,9 @@ const SchedulerTab = () => {
 
           {status.isCheckInProgress && (
             <div className={styles.infoRow}>
-              <span className={styles.progressIndicator}>⟳ Check in progress...</span>
+              <span className={styles.progressIndicator}>
+                ⟳ Check in progress...
+              </span>
             </div>
           )}
         </div>
@@ -443,4 +573,4 @@ const SchedulerTab = () => {
       </div>
     </div>
   );
-}
+};
