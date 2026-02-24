@@ -157,7 +157,6 @@ export const Home = () => {
               </Link>
             )}
             variant="primary"
-            size="large"
             className={styles.ctaSectionBtn}
           >
             Create Your First Watch
