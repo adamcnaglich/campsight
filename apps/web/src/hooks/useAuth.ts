@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
-export function useAuth() {
+export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,4 +38,4 @@ export function useAuth() {
   }, []);
 
   return { user, loading, signInWithGoogle, signOut, getIdToken };
-}
+};

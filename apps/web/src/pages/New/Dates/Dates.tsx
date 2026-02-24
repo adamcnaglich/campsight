@@ -5,19 +5,19 @@ import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Dates.module.scss';
 
-function toISODateString(date: Date): string {
+const toISODateString = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
+};
 
-function parseISODateString(str: string): Date {
+const parseISODateString = (str: string): Date => {
   const [year, month, day] = str.split('-').map(Number);
   return new Date(year, month - 1, day);
-}
+};
 
-function formatDateRange(start: string, end: string): string {
+const formatDateRange = (start: string, end: string): string => {
   if (!start || !end) return '';
   const startDate = parseISODateString(start);
   const endDate = parseISODateString(end);
@@ -28,7 +28,7 @@ function formatDateRange(start: string, end: string): string {
     return `${startStr} - ${endDate.getDate()}`;
   }
   return `${startStr} - ${endStr}`;
-}
+};
 
 export interface DatesProps {
   selectedSite: CampsiteSearchResult | null;
@@ -42,7 +42,7 @@ export interface DatesProps {
   onContinue: () => void;
 }
 
-export function Dates({
+export const Dates = ({
   selectedSite,
   selectedSitesCount,
   campgroundName,
@@ -52,7 +52,7 @@ export function Dates({
   onEndDateChange,
   onClearSelection,
   onContinue,
-}: DatesProps) {
+}: DatesProps) => {
   const selected: DateRange | undefined = useMemo(() => {
     if (!startDate) return undefined;
     return {
@@ -110,4 +110,4 @@ export function Dates({
       />
     </div>
   );
-}
+};

@@ -2,7 +2,7 @@ import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Review.module.scss';
 
-function formatDateRange(start: string, end: string): string {
+const formatDateRange = (start: string, end: string): string => {
   if (!start || !end) return '';
   const [y1, m1, d1] = start.split('-').map(Number);
   const [y2, m2, d2] = end.split('-').map(Number);
@@ -15,9 +15,9 @@ function formatDateRange(start: string, end: string): string {
     return `${startStr} - ${endDate.getDate()}`;
   }
   return `${startStr} - ${endStr}`;
-}
+};
 
-function EditIcon() {
+const EditIcon = () => {
   return (
     <svg
       width="18"
@@ -34,7 +34,7 @@ function EditIcon() {
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
     </svg>
   );
-}
+};
 
 export interface ReviewProps {
   selectedFacility: CampsiteSearchResult | null;
@@ -51,7 +51,7 @@ export interface ReviewProps {
   hasError: boolean;
 }
 
-export function Review({
+export const Review = ({
   selectedFacility,
   campgroundName,
   selectedSites,
@@ -64,7 +64,7 @@ export function Review({
   onConfirm,
   isSubmitting,
   hasError,
-}: ReviewProps) {
+}: ReviewProps) => {
   const formattedDates = formatDateRange(startDate, endDate);
   const siteNames = selectedSites
     .map((s) => s.campsiteName)
@@ -174,4 +174,4 @@ export function Review({
       )}
     </div>
   );
-}
+};

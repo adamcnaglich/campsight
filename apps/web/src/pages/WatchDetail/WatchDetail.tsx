@@ -11,7 +11,7 @@ interface WatchAvailabilityResponse {
   snapshots: AvailabilitySnapshot[];
 }
 
-export function WatchDetail() {
+export const WatchDetail = () => {
   const { id } = useParams<{ id: string }>();
 
   const { data, isLoading, error } = useQuery<WatchAvailabilityResponse>({
@@ -148,4 +148,4 @@ export function WatchDetail() {
       </div>
     </div>
   );
-}
+};

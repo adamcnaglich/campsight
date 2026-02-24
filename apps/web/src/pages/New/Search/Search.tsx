@@ -39,14 +39,14 @@ const TRENDING_CAMPGROUNDS = [
   { id: '6', image: 'https://picsum.photos/seed/camp6/400/240', title: 'Moraine Park Campground', location: 'Estes Park, CO' },
 ] as const;
 
-export function Search({
+export const Search = ({
   searchQuery,
   onSearchQueryChange,
   onSearch,
   onSearchForQuery,
   onSelectCampground,
   searching,
-}: SearchProps) {
+}: SearchProps) => {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -230,4 +230,4 @@ export function Search({
       </div>
     </div>
   );
-}
+};

@@ -9,7 +9,7 @@ import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
 import { Settings } from '../pages/Settings/Settings';
 import { Admin } from '../pages/Admin/Admin';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
 
   if (loading) {
@@ -25,9 +25,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <Layout>{children}</Layout>;
-}
+};
 
-export function App() {
+export const App = () => {
   const { user, loading } = useAuthContext();
 
   return (
@@ -82,6 +82,6 @@ export function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-}
+};
 
 export default App;

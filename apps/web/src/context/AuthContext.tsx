@@ -16,18 +16,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuth();
 
   return (
     <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
   );
-}
+};
 
-export function useAuthContext() {
+export const useAuthContext = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     throw new Error('useAuthContext must be used within AuthProvider');
   }
   return ctx;
-}
+};

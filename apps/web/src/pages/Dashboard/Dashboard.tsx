@@ -4,7 +4,7 @@ import { Watch } from '@campsight/shared';
 import { api } from '../../lib/api';
 import styles from './Dashboard.module.scss';
 
-export function Dashboard() {
+export const Dashboard = () => {
   const queryClient = useQueryClient();
 
   const {
@@ -129,4 +129,4 @@ export function Dashboard() {
       )}
     </div>
   );
-}
+};

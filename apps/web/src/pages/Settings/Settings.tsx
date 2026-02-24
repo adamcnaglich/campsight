@@ -1,7 +1,7 @@
 import { useAuthContext } from '../../context/AuthContext';
 import styles from './Settings.module.scss';
 
-export function Settings() {
+export const Settings = () => {
   const { user } = useAuthContext();
 
   return (
@@ -54,4 +54,4 @@ export function Settings() {
       </div>
     </div>
   );
-}
+};

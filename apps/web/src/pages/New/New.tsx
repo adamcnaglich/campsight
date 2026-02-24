@@ -18,7 +18,7 @@ const STEPS = [
   { id: 5, label: 'Review' },
 ] as const;
 
-export function New() {
+export const New = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -345,4 +345,4 @@ export function New() {
       </form>
     </div>
   );
-}
+};

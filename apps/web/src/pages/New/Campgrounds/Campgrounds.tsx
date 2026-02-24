@@ -9,12 +9,12 @@ export interface CampgroundsProps {
   onChange: () => void;
 }
 
-export function Campgrounds({
+export const Campgrounds = ({
   searchDisplayName,
   searchResults,
   selectedFacility,
   onSelectFacility,
-}: CampgroundsProps) {
+}: CampgroundsProps) => {
   return (
     <div className={styles.root}>
       {searchResults.length > 0 ? (
@@ -82,4 +82,4 @@ export function Campgrounds({
       )}
     </div>
   );
-}
+};

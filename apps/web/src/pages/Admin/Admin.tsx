@@ -54,7 +54,7 @@ interface SchedulerStatus {
 
 type Tab = 'overview' | 'users' | 'watches' | 'activity' | 'scheduler';
 
-export function Admin() {
+export const Admin = () => {
   const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
@@ -111,9 +111,9 @@ export function Admin() {
       </div>
     </div>
   );
-}
+};
 
-function OverviewTab() {
+const OverviewTab = () => {
   const { data: stats, isLoading, error } = useQuery<Stats>({
     queryKey: ['admin', 'overview'],
     queryFn: () => api.get('/admin'),
@@ -149,9 +149,9 @@ function OverviewTab() {
       </div>
     </div>
   );
-}
+};
 
-function UsersTab() {
+const UsersTab = () => {
   const { data: users, isLoading, error } = useQuery<User[]>({
     queryKey: ['admin', 'users'],
     queryFn: () => api.get('/admin/users'),
@@ -187,9 +187,9 @@ function UsersTab() {
       </table>
     </div>
   );
-}
+};
 
-function WatchesTab() {
+const WatchesTab = () => {
   const { data: watches, isLoading, error } = useQuery<Watch[]>({
     queryKey: ['admin', 'watches'],
     queryFn: () => api.get('/admin/watches'),
@@ -239,9 +239,9 @@ function WatchesTab() {
       </table>
     </div>
   );
-}
+};
 
-function ActivityTab() {
+const ActivityTab = () => {
   const { data: activities, isLoading, error } = useQuery<Activity[]>({
     queryKey: ['admin', 'activity'],
     queryFn: () => api.get('/admin/activity'),
@@ -300,9 +300,9 @@ function ActivityTab() {
       })}
     </div>
   );
-}
+};
 
-function SchedulerTab() {
+const SchedulerTab = () => {
   const queryClient = useQueryClient();
   
   const { data: status, isLoading, error } = useQuery<SchedulerStatus>({

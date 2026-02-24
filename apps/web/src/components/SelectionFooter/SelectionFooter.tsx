@@ -10,14 +10,14 @@ export interface SelectionFooterProps {
   continueDisabled?: boolean;
 }
 
-export function SelectionFooter({
+export const SelectionFooter = ({
   clearLabel = 'Clear selection',
   continueLabel,
   onClear,
   onContinue,
   visible,
   continueDisabled = false,
-}: SelectionFooterProps) {
+}: SelectionFooterProps) => {
   if (!visible || typeof document === 'undefined') return null;
 
   const footer = (
@@ -39,4 +39,4 @@ export function SelectionFooter({
   );
 
   return createPortal(footer, document.body);
-}
+};

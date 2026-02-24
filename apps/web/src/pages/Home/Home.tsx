@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar/Navbar';
 import styles from './Home.module.scss';
 
-export function Home() {
+export const Home = () => {
   return (
     <div className={styles.hero}>
       <Navbar />
@@ -122,4 +122,4 @@ export function Home() {
       </section>
     </div>
   );
-}
+};

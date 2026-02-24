@@ -1,7 +1,7 @@
 import { useAuthContext } from '../../context/AuthContext';
 import styles from './Login.module.scss';
 
-export function Login() {
+export const Login = () => {
   const { signInWithGoogle } = useAuthContext();
 
   return (
@@ -44,4 +44,4 @@ export function Login() {
       </div>
     </div>
   );
-}
+};

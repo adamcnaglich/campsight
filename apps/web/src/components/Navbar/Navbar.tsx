@@ -4,7 +4,7 @@ import { useAuthContext } from '../../context/AuthContext';
 import { isAdmin } from '../../lib/admin';
 import styles from './Navbar.module.scss';
 
-export function Navbar() {
+export const Navbar = () => {
   const { user, signOut } = useAuthContext();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -205,4 +205,4 @@ export function Navbar() {
       )}
     </>
   );
-}
+};

@@ -12,7 +12,7 @@ export interface CampsitesProps {
   onContinue: () => void;
 }
 
-export function Campsites({
+export const Campsites = ({
   facility,
   campsites,
   selectedSites,
@@ -20,7 +20,7 @@ export function Campsites({
   onToggleSite,
   onClearSelection,
   onContinue,
-}: CampsitesProps) {
+}: CampsitesProps) => {
   const hasSelection = selectedSites.length > 0;
 
   return (
@@ -91,4 +91,4 @@ export function Campsites({
       />
     </div>
   );
-}
+};
