@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Watch } from '@campsight/shared';
 import { api } from '../../lib/api';
+import { Text } from '../../components/Text';
 import styles from './Dashboard.module.scss';
 
 export const Dashboard = () => {
@@ -28,13 +29,17 @@ export const Dashboard = () => {
   });
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading your watches...</div>;
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading your watches...</Text>
+      </div>
+    );
   }
 
   if (error) {
     return (
       <div className={styles.error}>
-        Failed to load watches. Please try again.
+        <Text variant="body">Failed to load watches. Please try again.</Text>
       </div>
     );
   }
@@ -43,14 +48,14 @@ export const Dashboard = () => {
     <div className={styles.dashboard}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Your Watches</h1>
+          <Text variant="h1" className={styles.title}>Your Watches</Text>
         </div>
 
         <div className={styles.headerContent}>
-          <p className={styles.subtitle}>
+          <Text variant="body-sm" className={styles.subtitle} as="p">
             Monitoring {watches?.filter((w) => w.isActive).length || 0} active
             campsite{watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
-          </p>
+          </Text>
           <Link to="/new" className={styles.addBtn}>
             + Add Watch
           </Link>
@@ -60,11 +65,11 @@ export const Dashboard = () => {
       {!watches?.length ? (
         <div className={styles.empty}>
           <span className={styles.emptyIcon}>🔭</span>
-          <h2>No watches yet</h2>
-          <p>
+          <Text variant="h2">No watches yet</Text>
+          <Text variant="body">
             Start monitoring campsites to get notified when they become
             available.
-          </p>
+          </Text>
           <Link to="/new" className={styles.emptyBtn}>
             Add your first watch
           </Link>
@@ -80,10 +85,10 @@ export const Dashboard = () => {
             >
               <div className={styles.cardHeader}>
                 <div>
-                  <h3 className={styles.campsiteName}>{watch.campsiteName}</h3>
-                  <p className={styles.campgroundName}>
+                  <Text variant="h3" className={styles.campsiteName}>{watch.campsiteName}</Text>
+                  <Text variant="body-sm" className={styles.campgroundName} as="p">
                     {watch.campgroundName}
-                  </p>
+                  </Text>
                 </div>
                 <span
                   className={`${styles.badge} ${
@@ -95,9 +100,9 @@ export const Dashboard = () => {
               </div>
 
               <div className={styles.dates}>
-                <span>{watch.startDate}</span>
+                <Text variant="body-sm" as="span">{watch.startDate}</Text>
                 <span className={styles.dateArrow}>→</span>
-                <span>{watch.endDate}</span>
+                <Text variant="body-sm" as="span">{watch.endDate}</Text>
               </div>
 
               <div className={styles.cardActions}>

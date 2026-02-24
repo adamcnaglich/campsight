@@ -3,6 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import type { DateRange } from 'react-day-picker';
 import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
+import { Text } from '../../../components/Text';
 import styles from './Dates.module.scss';
 
 const toISODateString = (date: Date): string => {
@@ -77,7 +78,7 @@ export const Dates = ({
   return (
     <div className={styles.root}>
       <div>
-        <label className={styles.label}>Select your timeframe</label>
+        <Text variant="h1" className={styles.label} as="label">Select your timeframe</Text>
         {selectedSite && (
           <div className={styles.selected}>
             {campgroundName} • {selectedSitesCount}{' '}

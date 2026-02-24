@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
 import { isAdmin } from '../../lib/admin';
+import { Text } from '../Text';
 import styles from './Navbar.module.scss';
 
 export const Navbar = () => {
@@ -57,7 +58,7 @@ export const Navbar = () => {
         <div className={styles.headerInner}>
           <Link to={logoHref} className={styles.logo}>
             <span className={styles.logoIcon}>🏕️</span>
-            <span className={styles.logoText}>CampSight</span>
+            <Text variant="h2" className={styles.logoText}>CampSight</Text>
           </Link>
 
           {user ? (

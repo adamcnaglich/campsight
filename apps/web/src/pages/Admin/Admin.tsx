@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { isAdmin } from '../../lib/admin';
 import { useAuthContext } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { Text } from '../../components/Text';
 import styles from './Admin.module.scss';
 
 interface Stats {
@@ -65,8 +66,8 @@ export const Admin = () => {
   return (
     <div className={styles.admin}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Admin Panel</h1>
-        <p className={styles.subtitle}>System administration and monitoring</p>
+        <Text variant="h1" className={styles.title}>Admin Panel</Text>
+        <Text variant="body-sm" className={styles.subtitle} as="p">System administration and monitoring</Text>
       </div>
 
       <div className={styles.tabs}>
@@ -119,32 +120,32 @@ const OverviewTab = () => {
     queryFn: () => api.get('/admin'),
   });
 
-  if (isLoading) return <div className={styles.loading}>Loading...</div>;
-  if (error) return <div className={styles.error}>Failed to load stats</div>;
+  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading...</Text></div>;
+  if (error) return <div className={styles.error}><Text variant="body">Failed to load stats</Text></div>;
   if (!stats) return null;
 
   return (
     <div className={styles.overview}>
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <h3 className={styles.statLabel}>Total Users</h3>
-          <p className={styles.statValue}>{stats.users.total}</p>
+          <Text variant="caption" className={styles.statLabel} as="h3">Total Users</Text>
+          <Text variant="h1" className={styles.statValue} as="p">{stats.users.total}</Text>
         </div>
         <div className={styles.statCard}>
-          <h3 className={styles.statLabel}>Total Watches</h3>
-          <p className={styles.statValue}>{stats.watches.total}</p>
+          <Text variant="caption" className={styles.statLabel} as="h3">Total Watches</Text>
+          <Text variant="h1" className={styles.statValue} as="p">{stats.watches.total}</Text>
         </div>
         <div className={styles.statCard}>
-          <h3 className={styles.statLabel}>Active Watches</h3>
-          <p className={styles.statValue}>{stats.watches.active}</p>
+          <Text variant="caption" className={styles.statLabel} as="h3">Active Watches</Text>
+          <Text variant="h1" className={styles.statValue} as="p">{stats.watches.active}</Text>
         </div>
         <div className={styles.statCard}>
-          <h3 className={styles.statLabel}>Availability Snapshots</h3>
-          <p className={styles.statValue}>{stats.snapshots.total}</p>
+          <Text variant="caption" className={styles.statLabel} as="h3">Availability Snapshots</Text>
+          <Text variant="h1" className={styles.statValue} as="p">{stats.snapshots.total}</Text>
         </div>
         <div className={styles.statCard}>
-          <h3 className={styles.statLabel}>Notifications Sent</h3>
-          <p className={styles.statValue}>{stats.notifications.total}</p>
+          <Text variant="caption" className={styles.statLabel} as="h3">Notifications Sent</Text>
+          <Text variant="h1" className={styles.statValue} as="p">{stats.notifications.total}</Text>
         </div>
       </div>
     </div>
@@ -157,8 +158,8 @@ const UsersTab = () => {
     queryFn: () => api.get('/admin/users'),
   });
 
-  if (isLoading) return <div className={styles.loading}>Loading users...</div>;
-  if (error) return <div className={styles.error}>Failed to load users</div>;
+  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading users...</Text></div>;
+  if (error) return <div className={styles.error}><Text variant="body">Failed to load users</Text></div>;
   if (!users) return null;
 
   return (
@@ -195,8 +196,8 @@ const WatchesTab = () => {
     queryFn: () => api.get('/admin/watches'),
   });
 
-  if (isLoading) return <div className={styles.loading}>Loading watches...</div>;
-  if (error) return <div className={styles.error}>Failed to load watches</div>;
+  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading watches...</Text></div>;
+  if (error) return <div className={styles.error}><Text variant="body">Failed to load watches</Text></div>;
   if (!watches) return null;
 
   return (
@@ -248,8 +249,8 @@ const ActivityTab = () => {
     refetchInterval: 5000,
   });
 
-  if (isLoading) return <div className={styles.loading}>Loading activity...</div>;
-  if (error) return <div className={styles.error}>Failed to load activity</div>;
+  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading activity...</Text></div>;
+  if (error) return <div className={styles.error}><Text variant="body">Failed to load activity</Text></div>;
   if (!activities) return null;
 
   return (
@@ -339,15 +340,15 @@ const SchedulerTab = () => {
     },
   });
 
-  if (isLoading) return <div className={styles.loading}>Loading scheduler status...</div>;
-  if (error) return <div className={styles.error}>Failed to load scheduler status</div>;
+  if (isLoading) return <div className={styles.loading}><Text variant="body">Loading scheduler status...</Text></div>;
+  if (error) return <div className={styles.error}><Text variant="body">Failed to load scheduler status</Text></div>;
   if (!status) return null;
 
   return (
     <div className={styles.scheduler}>
       <div className={styles.schedulerCard}>
         <div className={styles.schedulerHeader}>
-          <h2 className={styles.schedulerTitle}>Availability Check Scheduler</h2>
+          <Text variant="h2" className={styles.schedulerTitle}>Availability Check Scheduler</Text>
           <span
             className={`${styles.schedulerStatus} ${
               status.isRunning ? styles.schedulerStatusRunning : styles.schedulerStatusStopped

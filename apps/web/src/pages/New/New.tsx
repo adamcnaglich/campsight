@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CampsiteSearchResult, CreateWatchDTO } from '@campsight/shared';
 import { api } from '../../lib/api';
+import { Text } from '../../components/Text';
 import { Search } from './Search';
 import { Campgrounds } from './Campgrounds';
 import { Campsites } from './Campsites';
@@ -252,11 +253,13 @@ export const New = () => {
                 >
                   {step.id}
                 </button>
-                <span
+                <Text
+                  variant="body-sm"
+                  as="span"
                   className={`${styles.stepLabel} ${isActive ? styles.stepLabelActive : ''} ${!accessible ? styles.stepLabelDisabled : ''}`}
                 >
                   {step.label}
-                </span>
+                </Text>
               </div>
               {!isLast && (
                 <div

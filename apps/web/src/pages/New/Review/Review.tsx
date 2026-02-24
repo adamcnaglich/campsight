@@ -1,5 +1,6 @@
 import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
+import { Text } from '../../../components/Text';
 import styles from './Review.module.scss';
 
 const formatDateRange = (start: string, end: string): string => {
@@ -76,7 +77,7 @@ export const Review = ({
       <div className={styles.twoColumnLayout}>
         {/* Left column: heading + edit cards */}
         <div className={styles.leftColumn}>
-          <h2 className={styles.heading}>Review & submit</h2>
+          <Text variant="h3" className={styles.heading}>Review & submit</Text>
 
           <div className={styles.cardList}>
             {/* Card 1: Campground (image, text, edit) */}
@@ -154,7 +155,7 @@ export const Review = ({
         <div className={styles.rightColumn}>
           <div className={styles.siteImagePlaceholder}>
             <span className={styles.siteImageIcon}>🏕️</span>
-            <p className={styles.siteImageText}>Site photo</p>
+            <Text variant="body-sm" className={styles.siteImageText} as="p">Site photo</Text>
           </div>
         </div>
       </div>
@@ -168,9 +169,9 @@ export const Review = ({
         continueDisabled={isSubmitting}
       />
       {hasError && (
-        <p className={styles.errorText}>
+        <Text variant="body-sm" className={styles.errorText} as="p">
           Failed to create watch. Please try again.
-        </p>
+        </Text>
       )}
     </div>
   );

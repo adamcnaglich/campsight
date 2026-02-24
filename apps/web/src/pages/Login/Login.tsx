@@ -1,4 +1,5 @@
 import { useAuthContext } from '../../context/AuthContext';
+import { Text } from '../../components/Text';
 import styles from './Login.module.scss';
 
 export const Login = () => {
@@ -9,11 +10,11 @@ export const Login = () => {
       <div className={styles.card}>
         <div className={styles.logoSection}>
           <span className={styles.logoIcon}>🏕️</span>
-          <h1 className={styles.title}>CampSight</h1>
-          <p className={styles.subtitle}>
+          <Text variant="h1" className={styles.title}>CampSight</Text>
+          <Text variant="body" className={styles.subtitle}>
             Never miss a campsite opening again. Monitor availability on
             Recreation.gov and get notified instantly.
-          </p>
+          </Text>
         </div>
 
         <button onClick={signInWithGoogle} className={styles.googleBtn}>
@@ -38,9 +39,9 @@ export const Login = () => {
           Sign in with Google
         </button>
 
-        <p className={styles.footer}>
+        <Text variant="caption" className={styles.footer} as="p">
           By signing in, you agree to our terms of service.
-        </p>
+        </Text>
       </div>
     </div>
   );

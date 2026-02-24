@@ -1,4 +1,5 @@
 import { CampsiteSearchResult } from '@campsight/shared';
+import { Text } from '../../../components/Text';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
@@ -21,9 +22,9 @@ export const Campgrounds = ({
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
             {(selectedFacility?.campgroundName || searchDisplayName) && (
-              <h2 className={styles.heading}>
+              <Text variant="h3" className={styles.heading}>
                 {selectedFacility?.campgroundName || searchDisplayName}
-              </h2>
+              </Text>
             )}
             <ul className={styles.resultsList}>
               {searchResults.map((facility, i) => {
@@ -40,14 +41,14 @@ export const Campgrounds = ({
                         <div className={styles.photoPlaceholder}>📷</div>
                       </div>
                       <div className={styles.cardContent}>
-                        <h3 className={styles.cardTitle}>
+                        <Text variant="h5" className={styles.cardTitle}>
                           {facility.campgroundName}
-                        </h3>
-                        <p className={styles.cardLocation}>
+                        </Text>
+                        <Text variant="body-sm" className={styles.cardLocation} as="p">
                           {facility.facilityId
                             ? `Facility ID: ${facility.facilityId}`
                             : 'Location not available'}
-                        </p>
+                        </Text>
                         <div className={styles.cardRating}>
                           <div className={styles.stars}>
                             {'★'
@@ -71,14 +72,14 @@ export const Campgrounds = ({
           <div className={styles.mapColumn}>
             <div className={styles.mapPlaceholder}>
               <span className={styles.mapIcon}>🗺️</span>
-              <p className={styles.mapText}>Map view coming soon</p>
+              <Text variant="body-sm" className={styles.mapText} as="p">Map view coming soon</Text>
             </div>
           </div>
         </div>
       ) : (
-        <p className={styles.hint}>
+        <Text variant="body-sm" className={styles.hint} as="p">
           Run a search in step 1 to see campgrounds.
-        </p>
+        </Text>
       )}
     </div>
   );

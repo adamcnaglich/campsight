@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Watch, AvailabilitySnapshot } from '@campsight/shared';
 import { format, parseISO, eachDayOfInterval } from 'date-fns';
 import { api } from '../../lib/api';
+import { Text } from '../../components/Text';
 import styles from './WatchDetail.module.scss';
 
 interface WatchAvailabilityResponse {
@@ -22,13 +23,17 @@ export const WatchDetail = () => {
   });
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading availability...</div>;
+    return (
+      <div className={styles.loading}>
+        <Text variant="body">Loading availability...</Text>
+      </div>
+    );
   }
 
   if (error || !data) {
     return (
       <div className={styles.error}>
-        <p>Failed to load watch details.</p>
+        <Text variant="body" as="p">Failed to load watch details.</Text>
         <Link to="/dashboard">Back to Dashboard</Link>
       </div>
     );
@@ -66,8 +71,8 @@ export const WatchDetail = () => {
 
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>{watch.campsiteName}</h1>
-          <p className={styles.campground}>{watch.campgroundName}</p>
+          <Text variant="h1" className={styles.title}>{watch.campsiteName}</Text>
+          <Text variant="body" className={styles.campground} as="p">{watch.campgroundName}</Text>
         </div>
         <span
           className={`${styles.badge} ${
@@ -83,28 +88,28 @@ export const WatchDetail = () => {
       </div>
 
       <div className={styles.calendarSection}>
-        <h2 className={styles.sectionTitle}>Availability Calendar</h2>
+        <Text variant="h2" className={styles.sectionTitle}>Availability Calendar</Text>
 
         {dateRange.length === 0 ? (
-          <p className={styles.noData}>
+          <Text variant="body" className={styles.noData} as="p">
             No availability data yet. The scheduler will check shortly.
-          </p>
+          </Text>
         ) : (
           <>
             <div className={styles.legend}>
               <span className={styles.legendItem}>
                 <span className={`${styles.legendDot} ${styles.available}`} />
-                Available
+                <Text variant="body-sm" as="span">Available</Text>
               </span>
               <span className={styles.legendItem}>
                 <span className={`${styles.legendDot} ${styles.reserved}`} />
-                Reserved
+                <Text variant="body-sm" as="span">Reserved</Text>
               </span>
               <span className={styles.legendItem}>
                 <span
                   className={`${styles.legendDot} ${styles.notAvailable}`}
                 />
-                Not Available
+                <Text variant="body-sm" as="span">Not Available</Text>
               </span>
             </div>
 

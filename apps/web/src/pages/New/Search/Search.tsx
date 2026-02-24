@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../../../lib/api';
+import { Text } from '../../../components/Text';
 import styles from './Search.module.scss';
 
 export interface SearchSuggestion {
@@ -139,10 +140,10 @@ export const Search = ({
 
   return (
     <div className={styles.root}>
-      <h2 className={styles.heading}>Where to?</h2>
-      <p className={styles.subtext}>
+      <Text variant="h1" className={styles.heading}>Where to?</Text>
+      <Text variant="body-sm" className={styles.subtext} as="p">
         Search campgrounds, parks, National Forest and more
-      </p>
+      </Text>
       <div className={styles.searchRow}>
         <div ref={dropdownRef} className={styles.dropdownWrapper}>
           <div className={styles.inputWrapper}>
@@ -205,7 +206,7 @@ export const Search = ({
       </div>
 
       <div className={styles.trendingSection}>
-        <h3 className={styles.trendingHeading}>Trending Campgrounds</h3>
+        <Text variant="h3" className={styles.trendingHeading}>Trending Campgrounds</Text>
         <div className={styles.trendingGrid}>
           {TRENDING_CAMPGROUNDS.map((campground) => (
             <button
