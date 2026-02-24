@@ -1,0 +1,1 @@
+export { WatchDetail } from './WatchDetail';

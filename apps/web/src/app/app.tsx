@@ -1,20 +1,22 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
-import { Layout } from '../components/Layout/Layout';
-import { Login } from '../pages/Login/Login';
-import { Home } from '../pages/Home/Home';
-import { Dashboard } from '../pages/Dashboard/Dashboard';
-import { New } from '../pages/New/New';
-import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
-import { Settings } from '../pages/Settings/Settings';
-import { Admin } from '../pages/Admin/Admin';
+import { Layout } from '../components/Layout';
+import { Login } from '../pages/Login';
+import { Home } from '../pages/Home';
+import { Dashboard } from '../pages/Dashboard';
+import { New } from '../pages/New';
+import { WatchDetail } from '../pages/WatchDetail';
+import { Settings } from '../pages/Settings';
+import { Admin } from '../pages/Admin';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}>
+      <div
+        style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}
+      >
         Loading...
       </div>
     );
@@ -35,7 +37,11 @@ export const App = () => {
       <Route
         path="/login"
         element={
-          loading ? null : user ? <Navigate to="/dashboard" replace /> : <Login />
+          loading ? null : user ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Login />
+          )
         }
       />
       <Route path="/" element={<Home />} />
@@ -83,5 +89,3 @@ export const App = () => {
     </Routes>
   );
 };
-
-export default App;
