@@ -4,7 +4,7 @@
   flex-direction: column;
 }
 
-/* When AddWatch is on Campgrounds or Campsites: constrain to viewport so flex chain works */
+/* When New is on Campgrounds or Campsites: constrain to viewport so flex chain works */
 .layout:has([data-fill-layout]) {
   height: 100vh;
   overflow: hidden;

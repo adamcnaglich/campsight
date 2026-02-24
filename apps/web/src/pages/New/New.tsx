@@ -8,7 +8,7 @@ import { Campgrounds } from './Campgrounds';
 import { Campsites } from './Campsites';
 import { Dates } from './Dates';
 import { Review } from './Review';
-import styles from './AddWatch.module.scss';
+import styles from './New.module.scss';
 
 const STEPS = [
   { id: 1, label: 'Search' },
@@ -18,7 +18,7 @@ const STEPS = [
   { id: 5, label: 'Review' },
 ] as const;
 
-export function AddWatch() {
+export function New() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

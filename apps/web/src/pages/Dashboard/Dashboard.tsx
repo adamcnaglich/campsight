@@ -44,21 +44,27 @@ export function Dashboard() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Your Watches</h1>
+        </div>
+
+        <div className={styles.headerContent}>
           <p className={styles.subtitle}>
             Monitoring {watches?.filter((w) => w.isActive).length || 0} active
             campsite{watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
           </p>
+          <Link to="/new" className={styles.addBtn}>
+            + Add Watch
+          </Link>
         </div>
-        <Link to="/new" className={styles.addBtn}>
-          + Add Watch
-        </Link>
       </div>
 
       {!watches?.length ? (
         <div className={styles.empty}>
           <span className={styles.emptyIcon}>🔭</span>
           <h2>No watches yet</h2>
-          <p>Start monitoring campsites to get notified when they become available.</p>
+          <p>
+            Start monitoring campsites to get notified when they become
+            available.
+          </p>
           <Link to="/new" className={styles.emptyBtn}>
             Add your first watch
           </Link>
@@ -95,10 +101,7 @@ export function Dashboard() {
               </div>
 
               <div className={styles.cardActions}>
-                <Link
-                  to={`/watch/${watch.id}`}
-                  className={styles.viewBtn}
-                >
+                <Link to={`/watch/${watch.id}`} className={styles.viewBtn}>
                   View Availability
                 </Link>
                 <button

@@ -4,7 +4,7 @@ import { Layout } from '../components/Layout/Layout';
 import { Login } from '../pages/Login/Login';
 import { Home } from '../pages/Home/Home';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
-import { AddWatch } from '../pages/AddWatch/AddWatch';
+import { New } from '../pages/New/New';
 import { WatchDetail } from '../pages/WatchDetail/WatchDetail';
 import { Settings } from '../pages/Settings/Settings';
 import { Admin } from '../pages/Admin/Admin';
@@ -51,7 +51,7 @@ export function App() {
         path="/new"
         element={
           <ProtectedRoute>
-            <AddWatch />
+            <New />
           </ProtectedRoute>
         }
       />
