@@ -7,6 +7,15 @@ import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
 import styles from './Dashboard.module.scss';
 
+const formatDate = (isoDate: string): string => {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
 export const Dashboard = () => {
   const queryClient = useQueryClient();
 
@@ -56,9 +65,9 @@ export const Dashboard = () => {
         </div>
 
         <div className={styles.headerContent}>
-          <Text variant="body-sm" className={styles.subtitle} as="p">
-            Monitoring {watches?.filter((w) => w.isActive).length || 0} active
-            campsite{watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
+          <Text variant="body" className={styles.subtitle} as="p">
+            Monitoring {watches?.filter((w) => w.isActive).length || 0} campsite
+            {watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
           </Text>
           <Button
             className={styles.addBtn}
@@ -100,81 +109,97 @@ export const Dashboard = () => {
       ) : (
         <div className={styles.grid}>
           {watches.map((watch) => (
-            <div
-              key={watch.id}
-              className={`${styles.card} ${
-                !watch.isActive ? styles.cardInactive : ''
-              }`}
-            >
-              <div className={styles.cardHeader}>
-                <div>
-                  <Text variant="h3" className={styles.campsiteName}>
-                    {watch.campsiteName}
-                  </Text>
+            <div key={watch.id} className={styles.card}>
+              <div className={styles.cardImage}>
+                <img
+                  src={`https://picsum.photos/seed/campsite-${watch.id}/600/300`}
+                  alt=""
+                  width="100%"
+                  height="100%"
+                />
+              </div>
+
+              <div className={styles.cardContent}>
+                {/* Row 1: Image */}
+
+                {/* Row 2: Location type (left) | Status pill (right) */}
+                <div className={styles.cardMeta}>
                   <Text
-                    variant="body-sm"
-                    className={styles.campgroundName}
-                    as="p"
+                    variant="caption"
+                    className={styles.locationType}
+                    as="span"
                   >
-                    {watch.campgroundName}
+                    TBD
+                  </Text>
+                  <span
+                    className={`${styles.badge} ${
+                      watch.isActive ? styles.badgeActive : styles.badgeInactive
+                    }`}
+                  >
+                    {watch.isActive ? 'Active' : 'Paused'}
+                  </span>
+                </div>
+
+                {/* Row 3: Campsite name */}
+                <Text variant="h3" className={styles.campsiteName}>
+                  Site: {watch.campsiteName}
+                </Text>
+
+                {/* Row 4: Campground name */}
+                <Text variant="body" className={styles.campgroundName} as="p">
+                  {watch.campgroundName.toLowerCase()}
+                </Text>
+
+                {/* Row 5: Date range */}
+                <div className={styles.dates}>
+                  <Text variant="caption" as="span">
+                    {formatDate(watch.startDate)}
+                  </Text>
+                  <span className={styles.dateArrow}>→</span>
+                  <Text variant="caption" as="span">
+                    {formatDate(watch.endDate)}
                   </Text>
                 </div>
-                <span
-                  className={`${styles.badge} ${
-                    watch.isActive ? styles.badgeActive : styles.badgeInactive
-                  }`}
-                >
-                  {watch.isActive ? 'Active' : 'Paused'}
-                </span>
-              </div>
 
-              <div className={styles.dates}>
-                <Text variant="body-sm" as="span">
-                  {watch.startDate}
-                </Text>
-                <span className={styles.dateArrow}>→</span>
-                <Text variant="body-sm" as="span">
-                  {watch.endDate}
-                </Text>
-              </div>
-
-              <div className={styles.cardActions}>
-                <Button
-                  as={({ children, className, ...props }) => (
-                    <Link
-                      to={`/watch/${watch.id}`}
-                      className={className}
-                      {...props}
-                    >
-                      {children}
-                    </Link>
-                  )}
-                  size="compact"
-                >
-                  View Availability
-                </Button>
-
-                <Button
-                  className={styles.cardActionBtn}
-                  variant="outline"
-                  size="compact"
-                  onClick={() => toggleMutation.mutate(watch)}
-                  disabled={toggleMutation.isPending}
-                >
-                  {watch.isActive ? 'Pause' : 'Resume'}
-                </Button>
-                <Button
-                  className={styles.cardActionBtn}
-                  size="compact"
-                  onClick={() => {
-                    if (confirm('Delete this watch?')) {
-                      deleteMutation.mutate(watch.id);
-                    }
-                  }}
-                  disabled={deleteMutation.isPending}
-                >
-                  Delete
-                </Button>
+                {/* Row 6: Buttons */}
+                <div className={styles.cardActions}>
+                  <Button
+                    variant="outline"
+                    as={({ children, className, ...props }) => (
+                      <Link
+                        to={`/watch/${watch.id}`}
+                        className={className}
+                        {...props}
+                      >
+                        {children}
+                      </Link>
+                    )}
+                  >
+                    Details
+                  </Button>
+                  <Button
+                    className={styles.cardActionBtn}
+                    variant="outline"
+                    level={!watch.isActive ? 'success' : undefined}
+                    onClick={() => toggleMutation.mutate(watch)}
+                    disabled={toggleMutation.isPending}
+                  >
+                    {watch.isActive ? 'Pause' : 'Resume'}
+                  </Button>
+                  <Button
+                    className={styles.cardActionBtn}
+                    variant="outline"
+                    level="danger"
+                    onClick={() => {
+                      if (confirm('Cancel this watch?')) {
+                        deleteMutation.mutate(watch.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
