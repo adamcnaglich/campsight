@@ -5,6 +5,7 @@
   width: 100%;
   margin: auto;
   text-align: center;
+  padding-top: 44px;
 }
 .heading {
   margin: 0;
@@ -12,10 +13,7 @@
 
 .subtext {
   margin: 0;
-  font-size: var(--text-body-sm-size);
-  font-weight: var(--text-body-sm-weight);
-  line-height: var(--text-body-sm-line-height);
-  color: var(--color-text-secondary);
+  color: #506172;
 }
 
 .searchRow {
@@ -52,6 +50,10 @@
   &:focus {
     border-color: #008234;
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  }
+
+  &::placeholder {
+    color: #c6d1dc;
   }
 }
 

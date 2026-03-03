@@ -171,7 +171,7 @@ export const Search = ({
       <Text variant="h1" className={styles.heading}>
         Where to?
       </Text>
-      <Text variant="body-sm" className={styles.subtext} as="p">
+      <Text variant="body" className={styles.subtext} as="p">
         Search campgrounds, parks, National Forest and more
       </Text>
       <div className={styles.searchRow}>
