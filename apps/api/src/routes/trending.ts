@@ -28,23 +28,48 @@ function isLocalIp(ip: string): boolean {
   );
 }
 
-async function coordsFromIp(ip: string): Promise<{ lat: number; lng: number }> {
+async function coordsFromIp(ip: string): Promise<{ lat: number; lng: number; source: string }> {
   if (isLocalIp(ip)) {
-    return DEFAULT_COORDS;
+    log.trending.debug({ ip }, 'Local IP detected, using default coords');
+    return { ...DEFAULT_COORDS, source: 'default:local-ip' };
   }
   const cleanIp = ip.replace(/^::ffff:/, '');
   try {
-    const { data } = await axios.get<{ latitude?: number; longitude?: number }>(
-      `${IPAPI_BASE}/${cleanIp}/json/`,
-      { timeout: 3000 },
-    );
-    if (data.latitude && data.longitude) {
-      return { lat: data.latitude, lng: data.longitude };
+    const response = await axios.get<{
+      latitude?: number;
+      longitude?: number;
+      error?: boolean;
+      reason?: string;
+    }>(`${IPAPI_BASE}/${cleanIp}/json/`, { timeout: 3000 });
+
+    const { data } = response;
+
+    if (data.error) {
+      log.trending.warn({ ip: cleanIp, reason: data.reason }, 'ipapi.co returned an error payload');
+      return { ...DEFAULT_COORDS, source: 'default:ipapi-error' };
     }
-  } catch {
-    // fall through
+
+    if (data.latitude && data.longitude) {
+      log.trending.debug({ ip: cleanIp, lat: data.latitude, lng: data.longitude }, 'IP geolocation resolved');
+      return { lat: data.latitude, lng: data.longitude, source: 'ipapi' };
+    }
+
+    log.trending.warn({ ip: cleanIp, data }, 'ipapi.co returned no coordinates');
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+      if (status === 429) {
+        log.trending.error({ ip: cleanIp, status }, 'ipapi.co rate limit hit (429) — falling back to default coords');
+      } else if (err.code === 'ECONNABORTED') {
+        log.trending.warn({ ip: cleanIp }, 'ipapi.co request timed out — falling back to default coords');
+      } else {
+        log.trending.warn({ ip: cleanIp, status, code: err.code, message: err.message }, 'ipapi.co request failed — falling back to default coords');
+      }
+    } else {
+      log.trending.warn({ ip: cleanIp, err }, 'Unexpected error during IP geolocation — falling back to default coords');
+    }
   }
-  return DEFAULT_COORDS;
+  return { ...DEFAULT_COORDS, source: 'default:fallback' };
 }
 
 function toDateString(year: number, month: number, day: number): string {
@@ -76,10 +101,14 @@ function getNextWeekendDates(): { start_date: string; end_date: string } {
  * from their IP address) for the upcoming weekend via Recreation.gov.
  */
 router.get('/', async (req: Request, res: Response) => {
+  // Prevent ETags / 304s — each request is IP-specific and must never be served from cache
+  res.set('Cache-Control', 'no-store');
+
   const ip = getClientIp(req);
+  log.trending.debug({ ip, forwardedFor: req.headers['x-forwarded-for'] }, 'Trending request received');
 
   try {
-    const { lat, lng } = await coordsFromIp(ip);
+    const { lat, lng, source: geoSource } = await coordsFromIp(ip);
     const { start_date, end_date } = getNextWeekendDates();
 
     const params = new URLSearchParams({
@@ -104,7 +133,7 @@ router.get('/', async (req: Request, res: Response) => {
       { timeout: 8000 },
     );
 
-    log.trending.info({ ip, lat, lng, total: data.total }, 'Trending campgrounds fetched');
+    log.trending.info({ ip, lat, lng, geoSource, total: data.total }, 'Trending campgrounds fetched');
     res.json({ data: data.results ?? [] });
   } catch (error) {
     log.trending.error({ err: error, ip }, 'Failed to fetch trending campgrounds');
