@@ -210,7 +210,7 @@ export const Search = ({
 
       <div className={styles.trendingSection}>
         <Text variant="h3" className={styles.trendingHeading}>
-          Trending Campgrounds
+          Available Campgrounds Nearby
         </Text>
         {trendingLoading ? (
           <div className={styles.trendingGrid}>
