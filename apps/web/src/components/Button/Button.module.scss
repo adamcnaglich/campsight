@@ -1,12 +1,12 @@
 .button {
   text-transform: capitalize;
-  line-height: initial;
+  line-height: var(--text-body-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: none;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-medium);
   font-size: var(--text-body-size);
   white-space: nowrap;
   cursor: pointer;
@@ -31,11 +31,11 @@
 }
 
 .primary {
-  background: var(--color-primary);
+  background: #008235;
   color: white;
 
   &:hover:not(:disabled) {
-    background: var(--color-primary-dark);
+    background: #00682a;
   }
 }
 
@@ -45,12 +45,11 @@
   border: 1px solid var(--color-border);
 
   &:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background: rgb(246, 246, 246);
   }
 }
 
-.subtle {
+.ghost {
   background: transparent;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
@@ -61,35 +60,25 @@
   }
 }
 
-.active {
-  background: var(--color-primary-bg);
-  color: var(--color-primary-dark);
+.success {
+  background: #eefdf3;
+  color: green;
+  border: none;
 
   &:hover:not(:disabled) {
-    background: var(--color-primary-bg);
-    color: var(--color-primary-dark);
+    background: #d8eddf;
+    color: green;
   }
 }
 
 .danger {
-  background: var(--color-danger);
-  color: white;
+  background: #fff4f4;
+  color: #b60000;
+  border: none;
 
   &:hover:not(:disabled) {
-    background: #b91c1c;
-  }
-}
-
-.outlineDanger {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  font-weight: var(--font-weight-medium);
-
-  &:hover:not(:disabled) {
-    color: var(--color-danger);
-    border-color: var(--color-danger-light);
-    background: #fef2f2;
+    background: #ffe5e5;
+    color: #b60000;
   }
 }
 
@@ -105,7 +94,6 @@
 
 .small {
   padding: 8px 16px;
-  font-size: var(--text-body-sm-size);
 }
 
 .compact {
@@ -130,4 +118,23 @@
   padding: 16px 24px;
   font-size: 16px;
   border-radius: 16px;
+  line-height: 18px;
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.hasIcon.small {
+  padding-left: 8px;
+}
+
+.hasIcon.compact {
+  padding-left: 4px;
+}
+
+.hasIcon.medium {
+  padding-left: 8px;
+}
+
+.hasIcon.large {
+  padding-left: 12px;
 }

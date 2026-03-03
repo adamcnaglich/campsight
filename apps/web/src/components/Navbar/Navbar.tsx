@@ -78,8 +78,10 @@ export const Navbar = () => {
                         {children}
                       </Link>
                     )}
-                    variant="subtle"
-                    active={location.pathname === item.path}
+                    variant="ghost"
+                    level={
+                      location.pathname === item.path ? 'success' : undefined
+                    }
                   >
                     {item.label}
                   </Button>
@@ -93,8 +95,12 @@ export const Navbar = () => {
                         {children}
                       </Link>
                     )}
-                    variant="subtle"
-                    active={location.pathname.startsWith('/admin')}
+                    variant="ghost"
+                    level={
+                      location.pathname.startsWith('/admin')
+                        ? 'success'
+                        : undefined
+                    }
                   >
                     Admin
                   </Button>
@@ -126,7 +132,7 @@ export const Navbar = () => {
                 {avatarMenuOpen && (
                   <div className={styles.avatarPopover}>
                     <Button
-                      variant="subtle"
+                      variant="ghost"
                       onClick={() => {
                         setAvatarMenuOpen(false);
                         signOut();
@@ -180,8 +186,8 @@ export const Navbar = () => {
                     {children}
                   </Link>
                 )}
-                variant="subtle"
-                active={location.pathname === item.path}
+                variant="ghost"
+                level={location.pathname === item.path ? 'success' : undefined}
               >
                 {item.label}
               </Button>
@@ -195,8 +201,10 @@ export const Navbar = () => {
                     {children}
                   </Link>
                 )}
-                variant="subtle"
-                active={location.pathname.startsWith('/admin')}
+                variant="ghost"
+                level={
+                  location.pathname.startsWith('/admin') ? 'success' : undefined
+                }
               >
                 Admin
               </Button>
@@ -212,7 +220,7 @@ export const Navbar = () => {
               />
             )}
             <Button
-              variant="subtle"
+              variant="ghost"
               onClick={() => {
                 setMenuOpen(false);
                 signOut();

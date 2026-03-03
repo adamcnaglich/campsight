@@ -24,11 +24,17 @@ export const SelectionFooter = ({
   const footer = (
     <div className={styles.footer}>
       <div className={styles.content}>
-        <Button variant="outline" fullWidthOnMobile onClick={onClear}>
+        <Button
+          variant="outline"
+          size="medium"
+          fullWidthOnMobile
+          onClick={onClear}
+        >
           {clearLabel}
         </Button>
         <Button
           variant="primary"
+          size="medium"
           fullWidthOnMobile
           onClick={onContinue}
           disabled={continueDisabled}

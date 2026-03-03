@@ -2,16 +2,15 @@ import { ElementType, ReactNode, ButtonHTMLAttributes } from 'react';
 import classNames from 'classnames';
 import styles from './Button.module.scss';
 
-export type ButtonVariant =
-  | 'primary'
-  | 'outline'
-  | 'subtle'
-  | 'danger'
-  | 'outlineDanger';
+export type ButtonVariant = 'primary' | 'outline' | 'ghost';
+export type ButtonLevel = 'success' | 'danger';
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'as'> {
+  /** Variant of the button */
   variant?: ButtonVariant;
+  /** Level of the button */
+  level?: ButtonLevel;
   /** Render as another element, e.g. Link */
   as?: ElementType;
   /** Padding by size only: default = 12px 24px, small = 10px 20px, compact = 6px 14px */
@@ -20,8 +19,6 @@ export interface ButtonProps
   fullWidth?: boolean;
   /** Full width on mobile breakpoint (480px) */
   fullWidthOnMobile?: boolean;
-  /** Active/selected state (e.g. current nav page) */
-  active?: boolean;
   /** Icon rendered before children */
   icon?: ReactNode;
 }
@@ -29,9 +26,12 @@ export interface ButtonProps
 const VARIANT_STYLE: Record<ButtonVariant, string> = {
   primary: styles.primary,
   outline: styles.outline,
-  subtle: styles.subtle,
+  ghost: styles.ghost,
+};
+
+const LEVEL_STYLE: Record<ButtonLevel, string> = {
+  success: styles.success,
   danger: styles.danger,
-  outlineDanger: styles.outlineDanger,
 };
 
 const SIZE_STYLE: Partial<Record<NonNullable<ButtonProps['size']>, string>> = {
@@ -44,9 +44,9 @@ const SIZE_STYLE: Partial<Record<NonNullable<ButtonProps['size']>, string>> = {
 export const Button = ({
   variant = 'primary',
   size = 'small',
+  level,
   fullWidth,
   fullWidthOnMobile,
-  active,
   icon,
   as: Component = 'button',
   children,
@@ -55,6 +55,7 @@ export const Button = ({
   ...rest
 }: ButtonProps) => {
   const variantClass = VARIANT_STYLE[variant];
+  const levelClass = level ? LEVEL_STYLE[level] : undefined;
   const sizeClass = SIZE_STYLE[size];
   const widthClass = fullWidth
     ? styles.fullWidth
@@ -64,10 +65,11 @@ export const Button = ({
   const combinedClassName = classNames(
     styles.button,
     variantClass,
+    levelClass,
     sizeClass,
     widthClass,
-    { [styles.active]: active },
     className,
+    { [styles.hasIcon]: !!icon },
   );
 
   const componentProps =

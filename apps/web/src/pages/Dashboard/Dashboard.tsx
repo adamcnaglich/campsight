@@ -149,7 +149,6 @@ export const Dashboard = () => {
                       {children}
                     </Link>
                   )}
-                  variant="subtle"
                   size="compact"
                 >
                   View Availability
@@ -166,7 +165,6 @@ export const Dashboard = () => {
                 </Button>
                 <Button
                   className={styles.cardActionBtn}
-                  variant="outlineDanger"
                   size="compact"
                   onClick={() => {
                     if (confirm('Delete this watch?')) {
