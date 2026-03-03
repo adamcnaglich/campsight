@@ -57,6 +57,10 @@
 .campsiteName {
   margin-bottom: 6px;
   text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
 }
 
 .campgroundName {
