@@ -40,6 +40,7 @@ export const log = {
   db: logger.child({ module: 'db' }),
   watches: logger.child({ module: 'watches' }),
   campsites: logger.child({ module: 'campsites' }),
+  trending: logger.child({ module: 'trending' }),
   scheduler: logger.child({ module: 'scheduler' }),
   notify: logger.child({ module: 'notify' }),
 };

@@ -10,6 +10,7 @@ import { authMiddleware } from './middleware/auth';
 import { adminAuthMiddleware } from './middleware/admin-auth';
 import watchesRouter from './routes/watches';
 import campsitesRouter from './routes/campsites';
+import trendingRouter from './routes/trending';
 import adminRouter from './routes/admin';
 import { startScheduler } from './services/scheduler';
 
@@ -42,6 +43,7 @@ app.get('/health', (_req, res) => {
 // Authenticated API routes
 app.use('/api/watches', authMiddleware, watchesRouter);
 app.use('/api/campsites', authMiddleware, campsitesRouter);
+app.use('/api/trending', authMiddleware, trendingRouter);
 
 // Admin routes (requires admin authentication)
 app.use('/admin', adminAuthMiddleware, adminRouter);

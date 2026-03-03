@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
@@ -32,44 +33,14 @@ export interface SearchProps {
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
 
-const TRENDING_CAMPGROUNDS = [
-  {
-    id: '1',
-    image: 'https://picsum.photos/seed/camp1/400/240',
-    title: 'Yosemite Pines RV Resort',
-    location: 'Groveland, CA',
-  },
-  {
-    id: '2',
-    image: 'https://picsum.photos/seed/camp2/400/240',
-    title: 'Upper Pines Campground',
-    location: 'Yosemite Valley, CA',
-  },
-  {
-    id: '3',
-    image: 'https://picsum.photos/seed/camp3/400/240',
-    title: 'Tuolumne Meadows Campground',
-    location: 'Tuolumne, CA',
-  },
-  {
-    id: '4',
-    image: 'https://picsum.photos/seed/camp4/400/240',
-    title: 'Crater Lake Mazama Village',
-    location: 'Klamath Falls, OR',
-  },
-  {
-    id: '5',
-    image: 'https://picsum.photos/seed/camp5/400/240',
-    title: 'Jenny Lake Campground',
-    location: 'Grand Teton, WY',
-  },
-  {
-    id: '6',
-    image: 'https://picsum.photos/seed/camp6/400/240',
-    title: 'Moraine Park Campground',
-    location: 'Estes Park, CO',
-  },
-] as const;
+interface TrendingCampground {
+  entity_id: string;
+  name: string;
+  city: string;
+  state_code: string;
+  parent_name: string;
+  preview_image_url: string;
+}
 
 export const Search = ({
   searchQuery,
@@ -84,6 +55,12 @@ export const Search = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
+
+  const { data: trendingData, isLoading: trendingLoading } = useQuery({
+    queryKey: ['trending'],
+    queryFn: () => api.get<TrendingCampground[]>('/api/trending'),
+    staleTime: 10 * 60 * 1000,
+  });
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (!query.trim() || query.length < MIN_QUERY_LENGTH) {
@@ -235,20 +212,29 @@ export const Search = ({
         <Text variant="h3" className={styles.trendingHeading}>
           Trending Campgrounds
         </Text>
-        <div className={styles.trendingGrid}>
-          {TRENDING_CAMPGROUNDS.map((campground) => (
-            <CampgroundCard
-              key={campground.id}
-              as="button"
-              imageSrc={campground.image}
-              campsiteName={campground.title}
-              campgroundName={campground.location}
-              onClick={() =>
-                onSelectCampground(campground.id, campground.title)
-              }
-            />
-          ))}
-        </div>
+        {trendingLoading ? (
+          <div className={styles.trendingGrid}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={styles.trendingSkeleton} />
+            ))}
+          </div>
+        ) : (
+          <div className={styles.trendingGrid}>
+            {(trendingData ?? []).map((site) => (
+              <CampgroundCard
+                key={site.entity_id}
+                as="button"
+                imageSrc={site.preview_image_url}
+                campsiteName={site.name}
+                campgroundName={
+                  [site.city, site.state_code].filter(Boolean).join(', ') ||
+                  site.parent_name
+                }
+                onClick={() => onSelectCampground(site.entity_id, site.name)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
