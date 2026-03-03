@@ -225,7 +225,7 @@ export const Search = ({
                 key={site.entity_id}
                 as="button"
                 imageSrc={site.preview_image_url}
-                campsiteName={site.name}
+                campsiteName={site.name.toLowerCase()}
                 campgroundName={
                   [site.city, site.state_code].filter(Boolean).join(', ') ||
                   site.parent_name
