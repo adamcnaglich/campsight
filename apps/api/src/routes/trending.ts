@@ -5,7 +5,7 @@ import { log } from '../lib/logger';
 const router = Router();
 
 const RECREATION_GOV_SEARCH = 'https://www.recreation.gov/api/search';
-const IPAPI_BASE = 'https://ipapi.co';
+const IP_API_BASE = 'http://ip-api.com/json';
 const DEFAULT_COORDS = { lat: 39.8283, lng: -98.5795 }; // geographic center of US
 
 function getClientIp(req: Request): string {
@@ -36,34 +36,34 @@ async function coordsFromIp(ip: string): Promise<{ lat: number; lng: number; sou
   const cleanIp = ip.replace(/^::ffff:/, '');
   try {
     const response = await axios.get<{
-      latitude?: number;
-      longitude?: number;
-      error?: boolean;
-      reason?: string;
-    }>(`${IPAPI_BASE}/${cleanIp}/json/`, { timeout: 3000 });
+      status: 'success' | 'fail';
+      message?: string;
+      lat?: number;
+      lon?: number;
+    }>(`${IP_API_BASE}/${cleanIp}`, { timeout: 3000 });
 
     const { data } = response;
 
-    if (data.error) {
-      log.trending.warn({ ip: cleanIp, reason: data.reason }, 'ipapi.co returned an error payload');
-      return { ...DEFAULT_COORDS, source: 'default:ipapi-error' };
+    if (data.status === 'fail') {
+      log.trending.warn({ ip: cleanIp, message: data.message }, 'ip-api.com returned a failure response');
+      return { ...DEFAULT_COORDS, source: 'default:ip-api-error' };
     }
 
-    if (data.latitude && data.longitude) {
-      log.trending.debug({ ip: cleanIp, lat: data.latitude, lng: data.longitude }, 'IP geolocation resolved');
-      return { lat: data.latitude, lng: data.longitude, source: 'ipapi' };
+    if (data.lat && data.lon) {
+      log.trending.debug({ ip: cleanIp, lat: data.lat, lng: data.lon }, 'IP geolocation resolved');
+      return { lat: data.lat, lng: data.lon, source: 'ip-api' };
     }
 
-    log.trending.warn({ ip: cleanIp, data }, 'ipapi.co returned no coordinates');
+    log.trending.warn({ ip: cleanIp, data }, 'ip-api.com returned no coordinates');
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const status = err.response?.status;
       if (status === 429) {
-        log.trending.error({ ip: cleanIp, status }, 'ipapi.co rate limit hit (429) — falling back to default coords');
+        log.trending.error({ ip: cleanIp, status }, 'ip-api.com rate limit hit (429) — falling back to default coords');
       } else if (err.code === 'ECONNABORTED') {
-        log.trending.warn({ ip: cleanIp }, 'ipapi.co request timed out — falling back to default coords');
+        log.trending.warn({ ip: cleanIp }, 'ip-api.com request timed out — falling back to default coords');
       } else {
-        log.trending.warn({ ip: cleanIp, status, code: err.code, message: err.message }, 'ipapi.co request failed — falling back to default coords');
+        log.trending.warn({ ip: cleanIp, status, code: err.code, message: err.message }, 'ip-api.com request failed — falling back to default coords');
       }
     } else {
       log.trending.warn({ ip: cleanIp, err }, 'Unexpected error during IP geolocation — falling back to default coords');
