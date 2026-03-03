@@ -5,7 +5,7 @@
   width: 100%;
   margin: auto;
   text-align: center;
-  padding-top: 44px;
+  padding: 44px 0 60px 0;
 }
 .heading {
   margin: 0;
@@ -143,8 +143,12 @@
 }
 
 @keyframes shimmer {
-  0%   { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 
 @media (max-width: 768px) {
