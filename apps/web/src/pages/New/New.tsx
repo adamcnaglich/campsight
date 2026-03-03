@@ -42,6 +42,7 @@ export const New = () => {
   );
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [skippedStep2, setSkippedStep2] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const goToStep = useCallback((step: number) => {
@@ -61,6 +62,7 @@ export const New = () => {
     setEndDate('');
     setSelectedSearchName(searchQuery);
     setHighestStepReached(1);
+    setSkippedStep2(false);
     try {
       const results = await api.get<CampsiteSearchResult[]>(
         `/api/campsites/search?q=${encodeURIComponent(searchQuery)}`,
@@ -85,6 +87,7 @@ export const New = () => {
       setStartDate('');
       setEndDate('');
       setHighestStepReached(1);
+      setSkippedStep2(false);
       try {
         const results = await api.get<CampsiteSearchResult[]>(
           `/api/campsites/search?q=${encodeURIComponent(query)}`,
@@ -164,6 +167,7 @@ export const New = () => {
       setStartDate('');
       setEndDate('');
       setHighestStepReached(1);
+      setSkippedStep2(true);
       selectFacility(facility);
     },
     [selectFacility],
@@ -173,6 +177,7 @@ export const New = () => {
     setSelectedFacility(null);
     setCampsites([]);
     setSelectedSites([]);
+    setSkippedStep2(false);
     goToStep(1);
   }, [goToStep]);
 
@@ -186,6 +191,7 @@ export const New = () => {
     setStartDate('');
     setEndDate('');
     setHighestStepReached(1);
+    setSkippedStep2(false);
     goToStep(1);
   }, [goToStep]);
 
@@ -220,7 +226,12 @@ export const New = () => {
 
   const isStepComplete = (step: number) => step < highestStepReached;
 
-  const canGoToStep = (step: number) => step <= highestStepReached;
+  const canGoToStep = (step: number) => {
+    if (skippedStep2 && step === 2) return false;
+    return step <= highestStepReached;
+  };
+
+  const visibleSteps = skippedStep2 ? STEPS.filter((s) => s.id !== 2) : STEPS;
 
   const campgroundName =
     selectedFacility?.campgroundName || selectedSites[0]?.campgroundName || '';
@@ -232,14 +243,16 @@ export const New = () => {
       className={classNames(styles.page, { [styles.pageFill]: isFillLayout })}
       data-fill-layout={isFillLayout ? '' : undefined}
     >
-      {/* Step indicator */}
+      {/* Step indicator (hidden on search step) */}
+      {currentStep !== 1 && (
       <div className={styles.stepIndicator}>
-        {STEPS.map((step, index) => {
+        {visibleSteps.map((step, index) => {
           const isActive = step.id === currentStep;
           const complete = isStepComplete(step.id);
           const accessible = canGoToStep(step.id);
-          const isLast = index === STEPS.length - 1;
+          const isLast = index === visibleSteps.length - 1;
           const connectorComplete = step.id < currentStep;
+          const displayNumber = index + 1;
 
           return (
             <Fragment key={step.id}>
@@ -259,7 +272,7 @@ export const New = () => {
                     [styles.stepCircleDisabled]: !accessible,
                   })}
                 >
-                  {step.id}
+                  {displayNumber}
                 </div>
                 <Text
                   variant="body-sm"
@@ -284,6 +297,7 @@ export const New = () => {
           );
         })}
       </div>
+      )}
 
       {/* Step content with animation */}
       <form
