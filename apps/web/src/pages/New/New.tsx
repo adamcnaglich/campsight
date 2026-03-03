@@ -243,31 +243,36 @@ export const New = () => {
 
           return (
             <Fragment key={step.id}>
-              <div className={styles.stepIndicatorItem}>
-                <button
-                  type="button"
+              <button
+                type="button"
+                className={classNames(styles.stepIndicatorItem, {
+                  [styles.stepIndicatorItemDisabled]: !accessible,
+                })}
+                onClick={() => accessible && goToStep(step.id)}
+                disabled={!accessible}
+                aria-current={isActive ? 'step' : undefined}
+              >
+                <div
                   className={classNames(styles.stepCircle, {
                     [styles.stepCircleActive]: isActive,
                     [styles.stepCircleComplete]: complete,
                     [styles.stepCircleDisabled]: !accessible,
                   })}
-                  onClick={() => accessible && goToStep(step.id)}
-                  disabled={!accessible}
-                  aria-current={isActive ? 'step' : undefined}
                 >
                   {step.id}
-                </button>
+                </div>
                 <Text
                   variant="body-sm"
                   as="span"
                   className={classNames(styles.stepLabel, {
                     [styles.stepLabelActive]: isActive,
+                    [styles.stepLabelComplete]: complete,
                     [styles.stepLabelDisabled]: !accessible,
                   })}
                 >
                   {step.label}
                 </Text>
-              </div>
+              </button>
               {!isLast && (
                 <div
                   className={classNames(styles.stepConnector, {

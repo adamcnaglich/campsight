@@ -39,72 +39,67 @@
 
 .stepIndicator {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0;
-  margin-bottom: 72px;
   padding: 0 4px;
+  max-width: 914px;
+  width: 100%;
+  margin: 0 auto 72px auto;
 }
 
 .stepIndicatorItem {
+  all: unset;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  min-width: 100px;
+  gap: 8px;
+}
+
+.stepIndicatorItemDisabled {
+  cursor: not-allowed;
 }
 
 .stepCircle {
-  width: 36px;
-  height: 36px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-sm-size);
+  border: none;
+  background: #86929d;
+  color: white;
+  font-size: 13px;
   font-weight: var(--font-weight-bold);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-
-  &:hover:not(:disabled) {
-    border-color: var(--color-primary);
-  }
-}
-
-.stepCircleActive {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: white;
-}
-
-.stepCircleComplete {
-  border-color: var(--color-primary);
-  background: var(--color-primary-bg);
-  color: var(--color-primary);
-}
-
-.stepCircleDisabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .stepLabel {
-  font-size: var(--text-caption-size);
-  color: var(--color-text-secondary);
-  margin-top: 6px;
+  color: #86929d;
+  font-size: var(--text-body-size);
   text-align: center;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
 }
 
-.stepLabelActive {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+.stepCircleActive,
+.stepCircleComplete {
+  border-color: #008235;
+  background: #008235;
+  color: white;
 }
 
+.stepLabelActive,
+.stepLabelComplete {
+  color: #008235;
+}
+
+.stepCircleDisabled {
+  opacity: 0.5;
+}
 .stepLabelDisabled {
   opacity: 0.5;
 }
@@ -112,6 +107,7 @@
 .stepConnector {
   flex: 1;
   min-width: 20px;
+  max-width: 72px;
   height: 2px;
   margin-top: 17px;
   background: var(--color-border);
