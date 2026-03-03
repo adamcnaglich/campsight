@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
+import { CampgroundCard } from '../../../components/CampgroundCard';
 import styles from './Search.module.scss';
 
 export interface SearchSuggestion {
@@ -236,25 +237,16 @@ export const Search = ({
         </Text>
         <div className={styles.trendingGrid}>
           {TRENDING_CAMPGROUNDS.map((campground) => (
-            <button
+            <CampgroundCard
               key={campground.id}
-              type="button"
-              className={styles.trendingCard}
+              as="button"
+              imageSrc={campground.image}
+              campsiteName={campground.title}
+              campgroundName={campground.location}
               onClick={() =>
                 onSelectCampground(campground.id, campground.title)
               }
-            >
-              <div
-                className={styles.trendingCardImage}
-                style={{ backgroundImage: `url(${campground.image})` }}
-              />
-              <span className={styles.trendingCardTitle}>
-                {campground.title}
-              </span>
-              <span className={styles.trendingCardLocation}>
-                {campground.location}
-              </span>
-            </button>
+            />
           ))}
         </div>
       </div>

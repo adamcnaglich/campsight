@@ -5,6 +5,7 @@ import { Watch } from '@campsight/shared';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
+import { CampgroundCard } from '../../components/CampgroundCard';
 import styles from './Dashboard.module.scss';
 
 const formatDate = (isoDate: string): string => {
@@ -109,60 +110,18 @@ export const Dashboard = () => {
       ) : (
         <div className={styles.grid}>
           {watches.map((watch) => (
-            <div key={watch.id} className={styles.card}>
-              <div className={styles.cardImage}>
-                <img
-                  src={`https://picsum.photos/seed/campsite-${watch.id}/600/300`}
-                  alt=""
-                  width="100%"
-                  height="100%"
-                />
-              </div>
-
-              <div className={styles.cardContent}>
-                {/* Row 1: Image */}
-
-                {/* Row 2: Location type (left) | Status pill (right) */}
-                <div className={styles.cardMeta}>
-                  <Text
-                    variant="caption"
-                    className={styles.locationType}
-                    as="span"
-                  >
-                    TBD
-                  </Text>
-                  <span
-                    className={`${styles.badge} ${
-                      watch.isActive ? styles.badgeActive : styles.badgeInactive
-                    }`}
-                  >
-                    {watch.isActive ? 'Active' : 'Paused'}
-                  </span>
-                </div>
-
-                {/* Row 3: Campsite name */}
-                <Text variant="h3" className={styles.campsiteName}>
-                  Site: {watch.campsiteName}
-                </Text>
-
-                {/* Row 4: Campground name */}
-                <Text variant="body" className={styles.campgroundName} as="p">
-                  {watch.campgroundName.toLowerCase()}
-                </Text>
-
-                {/* Row 5: Date range */}
-                <div className={styles.dates}>
-                  <Text variant="caption" as="span">
-                    {formatDate(watch.startDate)}
-                  </Text>
-                  <span className={styles.dateArrow}>→</span>
-                  <Text variant="caption" as="span">
-                    {formatDate(watch.endDate)}
-                  </Text>
-                </div>
-
-                {/* Row 6: Buttons */}
-                <div className={styles.cardActions}>
+            <CampgroundCard
+              key={watch.id}
+              imageSrc={`https://picsum.photos/seed/campsite-${watch.id}/600/300`}
+              campsiteName={`Site: ${watch.campsiteName}`}
+              campgroundName={watch.campgroundName}
+              metaLeft="TBD"
+              badgeLabel={watch.isActive ? 'Active' : 'Paused'}
+              badgeActive={watch.isActive}
+              startDate={formatDate(watch.startDate)}
+              endDate={formatDate(watch.endDate)}
+              actions={
+                <>
                   <Button
                     variant="outline"
                     as={({ children, className, ...props }) => (
@@ -178,7 +137,6 @@ export const Dashboard = () => {
                     Details
                   </Button>
                   <Button
-                    className={styles.cardActionBtn}
                     variant="outline"
                     level={!watch.isActive ? 'success' : undefined}
                     onClick={() => toggleMutation.mutate(watch)}
@@ -187,7 +145,6 @@ export const Dashboard = () => {
                     {watch.isActive ? 'Pause' : 'Resume'}
                   </Button>
                   <Button
-                    className={styles.cardActionBtn}
                     variant="outline"
                     level="danger"
                     onClick={() => {
@@ -199,9 +156,9 @@ export const Dashboard = () => {
                   >
                     Cancel
                   </Button>
-                </div>
-              </div>
-            </div>
+                </>
+              }
+            />
           ))}
         </div>
       )}
