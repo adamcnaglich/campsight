@@ -35,8 +35,8 @@ export const Campsites = ({
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
             {facility && (
-              <Text variant="h3" className={styles.heading}>
-                {facility.campgroundName}
+              <Text variant="h1" className={styles.heading}>
+                {facility.campgroundName.toLowerCase()}
               </Text>
             )}
             <ul
@@ -61,23 +61,24 @@ export const Campsites = ({
                         <div className={styles.photoPlaceholder}>🏕️</div>
                       </div>
                       <div className={styles.cardContent}>
-                        <Text variant="h5" className={styles.cardTitle}>
-                          {site.campsiteName}
-                        </Text>
-                        <Text
-                          variant="body-sm"
-                          className={styles.cardLocation}
-                          as="p"
-                        >
+                        <Text variant="h3" className={styles.cardTitle}>
+                          {site.campsiteName}{' '}
                           {site.loop
                             ? `Loop: ${site.loop}`
                             : 'Loop not specified'}
                         </Text>
+                        {/* <Text
+                          variant="body-sm"
+                          className={styles.cardLocation}
+                          as="p"
+                        >
+                          
+                        </Text> */}
                         <div className={styles.cardType}>
-                          <span className={styles.typeLabel}>Type:</span>
-                          <span className={styles.typeValue}>
-                            {site.type || 'N/A'}
-                          </span>
+                          {/* <span className={styles.typeLabel}>Type:</span> */}
+                          <Text variant="caption" className={styles.typeValue}>
+                            {site.type?.toLowerCase() || 'N/A'}
+                          </Text>
                         </div>
                       </div>
                     </button>
