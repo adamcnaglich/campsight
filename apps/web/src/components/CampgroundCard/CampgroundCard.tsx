@@ -41,7 +41,7 @@ export const CampgroundCard = ({
   const combinedClassName = classNames(
     styles.card,
     { [styles.cardButton]: isButton },
-    className
+    className,
   );
 
   return (
@@ -51,12 +51,7 @@ export const CampgroundCard = ({
     >
       {imageSrc && (
         <div className={styles.cardImage}>
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            width="100%"
-            height="100%"
-          />
+          <img src={imageSrc} alt={imageAlt} width={336} height={240} />
         </div>
       )}
 
