@@ -22,9 +22,9 @@ export const Campgrounds = ({
       {searchResults.length > 0 ? (
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
-            {(selectedFacility?.campgroundName || searchDisplayName) && (
+            {(searchDisplayName || selectedFacility?.campgroundName) && (
               <Text variant="h1" className={styles.heading}>
-                {selectedFacility?.campgroundName || searchDisplayName}
+                {searchDisplayName || selectedFacility?.campgroundName}
               </Text>
             )}
             <ul className={styles.resultsList}>
