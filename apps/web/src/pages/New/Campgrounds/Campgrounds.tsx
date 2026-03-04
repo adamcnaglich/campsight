@@ -23,7 +23,7 @@ export const Campgrounds = ({
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
             {(selectedFacility?.campgroundName || searchDisplayName) && (
-              <Text variant="h3" className={styles.heading}>
+              <Text variant="h1" className={styles.heading}>
                 {selectedFacility?.campgroundName || searchDisplayName}
               </Text>
             )}
@@ -44,11 +44,9 @@ export const Campgrounds = ({
                         <div className={styles.photoPlaceholder}>📷</div>
                       </div>
                       <div className={styles.cardContent}>
-                        <Text variant="h5" className={styles.cardTitle}>
-                          {facility.campgroundName}
-                        </Text>
+                        <Text variant="h3">{facility.campgroundName}</Text>
                         <Text
-                          variant="body-sm"
+                          variant="body"
                           className={styles.cardLocation}
                           as="p"
                         >
@@ -67,7 +65,12 @@ export const Campgrounds = ({
                                 </span>
                               ))}
                           </div>
-                          <span className={styles.ratingNumber}>N/A</span>
+                          <Text
+                            variant="caption"
+                            className={styles.ratingNumber}
+                          >
+                            (N/A)
+                          </Text>
                         </div>
                       </div>
                     </button>

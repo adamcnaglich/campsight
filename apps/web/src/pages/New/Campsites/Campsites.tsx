@@ -67,15 +67,7 @@ export const Campsites = ({
                             ? `Loop: ${site.loop}`
                             : 'Loop not specified'}
                         </Text>
-                        {/* <Text
-                          variant="body-sm"
-                          className={styles.cardLocation}
-                          as="p"
-                        >
-                          
-                        </Text> */}
                         <div className={styles.cardType}>
-                          {/* <span className={styles.typeLabel}>Type:</span> */}
                           <Text variant="caption" className={styles.typeValue}>
                             {site.type?.toLowerCase() || 'N/A'}
                           </Text>
