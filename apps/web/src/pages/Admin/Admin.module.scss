@@ -11,20 +11,20 @@
 .title {
   font-size: 32px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .tabs {
   display: flex;
   gap: 8px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--color-border);
   margin-bottom: 32px;
 }
 
@@ -34,19 +34,19 @@
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--color-text-secondary);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
   transition: all 0.2s;
 
   &:hover {
-    color: #0f172a;
+    color: var(--color-text);
   }
 
   &.tabActive {
-    color: #10b981;
-    border-bottom-color: #10b981;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
   }
 }
 
@@ -58,12 +58,12 @@
 .error {
   text-align: center;
   padding: 60px 24px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 16px;
 }
 
 .error {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 // ─── Overview Tab ─────────────────────────────────────────────────────────────
@@ -79,8 +79,8 @@
 }
 
 .statCard {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 24px;
 }
@@ -88,7 +88,7 @@
 .statLabel {
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin: 0 0 8px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -97,15 +97,15 @@
 .statValue {
   font-size: 36px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0;
 }
 
 // ─── Table Styles ─────────────────────────────────────────────────────────────
 
 .tableContainer {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -115,15 +115,15 @@
   border-collapse: collapse;
 
   thead {
-    background: #f8fafc;
-    border-bottom: 2px solid #e2e8f0;
+    background: var(--color-bg-muted);
+    border-bottom: 2px solid var(--color-border);
 
     th {
       text-align: left;
       padding: 16px;
       font-size: 12px;
       font-weight: 600;
-      color: #475569;
+      color: var(--color-text-tertiary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -131,11 +131,11 @@
 
   tbody {
     tr {
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--color-border);
       transition: background-color 0.15s;
 
       &:hover {
-        background: #f8fafc;
+        background: var(--color-bg-muted);
       }
 
       &:last-child {
@@ -146,13 +146,13 @@
     td {
       padding: 16px;
       font-size: 14px;
-      color: #0f172a;
+      color: var(--color-text);
     }
   }
 }
 
 .userEmail {
-  color: #3b82f6;
+  color: var(--color-link);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
   font-size: 13px;
 }
@@ -174,27 +174,27 @@
 }
 
 .badgeActive {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-strong-bg);
+  color: var(--color-success-strong-text);
 }
 
 .badgeInactive {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
 // ─── Activity Tab ─────────────────────────────────────────────────────────────
 
 .activityList {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .activityItem {
   padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 16px;
 
@@ -203,13 +203,13 @@
   }
 
   &:hover {
-    background: #f8fafc;
+    background: var(--color-bg-muted);
   }
 }
 
 .activityTime {
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
   min-width: 160px;
   flex-shrink: 0;
@@ -225,18 +225,18 @@
 .activityType {
   font-size: 14px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .activityUser {
   font-size: 13px;
-  color: #3b82f6;
+  color: var(--color-link);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
 }
 
 .activityDetails {
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin-top: 4px;
 }
 
@@ -247,8 +247,8 @@
 }
 
 .schedulerCard {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 32px;
 }
@@ -259,13 +259,13 @@
   justify-content: space-between;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .schedulerTitle {
   font-size: 20px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -279,13 +279,13 @@
 }
 
 .schedulerStatusRunning {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-strong-bg);
+  color: var(--color-success-strong-text);
 }
 
 .schedulerStatusStopped {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-bg-strong);
+  color: var(--color-danger-darker);
 }
 
 .schedulerInfo {
@@ -304,39 +304,39 @@
 .infoLabel {
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-text-tertiary);
   min-width: 120px;
 }
 
 .infoValue {
   font-size: 14px;
-  color: #0f172a;
+  color: var(--color-text);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
 }
 
 .statusSuccess {
-  color: #10b981;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .statusError {
-  color: #ef4444;
+  color: var(--color-danger);
   font-weight: 600;
 }
 
 .errorText {
   font-size: 13px;
-  color: #ef4444;
+  color: var(--color-danger);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
   padding: 8px 12px;
-  background: #fef2f2;
+  background: var(--color-danger-bg);
   border-radius: 6px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger-light);
 }
 
 .progressIndicator {
   font-size: 14px;
-  color: #3b82f6;
+  color: var(--color-link);
   font-weight: 600;
   animation: pulse 2s ease-in-out infinite;
 }

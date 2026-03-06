@@ -31,21 +31,21 @@
 }
 
 .primary {
-  background: #008235;
+  background: var(--color-primary);
   color: white;
 
   &:hover:not(:disabled) {
-    background: #00682a;
+    background: var(--color-primary-dark);
   }
 }
 
 .outline {
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
 
   &:hover:not(:disabled) {
-    background: rgb(246, 246, 246);
+    background: var(--color-bg-hover);
   }
 }
 
@@ -61,24 +61,24 @@
 }
 
 .success {
-  background: #eefdf3;
-  color: green;
+  background: var(--color-success-bg);
+  color: var(--color-available);
   border: none;
 
   &:hover:not(:disabled) {
-    background: #d8eddf;
-    color: green;
+    background: var(--color-success-bg-hover);
+    color: var(--color-available);
   }
 }
 
 .danger {
-  background: #fff4f4;
-  color: #b60000;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-dark);
   border: none;
 
   &:hover:not(:disabled) {
-    background: #ffe5e5;
-    color: #b60000;
+    background: var(--color-danger-bg-hover);
+    color: var(--color-danger-dark);
   }
 }
 

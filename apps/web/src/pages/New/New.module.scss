@@ -67,7 +67,7 @@
   height: 20px;
   border-radius: 50%;
   border: none;
-  background: #86929d;
+  background: var(--color-step-inactive);
   color: white;
   font-size: 13px;
   font-weight: var(--font-weight-bold);
@@ -79,7 +79,7 @@
 }
 
 .stepLabel {
-  color: #86929d;
+  color: var(--color-step-inactive);
   font-size: var(--text-body-size);
   text-align: center;
   font-weight: var(--font-weight-bold);
@@ -87,14 +87,14 @@
 
 .stepCircleActive,
 .stepCircleComplete {
-  border-color: #008235;
-  background: #008235;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
   color: white;
 }
 
 .stepLabelActive,
 .stepLabelComplete {
-  color: #008235;
+  color: var(--color-primary);
 }
 
 .stepCircleDisabled {

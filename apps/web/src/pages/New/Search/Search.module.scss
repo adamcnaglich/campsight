@@ -13,7 +13,7 @@
 
 .subtext {
   margin: 0;
-  color: #506172;
+  color: var(--color-text-subtle);
 }
 
 .searchRow {
@@ -48,11 +48,11 @@
   min-width: 0;
 
   &:focus {
-    border-color: #008234;
+    border-color: var(--color-primary);
   }
 
   &::placeholder {
-    color: #c6d1dc;
+    color: var(--color-placeholder);
   }
 }
 

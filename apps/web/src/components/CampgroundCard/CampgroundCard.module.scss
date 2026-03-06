@@ -17,7 +17,7 @@
   width: 100%;
   aspect-ratio: 1.4 / 1;
   overflow: hidden;
-  background: var(--color-bg-tertiary, #f1f5f9);
+  background: var(--color-bg-tertiary);
   border-radius: 16px;
 
   img {
@@ -49,8 +49,8 @@
 }
 
 .badgeInactive {
-  background: #fffbc7;
-  color: #827a00;
+  background: var(--color-inactive-bg);
+  color: var(--color-inactive-text);
 }
 
 .campsiteName {
@@ -63,7 +63,7 @@
 }
 
 .campgroundName {
-  color: #77899c;
+  color: var(--color-text-muted);
   text-transform: capitalize;
 }
 
@@ -75,14 +75,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #77899c;
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   margin-bottom: 32px;
 }
 
 .dateArrow {
-  color: #77899c;
+  color: var(--color-text-muted);
 }
 
 .cardActions {
