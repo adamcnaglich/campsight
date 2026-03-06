@@ -308,10 +308,10 @@ const WatchesTab = () => {
               </td>
               <td>
                 <span
-                  className={classNames(
-                    styles.badge,
-                    watch.isActive ? styles.badgeActive : styles.badgeInactive,
-                  )}
+                  className={classNames(styles.badge, {
+                    [styles.badgeActive]: watch.isActive,
+                    [styles.badgeInactive]: !watch.isActive,
+                  })}
                 >
                   {watch.isActive ? 'Active' : 'Paused'}
                 </span>
@@ -479,12 +479,10 @@ const SchedulerTab = () => {
             Availability Check Scheduler
           </Text>
           <span
-            className={classNames(
-              styles.schedulerStatus,
-              status.isRunning
-                ? styles.schedulerStatusRunning
-                : styles.schedulerStatusStopped,
-            )}
+            className={classNames(styles.schedulerStatus, {
+              [styles.schedulerStatusRunning]: status.isRunning,
+              [styles.schedulerStatusStopped]: !status.isRunning,
+            })}
           >
             {status.isRunning ? 'Running' : 'Stopped'}
           </span>

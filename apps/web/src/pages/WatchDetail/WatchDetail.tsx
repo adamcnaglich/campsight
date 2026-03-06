@@ -55,17 +55,6 @@ export const WatchDetail = () => {
     // Invalid date range
   }
 
-  const statusColor = (status: string) => {
-    switch (status) {
-      case 'Available':
-        return styles.available;
-      case 'Reserved':
-        return styles.reserved;
-      default:
-        return styles.notAvailable;
-    }
-  };
-
   return (
     <div className={styles.page}>
       <Link to="/dashboard" className={styles.backLink}>
@@ -82,10 +71,10 @@ export const WatchDetail = () => {
           </Text>
         </div>
         <span
-          className={classNames(
-            styles.badge,
-            watch.isActive ? styles.badgeActive : styles.badgeInactive,
-          )}
+          className={classNames(styles.badge, {
+            [styles.badgeActive]: watch.isActive,
+            [styles.badgeInactive]: !watch.isActive,
+          })}
         >
           {watch.isActive ? 'Active' : 'Paused'}
         </span>
@@ -146,7 +135,12 @@ export const WatchDetail = () => {
                 return (
                   <div
                     key={dateKey}
-                    className={classNames(styles.dayCell, statusColor(status))}
+                    className={classNames(styles.dayCell, {
+                      [styles.available]: status === 'Available',
+                      [styles.reserved]: status === 'Reserved',
+                      [styles.notAvailable]:
+                        status !== 'Available' && status !== 'Reserved',
+                    })}
                     title={`${format(date, 'MMM d, yyyy')}: ${status}`}
                   >
                     <span className={styles.dayNum}>{format(date, 'd')}</span>

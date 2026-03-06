@@ -306,12 +306,10 @@ export const New = () => {
         className={classNames(styles.form, { [styles.formFill]: isFillLayout })}
       >
         <div
-          className={classNames(
-            styles.stepContent,
-            direction === 'forward'
-              ? styles.slideFromRight
-              : styles.slideFromLeft,
-          )}
+          className={classNames(styles.stepContent, {
+            [styles.slideFromRight]: direction === 'forward',
+            [styles.slideFromLeft]: direction !== 'forward',
+          })}
           key={currentStep}
         >
           {currentStep === 1 && (

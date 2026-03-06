@@ -69,11 +69,10 @@ export const CampgroundCard = ({
             )}
             {badgeLabel != null && (
               <span
-                className={
-                  badgeActive
-                    ? `${styles.badge} ${styles.badgeActive}`
-                    : `${styles.badge} ${styles.badgeInactive}`
-                }
+                className={classNames(styles.badge, {
+                  [styles.badgeActive]: badgeActive,
+                  [styles.badgeInactive]: !badgeActive,
+                })}
               >
                 {badgeLabel}
               </span>
