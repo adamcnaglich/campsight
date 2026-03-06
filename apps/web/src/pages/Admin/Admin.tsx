@@ -544,7 +544,8 @@ const SchedulerTab = () => {
             {startMutation.isPending ? 'Starting...' : 'Start'}
           </Button>
           <Button
-            variant="danger"
+            variant="outline"
+            level="danger"
             size="small"
             onClick={() => stopMutation.mutate()}
             disabled={!status.isRunning || stopMutation.isPending}
