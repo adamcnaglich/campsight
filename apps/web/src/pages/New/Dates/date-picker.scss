@@ -35,7 +35,7 @@
     top: 0;
     bottom: 0;
     z-index: 0;
-    background: #e4f2eb; // todo use var
+    background: var(--color-primary-subtle);
     height: 40px;
   }
 }
