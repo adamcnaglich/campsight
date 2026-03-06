@@ -5,6 +5,7 @@ import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
 import styles from './Dates.module.scss';
+import './date-picker.scss';
 
 const toISODateString = (date: Date): string => {
   const year = date.getFullYear();
@@ -82,17 +83,18 @@ export const Dates = ({
     <div className={styles.root}>
       <div>
         <Text variant="h1" className={styles.label} as="label">
-          Select your timeframe
+          Select Your Timeframe
         </Text>
         {selectedSite && (
-          <div className={styles.selected}>
+          <Text variant="body" className={styles.selected}>
             {campgroundName} • {selectedSitesCount}{' '}
             {selectedSitesCount === 1 ? 'Site' : 'Sites'}
-          </div>
+          </Text>
         )}
       </div>
       <div className={styles.pickerWrapper}>
         <DayPicker
+          animate
           mode="range"
           selected={selected}
           onSelect={handleSelect}

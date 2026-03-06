@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
-  max-width: 904px;
+  max-width: 1016px;
   margin: 0 auto;
 }
 
@@ -19,19 +19,19 @@
 }
 
 .selected {
-  font-size: var(--text-body-sm-size);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   color: var(--color-text-subtle);
+  margin-top: 16px;
 }
 
 .pickerWrapper {
   display: flex;
   justify-content: center;
-  padding: 24px;
+  padding: 40px 12px;
   background-color: white;
   border: 1px solid var(--color-border);
   border-radius: 32px;
@@ -39,8 +39,8 @@
 
 .dayPicker {
   --rdp-accent-color: var(--color-primary);
-  --rdp-accent-background-color: var(--color-primary-light);
-  --rdp-months-gap: 104px;
-  --rdp-day_button-width: 52px;
-  --rdp-day_button-height: 52px;
+  --rdp-months-gap: 80px;
+  --rdp-day_button-width: 40px;
+  --rdp-day_button-height: 40px;
+  --rdp-disabled-opacity: 0.25;
 }

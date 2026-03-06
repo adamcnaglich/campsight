@@ -1,0 +1,78 @@
+.rdp-day {
+  padding: 10px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.rdp-month_caption {
+  margin-bottom: 20px;
+}
+
+.rdp-caption_label {
+  font-size: 20px;
+}
+
+.rdp-weekdays {
+  height: 60px;
+  color: #677685;
+}
+
+.rdp-root[data-nav-layout='around'] .rdp-button_next,
+.rdp-root[data-nav-layout='around'] .rdp-button_previous {
+  margin: 0 12px;
+}
+
+.rdp-selected {
+  font-weight: 500;
+
+  button {
+    position: relative;
+    z-index: 1;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    background: #e4f2eb; // todo use var
+    height: 40px;
+  }
+}
+
+.rdp-selected.rdp-range_start {
+  background: transparent;
+  position: relative;
+
+  &::after {
+    right: -10px;
+    left: 50%;
+    margin: auto;
+  }
+}
+
+.rdp-selected.rdp-range_middle {
+  background-color: transparent;
+  position: relative;
+
+  &::after {
+    left: -10px;
+    right: -10px;
+    margin: auto 0;
+  }
+}
+
+.rdp-selected.rdp-range_end {
+  background: transparent;
+  position: relative;
+
+  &::after {
+    left: -10px;
+    right: 50%;
+    margin: auto;
+  }
+}
+
+.rdp-selected.rdp-range_start.rdp-range_end::after {
+  content: unset;
+}
