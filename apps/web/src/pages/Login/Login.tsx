@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
 import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
@@ -43,7 +44,11 @@ export const Login = () => {
         </Button>
 
         <Text variant="caption" className={styles.footer} as="p">
-          By signing in, you agree to our terms of service.
+          By signing in, you agree to our{' '}
+          <Link to="/terms" className={styles.termsLink}>
+            terms of service
+          </Link>
+          .
         </Text>
       </div>
     </div>

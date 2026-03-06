@@ -9,6 +9,7 @@ import { WatchDetail } from '../pages/WatchDetail';
 import { Settings } from '../pages/Settings';
 import { Admin } from '../pages/Admin';
 import { DS } from '../pages/DS';
+import { Terms } from '../pages/Terms';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
@@ -46,6 +47,7 @@ export const App = () => {
         }
       />
       <Route path="/" element={<Home />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/ds" element={<DS />} />
       <Route
         path="/dashboard"
