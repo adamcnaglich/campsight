@@ -261,7 +261,12 @@ export const New = () => {
                 className={classNames(styles.stepIndicatorItem, {
                   [styles.stepIndicatorItemDisabled]: !accessible,
                 })}
-                onClick={() => accessible && goToStep(step.id)}
+                onClick={() => {
+                  if (accessible) {
+                    if (step.id === 1) setSearchQuery('');
+                    goToStep(step.id);
+                  }
+                }}
                 disabled={!accessible}
                 aria-current={isActive ? 'step' : undefined}
               >
