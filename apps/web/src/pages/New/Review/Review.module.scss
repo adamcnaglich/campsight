@@ -76,17 +76,11 @@
 }
 
 .cardRowTitle {
-  font-size: var(--text-h3-size);
-  font-weight: var(--text-h3-weight);
-  line-height: var(--text-h3-line-height);
   color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
   text-transform: capitalize;
 }
 
 .cardRowLocation {
-  font-size: var(--text-body-size);
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -102,7 +96,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: black;
   transition: color 0.15s ease;
 
   .editCard:hover & {
