@@ -25,6 +25,9 @@ const formatDateRange = (start: string, end: string): string => {
   const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
   const startStr = startDate.toLocaleDateString('en-US', options);
   const endStr = endDate.toLocaleDateString('en-US', options);
+  if (start === end) {
+    return startStr;
+  }
   if (startDate.getMonth() === endDate.getMonth()) {
     return `${startStr} - ${endDate.getDate()}`;
   }
