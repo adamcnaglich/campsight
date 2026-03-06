@@ -77,8 +77,8 @@ export const Review = ({
       <div className={styles.twoColumnLayout}>
         {/* Left column: heading + edit cards */}
         <div className={styles.leftColumn}>
-          <Text variant="h3" className={styles.heading}>
-            Review & submit
+          <Text variant="h1" className={styles.heading}>
+            Review & Confirm
           </Text>
 
           <div className={styles.cardList}>
@@ -88,29 +88,15 @@ export const Review = ({
               className={styles.editCard}
               onClick={onEditCampground}
             >
-              <div className={styles.cardImage}>
-                <div className={styles.imagePlaceholder}>📷</div>
-              </div>
               <div className={styles.cardText}>
-                <span className={styles.cardRowTitle}>{campgroundName}</span>
-                <span className={styles.cardRowLocation}>
+                <Text variant="h3" className={styles.cardRowTitle}>
+                  {campgroundName.toLowerCase()}
+                </Text>
+                <Text variant="body" className={styles.cardRowLocation} as="p">
                   {selectedFacility?.facilityId
                     ? `Facility ID: ${selectedFacility.facilityId}`
                     : 'Location not available'}
-                </span>
-                <span className={styles.cardRowRating}>
-                  <span className={styles.stars}>
-                    {'★'
-                      .repeat(5)
-                      .split('')
-                      .map((star, idx) => (
-                        <span key={idx} className={styles.star}>
-                          {star}
-                        </span>
-                      ))}
-                  </span>
-                  <span>N/A</span>
-                </span>
+                </Text>
               </div>
               <span className={styles.editIcon}>
                 <EditIcon />
@@ -124,13 +110,13 @@ export const Review = ({
               onClick={onEditCampsites}
             >
               <div className={styles.cardText}>
-                <span className={styles.cardRowLabel}>
+                <Text variant="h3" className={styles.cardRowLabel}>
                   {selectedSites.length}{' '}
                   {selectedSites.length === 1 ? 'Campsite' : 'Campsites'}
-                </span>
-                <span className={styles.cardRowValue}>
+                </Text>
+                <Text variant="body" className={styles.cardRowValue}>
                   {siteNames || 'No sites selected'}
-                </span>
+                </Text>
               </div>
               <span className={styles.editIcon}>
                 <EditIcon />
@@ -144,10 +130,12 @@ export const Review = ({
               onClick={onEditDates}
             >
               <div className={styles.cardText}>
-                <span className={styles.cardRowLabel}>Timeframe</span>
-                <span className={styles.cardRowValue}>
+                <Text variant="h3" className={styles.cardRowLabel}>
+                  Timeframe
+                </Text>
+                <Text variant="body" className={styles.cardRowValue}>
                   {formattedDates || 'No dates selected'}
-                </span>
+                </Text>
               </div>
               <span className={styles.editIcon}>
                 <EditIcon />
