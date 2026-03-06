@@ -83,13 +83,10 @@
   background: var(--color-surface);
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
   }
 
   h3 {
@@ -164,7 +161,6 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0 auto 16px;
-  box-shadow: var(--shadow-md);
 }
 
 .whySection {
@@ -230,12 +226,10 @@
 .ctaSectionBtn {
   background: white !important;
   color: var(--color-primary) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 
   &:hover {
     background: white !important;
     color: var(--color-primary-dark) !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
   }
 }

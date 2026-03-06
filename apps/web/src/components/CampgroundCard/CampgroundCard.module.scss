@@ -3,7 +3,6 @@
   border: 1px solid var(--color-border);
   border-radius: 32px;
   overflow: hidden;
-  transition: box-shadow 0.15s ease;
   padding: 16px 16px 32px 16px;
   display: flex;
   flex-direction: column;
@@ -97,14 +96,9 @@
   cursor: pointer;
   text-align: left;
 
-  &:hover {
-    box-shadow: var(--shadow-md);
-  }
-
   &:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
   }
 }
 
