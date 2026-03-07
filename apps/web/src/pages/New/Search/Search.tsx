@@ -7,11 +7,21 @@ import { Text } from '../../../components/Text';
 import { CampgroundCard } from '../../../components/CampgroundCard';
 import styles from './Search.module.scss';
 
+export interface SelectCampgroundOptions {
+  previewImageUrl?: string;
+  city?: string;
+  stateCode?: string;
+}
+
 export interface SearchProps {
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
   onSearchForRecArea: (recAreaId: string, displayName: string) => void;
-  onSelectCampground: (facilityId: string, campgroundName: string) => void;
+  onSelectCampground: (
+    facilityId: string,
+    campgroundName: string,
+    options?: SelectCampgroundOptions,
+  ) => void;
 }
 
 const DEBOUNCE_MS = 300;
@@ -73,7 +83,9 @@ export const Search = ({
   const handleSelect = useCallback(
     (suggestion: SuggestionResult) => {
       if (suggestion.entityType === 'campground') {
-        onSelectCampground(suggestion.entityId, suggestion.name);
+        onSelectCampground(suggestion.entityId, suggestion.name, {
+          stateCode: suggestion.stateCode || undefined,
+        });
       } else {
         onSearchQueryChange(suggestion.name);
         onSearchForRecArea(suggestion.entityId, suggestion.name);
@@ -196,7 +208,13 @@ export const Search = ({
                   [site.city, site.state_code].filter(Boolean).join(', ') ||
                   site.parent_name
                 }
-                onClick={() => onSelectCampground(site.entity_id, site.name)}
+                onClick={() =>
+                  onSelectCampground(site.entity_id, site.name, {
+                    previewImageUrl: site.preview_image_url || undefined,
+                    city: site.city || undefined,
+                    stateCode: site.state_code || undefined,
+                  })
+                }
               />
             ))}
           </div>

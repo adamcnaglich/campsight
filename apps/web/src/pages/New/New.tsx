@@ -112,7 +112,15 @@ export const New = () => {
   );
 
   const handleSelectCampground = useCallback(
-    (facilityId: string, campgroundName: string) => {
+    (
+      facilityId: string,
+      campgroundName: string,
+      options?: {
+        previewImageUrl?: string;
+        city?: string;
+        stateCode?: string;
+      },
+    ) => {
       setSearchResults([]);
       setSelectedSites([]);
       setStartDate('');
@@ -122,9 +130,9 @@ export const New = () => {
       setSelectedFacility({
         entityId: facilityId,
         name: campgroundName,
-        city: '',
-        stateCode: '',
-        previewImageUrl: '',
+        city: options?.city ?? '',
+        stateCode: options?.stateCode ?? '',
+        previewImageUrl: options?.previewImageUrl ?? '',
         latitude: '',
         longitude: '',
         averageRating: null,
