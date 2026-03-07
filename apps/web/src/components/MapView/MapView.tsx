@@ -98,11 +98,29 @@ export const MapView = ({
     <div className={styles.root}>
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
         <Map
+          mapTypeId="terrain"
           defaultCenter={DEFAULT_CENTER}
           defaultZoom={DEFAULT_ZOOM}
           mapId="campsight-map"
           gestureHandling="greedy"
-          disableDefaultUI={false}
+          disableDefaultUI
+          styles={[
+            {
+              featureType: 'poi',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'transit',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'water',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }],
+            },
+          ]}
           className={styles.map}
         >
           <FitBounds markers={markers} selectedId={selectedId} />
