@@ -1,14 +1,46 @@
-import { CampsiteSearchResult } from '@campsight/shared';
+import { useMemo } from 'react';
+import { CampgroundSearchResult } from '@campsight/shared';
 import classNames from 'classnames';
 import { Text } from '../../../components/Text';
+import { MapView, MapMarker } from '../../../components/MapView';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
   searchDisplayName: string;
-  searchResults: CampsiteSearchResult[];
-  selectedFacility: CampsiteSearchResult | null;
-  onSelectFacility: (facility: CampsiteSearchResult) => void;
+  searchResults: CampgroundSearchResult[];
+  selectedFacility: CampgroundSearchResult | null;
+  onSelectFacility: (facility: CampgroundSearchResult) => void;
   onChange: () => void;
+}
+
+function StarRating({
+  rating,
+  count,
+}: {
+  rating: number | null;
+  count: number;
+}) {
+  const filled = rating != null ? Math.round(rating) : 0;
+
+  return (
+    <div className={styles.cardRating}>
+      <div className={styles.stars}>
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <span
+            key={idx}
+            className={classNames(styles.star, {
+              [styles.starFilled]: idx < filled,
+            })}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <Text variant="caption" className={styles.ratingNumber}>
+        {rating != null ? `${rating.toFixed(1)} (${count})` : '(N/A)'}
+      </Text>
+    </div>
+  );
 }
 
 export const Campgrounds = ({
@@ -17,22 +49,35 @@ export const Campgrounds = ({
   selectedFacility,
   onSelectFacility,
 }: CampgroundsProps) => {
+  const markers: MapMarker[] = useMemo(
+    () =>
+      searchResults
+        .filter((f) => f.latitude && f.longitude)
+        .map((f) => ({
+          id: f.entityId,
+          lat: Number(f.latitude),
+          lng: Number(f.longitude),
+          label: f.name,
+        })),
+    [searchResults],
+  );
+
   return (
     <div className={styles.root}>
       {searchResults.length > 0 ? (
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
-            {(searchDisplayName || selectedFacility?.campgroundName) && (
+            {(searchDisplayName || selectedFacility?.name) && (
               <Text variant="h1" className={styles.heading}>
-                {searchDisplayName || selectedFacility?.campgroundName}
+                {searchDisplayName || selectedFacility?.name}
               </Text>
             )}
             <ul className={styles.resultsList}>
               {searchResults.map((facility, i) => {
                 const isSelected =
-                  selectedFacility?.facilityId === facility.facilityId;
+                  selectedFacility?.entityId === facility.entityId;
                 return (
-                  <li key={`${facility.facilityId}-${i}`}>
+                  <li key={`${facility.entityId}-${i}`}>
                     <button
                       type="button"
                       className={classNames(styles.resultCard, {
@@ -41,37 +86,31 @@ export const Campgrounds = ({
                       onClick={() => onSelectFacility(facility)}
                     >
                       <div className={styles.cardPhoto}>
-                        <div className={styles.photoPlaceholder}>📷</div>
+                        {facility.previewImageUrl ? (
+                          <img
+                            src={facility.previewImageUrl}
+                            alt={facility.name}
+                            className={styles.cardImage}
+                          />
+                        ) : (
+                          <div className={styles.photoPlaceholder}>📷</div>
+                        )}
                       </div>
                       <div className={styles.cardContent}>
-                        <Text variant="h3">{facility.campgroundName}</Text>
+                        <Text variant="h3">{facility.name}</Text>
                         <Text
                           variant="body"
                           className={styles.cardLocation}
                           as="p"
                         >
-                          {facility.facilityId
-                            ? `Facility ID: ${facility.facilityId}`
-                            : 'Location not available'}
+                          {[facility.city, facility.stateCode]
+                            .filter(Boolean)
+                            .join(', ') || 'Location not available'}
                         </Text>
-                        <div className={styles.cardRating}>
-                          <div className={styles.stars}>
-                            {'★'
-                              .repeat(5)
-                              .split('')
-                              .map((star, idx) => (
-                                <span key={idx} className={styles.star}>
-                                  {star}
-                                </span>
-                              ))}
-                          </div>
-                          <Text
-                            variant="caption"
-                            className={styles.ratingNumber}
-                          >
-                            (N/A)
-                          </Text>
-                        </div>
+                        <StarRating
+                          rating={facility.averageRating}
+                          count={facility.numberOfRatings}
+                        />
                       </div>
                     </button>
                   </li>
@@ -80,12 +119,14 @@ export const Campgrounds = ({
             </ul>
           </div>
           <div className={styles.mapColumn}>
-            <div className={styles.mapPlaceholder}>
-              <span className={styles.mapIcon}>🗺️</span>
-              <Text variant="body-sm" className={styles.mapText} as="p">
-                Map view coming soon
-              </Text>
-            </div>
+            <MapView
+              markers={markers}
+              selectedId={selectedFacility?.entityId}
+              onMarkerClick={(id) => {
+                const facility = searchResults.find((f) => f.entityId === id);
+                if (facility) onSelectFacility(facility);
+              }}
+            />
           </div>
         </div>
       ) : (

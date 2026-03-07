@@ -1,7 +1,11 @@
 import { useState, useCallback, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CampsiteSearchResult, CreateWatchDTO } from '@campsight/shared';
+import {
+  CampgroundSearchResult,
+  CampsiteSearchResult,
+  CreateWatchDTO,
+} from '@campsight/shared';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
@@ -30,11 +34,11 @@ export const New = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchName, setSelectedSearchName] = useState('');
-  const [searchResults, setSearchResults] = useState<CampsiteSearchResult[]>(
+  const [searchResults, setSearchResults] = useState<CampgroundSearchResult[]>(
     [],
   );
   const [selectedFacility, setSelectedFacility] =
-    useState<CampsiteSearchResult | null>(null);
+    useState<CampgroundSearchResult | null>(null);
   const [campsites, setCampsites] = useState<CampsiteSearchResult[]>([]);
   const [loadingCampsites, setLoadingCampsites] = useState(false);
   const [selectedSites, setSelectedSites] = useState<CampsiteSearchResult[]>(
@@ -53,34 +57,10 @@ export const New = () => {
     setHighestStepReached((prev) => Math.max(prev, step));
   }, []);
 
-  const searchFacilities = useCallback(async () => {
-    if (!searchQuery.trim()) return;
-    setSelectedFacility(null);
-    setCampsites([]);
-    setSelectedSites([]);
-    setStartDate('');
-    setEndDate('');
-    setSelectedSearchName(searchQuery);
-    setHighestStepReached(1);
-    setSkippedStep2(false);
-    try {
-      const results = await api.get<CampsiteSearchResult[]>(
-        `/api/campsites/search?q=${encodeURIComponent(searchQuery)}`,
-      );
-      setSearchResults(results);
-      if (results.length > 0) {
-        goToStep(2);
-      }
-    } catch (err) {
-      console.error('Search failed:', err);
-    }
-  }, [searchQuery, goToStep]);
-
-  const searchForQuery = useCallback(
-    async (query: string, displayName?: string) => {
-      if (!query.trim()) return;
-      setSearchQuery(query);
-      setSelectedSearchName(displayName ?? query);
+  const searchForRecArea = useCallback(
+    async (recAreaId: string, displayName: string) => {
+      setSearchQuery(displayName);
+      setSelectedSearchName(displayName);
       setSelectedFacility(null);
       setCampsites([]);
       setSelectedSites([]);
@@ -89,8 +69,8 @@ export const New = () => {
       setHighestStepReached(1);
       setSkippedStep2(false);
       try {
-        const results = await api.get<CampsiteSearchResult[]>(
-          `/api/campsites/search?q=${encodeURIComponent(query)}`,
+        const results = await api.get<CampgroundSearchResult[]>(
+          `/api/campsites/search?recAreaId=${encodeURIComponent(recAreaId)}`,
         );
         setSearchResults(results);
         if (results.length > 0) {
@@ -103,13 +83,15 @@ export const New = () => {
     [goToStep],
   );
 
-  const selectFacility = useCallback(
-    async (facility: CampsiteSearchResult) => {
-      setSelectedFacility(facility);
+  const fetchCampsites = useCallback(
+    async (facilityId: string, campground?: CampgroundSearchResult) => {
+      if (campground) {
+        setSelectedFacility(campground);
+      }
       setLoadingCampsites(true);
       try {
         const sites = await api.get<CampsiteSearchResult[]>(
-          `/api/campsites/search?facilityId=${facility.facilityId}`,
+          `/api/campsites/search?facilityId=${encodeURIComponent(facilityId)}`,
         );
         setCampsites(sites);
         goToStep(3);
@@ -120,6 +102,37 @@ export const New = () => {
       }
     },
     [goToStep],
+  );
+
+  const selectFacility = useCallback(
+    (facility: CampgroundSearchResult) => {
+      fetchCampsites(facility.entityId, facility);
+    },
+    [fetchCampsites],
+  );
+
+  const handleSelectCampground = useCallback(
+    (facilityId: string, campgroundName: string) => {
+      setSearchResults([]);
+      setSelectedSites([]);
+      setStartDate('');
+      setEndDate('');
+      setHighestStepReached(1);
+      setSkippedStep2(true);
+      setSelectedFacility({
+        entityId: facilityId,
+        name: campgroundName,
+        city: '',
+        stateCode: '',
+        previewImageUrl: '',
+        latitude: '',
+        longitude: '',
+        averageRating: null,
+        numberOfRatings: 0,
+      });
+      fetchCampsites(facilityId);
+    },
+    [fetchCampsites],
   );
 
   const toggleSite = useCallback((site: CampsiteSearchResult) => {
@@ -151,27 +164,6 @@ export const New = () => {
   const continueToReview = useCallback(() => {
     goToStep(5);
   }, [goToStep]);
-
-  const handleSelectCampground = useCallback(
-    (facilityId: string, campgroundName: string) => {
-      const facility: CampsiteSearchResult = {
-        facilityId,
-        campgroundName,
-        campsiteId: '',
-        campsiteName: '',
-        loop: '',
-        type: 'facility',
-      };
-      setSearchResults([]);
-      setSelectedSites([]);
-      setStartDate('');
-      setEndDate('');
-      setHighestStepReached(1);
-      setSkippedStep2(true);
-      selectFacility(facility);
-    },
-    [selectFacility],
-  );
 
   const handleCampgroundChange = useCallback(() => {
     setSelectedFacility(null);
@@ -211,14 +203,12 @@ export const New = () => {
     e.preventDefault();
     if (selectedSites.length === 0 || !startDate || !endDate) return;
 
-    // For now, just submit the first selected site
-    // TODO: Update backend to support multiple campsites
     const firstSite = selectedSites[0];
     createMutation.mutate({
       campsiteId: firstSite.campsiteId,
-      campsiteName: firstSite.campsiteName,
+      campsiteName: firstSite.name,
       campgroundName:
-        selectedFacility?.campgroundName || firstSite.campgroundName,
+        selectedFacility?.name || firstSite.campgroundName,
       startDate,
       endDate,
     });
@@ -234,7 +224,7 @@ export const New = () => {
   const visibleSteps = skippedStep2 ? STEPS.filter((s) => s.id !== 2) : STEPS;
 
   const campgroundName =
-    selectedFacility?.campgroundName || selectedSites[0]?.campgroundName || '';
+    selectedFacility?.name || selectedSites[0]?.campgroundName || '';
 
   const isFillLayout = currentStep === 2 || currentStep === 3;
 
@@ -243,7 +233,6 @@ export const New = () => {
       className={classNames(styles.page, { [styles.pageFill]: isFillLayout })}
       data-fill-layout={isFillLayout ? '' : undefined}
     >
-      {/* Step indicator (hidden on search step) */}
       {currentStep !== 1 && (
       <div className={styles.stepIndicator}>
         {visibleSteps.map((step, index) => {
@@ -304,7 +293,6 @@ export const New = () => {
       </div>
       )}
 
-      {/* Step content with animation */}
       <form
         ref={formRef}
         onSubmit={handleSubmit}
@@ -321,8 +309,7 @@ export const New = () => {
             <Search
               searchQuery={searchQuery}
               onSearchQueryChange={setSearchQuery}
-              onSearch={searchFacilities}
-              onSearchForQuery={searchForQuery}
+              onSearchForRecArea={searchForRecArea}
               onSelectCampground={handleSelectCampground}
             />
           )}

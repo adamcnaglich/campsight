@@ -1,17 +1,28 @@
-import { CampsiteSearchResult } from '@campsight/shared';
+import { useMemo } from 'react';
+import { CampgroundSearchResult, CampsiteSearchResult } from '@campsight/shared';
 import classNames from 'classnames';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
+import { MapView, MapMarker } from '../../../components/MapView';
 import styles from './Campsites.module.scss';
 
 export interface CampsitesProps {
-  facility: CampsiteSearchResult | null;
+  facility: CampgroundSearchResult | null;
   campsites: CampsiteSearchResult[];
   selectedSites: CampsiteSearchResult[];
   loading: boolean;
   onToggleSite: (site: CampsiteSearchResult) => void;
   onClearSelection: () => void;
   onContinue: () => void;
+}
+
+function buildDetailLine(site: CampsiteSearchResult): string {
+  const parts: string[] = [];
+  if (site.type) parts.push(site.type);
+  if (site.typeOfUse) parts.push(site.typeOfUse);
+  if (site.maxOccupants != null) parts.push(`${site.maxOccupants} max occupants`);
+  if (site.maxVehicles != null) parts.push(`${site.maxVehicles} max vehicles`);
+  return parts.join(' - ');
 }
 
 export const Campsites = ({
@@ -25,6 +36,24 @@ export const Campsites = ({
 }: CampsitesProps) => {
   const hasSelection = selectedSites.length > 0;
 
+  const markers: MapMarker[] = useMemo(
+    () =>
+      campsites
+        .filter((s) => s.latitude && s.longitude)
+        .map((s) => ({
+          id: s.campsiteId,
+          lat: Number(s.latitude),
+          lng: Number(s.longitude),
+          label: s.name,
+        })),
+    [campsites],
+  );
+
+  const selectedMarkerIds = useMemo(
+    () => selectedSites.map((s) => s.campsiteId),
+    [selectedSites],
+  );
+
   return (
     <div className={styles.root}>
       {loading ? (
@@ -36,7 +65,7 @@ export const Campsites = ({
           <div className={styles.listColumn}>
             {facility && (
               <Text variant="h1" className={styles.heading}>
-                {facility.campgroundName.toLowerCase()}
+                {facility.name.toLowerCase()}
               </Text>
             )}
             <ul
@@ -48,6 +77,7 @@ export const Campsites = ({
                 const isSelected = selectedSites.some(
                   (s) => s.campsiteId === site.campsiteId,
                 );
+                const detailLine = buildDetailLine(site);
                 return (
                   <li key={site.campsiteId}>
                     <button
@@ -58,20 +88,30 @@ export const Campsites = ({
                       onClick={() => onToggleSite(site)}
                     >
                       <div className={styles.cardPhoto}>
-                        <div className={styles.photoPlaceholder}>🏕️</div>
+                        {site.previewImageUrl ? (
+                          <img
+                            src={site.previewImageUrl}
+                            alt={`Site ${site.name}`}
+                            className={styles.cardImage}
+                          />
+                        ) : (
+                          <div className={styles.photoPlaceholder}>🏕️</div>
+                        )}
                       </div>
                       <div className={styles.cardContent}>
                         <Text variant="h3" className={styles.cardTitle}>
-                          {site.campsiteName}{' '}
-                          {site.loop
-                            ? `Loop: ${site.loop}`
-                            : 'Loop not specified'}
+                          Site: {site.name}
+                          {site.loop ? `, Loop: ${site.loop}` : ''}
                         </Text>
-                        <div className={styles.cardType}>
-                          <Text variant="caption" className={styles.typeValue}>
-                            {site.type?.toLowerCase() || 'N/A'}
+                        {detailLine && (
+                          <Text
+                            variant="caption"
+                            className={styles.cardDetail}
+                            as="p"
+                          >
+                            {detailLine}
                           </Text>
-                        </div>
+                        )}
                       </div>
                     </button>
                   </li>
@@ -80,12 +120,14 @@ export const Campsites = ({
             </ul>
           </div>
           <div className={styles.mapColumn}>
-            <div className={styles.mapPlaceholder}>
-              <span className={styles.mapIcon}>🗺️</span>
-              <Text variant="body-sm" className={styles.mapText} as="p">
-                Map view coming soon
-              </Text>
-            </div>
+            <MapView
+              markers={markers}
+              selectedId={selectedMarkerIds[0] ?? null}
+              onMarkerClick={(id) => {
+                const site = campsites.find((s) => s.campsiteId === id);
+                if (site) onToggleSite(site);
+              }}
+            />
           </div>
         </div>
       ) : (

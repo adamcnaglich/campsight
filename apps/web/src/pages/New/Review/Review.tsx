@@ -1,4 +1,7 @@
-import { CampsiteSearchResult } from '@campsight/shared';
+import {
+  CampgroundSearchResult,
+  CampsiteSearchResult,
+} from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
 import styles from './Review.module.scss';
@@ -38,7 +41,7 @@ const EditIcon = () => {
 };
 
 export interface ReviewProps {
-  selectedFacility: CampsiteSearchResult | null;
+  selectedFacility: CampgroundSearchResult | null;
   campgroundName: string;
   selectedSites: CampsiteSearchResult[];
   startDate: string;
@@ -68,7 +71,7 @@ export const Review = ({
 }: ReviewProps) => {
   const formattedDates = formatDateRange(startDate, endDate);
   const siteNames = selectedSites
-    .map((s) => s.campsiteName)
+    .map((s) => s.name)
     .join(', ')
     .trim();
 
@@ -93,8 +96,10 @@ export const Review = ({
                   {campgroundName.toLowerCase()}
                 </Text>
                 <Text variant="body" className={styles.cardRowLocation} as="p">
-                  {selectedFacility?.facilityId
-                    ? `Facility ID: ${selectedFacility.facilityId}`
+                  {selectedFacility?.city || selectedFacility?.stateCode
+                    ? [selectedFacility.city, selectedFacility.stateCode]
+                        .filter(Boolean)
+                        .join(', ')
                     : 'Location not available'}
                 </Text>
               </div>
@@ -144,14 +149,21 @@ export const Review = ({
           </div>
         </div>
 
-        {/* Right column: site image placeholder */}
         <div className={styles.rightColumn}>
-          <div className={styles.siteImagePlaceholder}>
-            <span className={styles.siteImageIcon}>🏕️</span>
-            <Text variant="body-sm" className={styles.siteImageText} as="p">
-              Site photo
-            </Text>
-          </div>
+          {selectedFacility?.previewImageUrl ? (
+            <img
+              src={selectedFacility.previewImageUrl}
+              alt={campgroundName}
+              className={styles.siteImage}
+            />
+          ) : (
+            <div className={styles.siteImagePlaceholder}>
+              <span className={styles.siteImageIcon}>🏕️</span>
+              <Text variant="body-sm" className={styles.siteImageText} as="p">
+                Site photo
+              </Text>
+            </div>
+          )}
         </div>
       </div>
 

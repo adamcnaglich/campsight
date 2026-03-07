@@ -109,13 +109,38 @@ export interface ApiError {
 
 export type ApiResult<T> = ApiResponse<T> | ApiError;
 
-// ─── Campsite Search (proxy to RIDB) ──────────────────────────────────────────
+// ─── Search Types (recreation.gov public API) ──────────────────────────────────
+
+export interface SuggestionResult {
+  entityType: 'recarea' | 'campground';
+  entityId: string;
+  name: string;
+  stateCode: string;
+}
+
+export interface CampgroundSearchResult {
+  entityId: string;
+  name: string;
+  city: string;
+  stateCode: string;
+  previewImageUrl: string;
+  latitude: string;
+  longitude: string;
+  averageRating: number | null;
+  numberOfRatings: number;
+}
 
 export interface CampsiteSearchResult {
   campsiteId: string;
-  campsiteName: string;
-  campgroundName: string;
-  facilityId: string;
+  name: string;
   loop: string;
   type: string;
+  typeOfUse: string;
+  previewImageUrl: string;
+  latitude: string;
+  longitude: string;
+  maxOccupants: number | null;
+  maxVehicles: number | null;
+  facilityId: string;
+  campgroundName: string;
 }
