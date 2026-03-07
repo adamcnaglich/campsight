@@ -3,7 +3,6 @@ import {
   APIProvider,
   Map,
   AdvancedMarker,
-  Pin,
   useMap,
 } from '@vis.gl/react-google-maps';
 import styles from './MapView.module.scss';
@@ -17,7 +16,7 @@ export interface MapMarker {
 
 export interface MapViewProps {
   markers: MapMarker[];
-  selectedId?: string | null;
+  selectedIds?: string[];
   onMarkerClick?: (id: string) => void;
 }
 
@@ -28,10 +27,10 @@ const DEFAULT_ZOOM = 4;
 
 function FitBounds({
   markers,
-  selectedId,
+  selectedIds,
 }: {
   markers: MapMarker[];
-  selectedId?: string | null;
+  selectedIds?: string[];
 }) {
   const map = useMap();
   const prevMarkersKey = useRef('');
@@ -61,19 +60,35 @@ function FitBounds({
   }, [map, markers]);
 
   useEffect(() => {
-    if (!map || !selectedId) return;
-    const marker = markers.find((m) => m.id === selectedId);
-    if (marker) {
-      map.panTo({ lat: marker.lat, lng: marker.lng });
+    if (!map || !selectedIds?.length) return;
+    const selectedMarkers = markers.filter((m) => selectedIds.includes(m.id));
+    if (selectedMarkers.length === 0) return;
+    if (selectedMarkers.length === 1) {
+      map.panTo({
+        lat: selectedMarkers[0].lat,
+        lng: selectedMarkers[0].lng,
+      });
+      return;
     }
-  }, [map, selectedId, markers]);
+    const lats = selectedMarkers.map((m) => m.lat);
+    const lngs = selectedMarkers.map((m) => m.lng);
+    map.fitBounds(
+      {
+        south: Math.min(...lats),
+        north: Math.max(...lats),
+        west: Math.min(...lngs),
+        east: Math.max(...lngs),
+      },
+      48,
+    );
+  }, [map, selectedIds, markers]);
 
   return null;
 }
 
 export const MapView = ({
   markers,
-  selectedId,
+  selectedIds = [],
   onMarkerClick,
 }: MapViewProps) => {
   const handleClick = useCallback(
@@ -98,7 +113,7 @@ export const MapView = ({
     <div className={styles.root}>
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
         <Map
-          mapTypeId="terrain"
+          mapTypeId="hybrid"
           defaultCenter={DEFAULT_CENTER}
           defaultZoom={DEFAULT_ZOOM}
           mapId="campsight-map"
@@ -123,9 +138,9 @@ export const MapView = ({
           ]}
           className={styles.map}
         >
-          <FitBounds markers={markers} selectedId={selectedId} />
+          <FitBounds markers={markers} selectedIds={selectedIds} />
           {markers.map((marker) => {
-            const isSelected = marker.id === selectedId;
+            const isSelected = selectedIds.includes(marker.id);
             return (
               <AdvancedMarker
                 key={marker.id}
@@ -133,11 +148,9 @@ export const MapView = ({
                 title={marker.label}
                 onClick={() => handleClick(marker.id)}
               >
-                <Pin
-                  background={isSelected ? '#2563eb' : '#ef4444'}
-                  glyphColor="#fff"
-                  borderColor={isSelected ? '#1d4ed8' : '#dc2626'}
-                  scale={isSelected ? 1.3 : 1}
+                <div
+                  className={styles.markerDot}
+                  data-selected={isSelected || undefined}
                 />
               </AdvancedMarker>
             );

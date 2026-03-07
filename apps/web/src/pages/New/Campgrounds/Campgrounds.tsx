@@ -121,7 +121,9 @@ export const Campgrounds = ({
           <div className={styles.mapColumn}>
             <MapView
               markers={markers}
-              selectedId={selectedFacility?.entityId}
+              selectedIds={
+                selectedFacility ? [selectedFacility.entityId] : []
+              }
               onMarkerClick={(id) => {
                 const facility = searchResults.find((f) => f.entityId === id);
                 if (facility) onSelectFacility(facility);
