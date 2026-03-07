@@ -36,6 +36,11 @@ export const Campsites = ({
 }: CampsitesProps) => {
   const hasSelection = selectedSites.length > 0;
 
+  const sortedCampsites = useMemo(
+    () => [...campsites].sort((a, b) => a.name.localeCompare(b.name)),
+    [campsites],
+  );
+
   const markers: MapMarker[] = useMemo(
     () =>
       campsites
@@ -73,7 +78,7 @@ export const Campsites = ({
                 [styles.campsiteListWithFooter]: hasSelection,
               })}
             >
-              {campsites.map((site) => {
+              {sortedCampsites.map((site) => {
                 const isSelected = selectedSites.some(
                   (s) => s.campsiteId === site.campsiteId,
                 );
