@@ -16,6 +16,26 @@ export interface CampsitesProps {
   onContinue: () => void;
 }
 
+/** Natural sort: "1" < "2" < "10" < "100" instead of "1" < "10" < "100" < "2" */
+function naturalCompare(a: string, b: string): number {
+  const tokenize = (s: string) => s.match(/(\d+|\D+)/g) ?? [];
+  const aParts = tokenize(a);
+  const bParts = tokenize(b);
+  for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+    const aPart = aParts[i];
+    const bPart = bParts[i];
+    const aNum = parseInt(aPart, 10);
+    const bNum = parseInt(bPart, 10);
+    if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+      if (aNum !== bNum) return aNum - bNum;
+    } else {
+      const c = (aPart ?? '').localeCompare(bPart ?? '');
+      if (c !== 0) return c;
+    }
+  }
+  return aParts.length - bParts.length;
+}
+
 function buildDetailLine(site: CampsiteSearchResult): string {
   const parts: string[] = [];
   if (site.type) parts.push(site.type);
@@ -37,7 +57,7 @@ export const Campsites = ({
   const hasSelection = selectedSites.length > 0;
 
   const sortedCampsites = useMemo(
-    () => [...campsites].sort((a, b) => a.name.localeCompare(b.name)),
+    () => [...campsites].sort((a, b) => naturalCompare(a.name, b.name)),
     [campsites],
   );
 
@@ -127,7 +147,7 @@ export const Campsites = ({
           <div className={styles.mapColumn}>
             <MapView
               markers={markers}
-              selectedId={selectedMarkerIds[0] ?? null}
+              selectedIds={selectedMarkerIds}
               onMarkerClick={(id) => {
                 const site = campsites.find((s) => s.campsiteId === id);
                 if (site) onToggleSite(site);
