@@ -6,22 +6,27 @@ const parseISODateString = (str: string): Date => {
 /**
  * Format a date range for display (e.g. in selection footer or review card).
  * Single day: "April 13"
- * Same month: "April 13 - 20"
- * Different months: "April 13 - May 2"
+ * Same month: "April 13 - 20" (short: "Apr 13 - 20")
+ * Different months: "April 13 - May 2" (short: "Apr 13 - May 2")
  */
-export const formatDateRange = (start: string, end: string): string => {
+export const formatDateRange = (
+  start: string,
+  end: string,
+  { short = false }: { short?: boolean } = {},
+): string => {
   if (!start || !end) return '';
   const startDate = parseISODateString(start);
   const endDate = parseISODateString(end);
+  const isRange = start !== end;
   const options: Intl.DateTimeFormatOptions = {
-    month: 'long',
+    month: short && isRange ? 'short' : 'long',
     day: 'numeric',
   };
   const startStr = startDate.toLocaleDateString('en-US', options);
-  const endStr = endDate.toLocaleDateString('en-US', options);
-  if (start === end) {
+  if (!isRange) {
     return startStr;
   }
+  const endStr = endDate.toLocaleDateString('en-US', options);
   if (startDate.getMonth() === endDate.getMonth()) {
     return `${startStr} - ${endDate.getDate()}`;
   }

@@ -96,7 +96,7 @@ export const Dates = ({
       <SelectionFooter
         continueLabel={
           canProceed
-            ? `Continue with ${formatDateRange(startDate, endDate)}`
+            ? `Continue with ${formatDateRange(startDate, endDate, { short: true })}`
             : ''
         }
         onClear={onClearSelection}
