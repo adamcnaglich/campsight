@@ -87,9 +87,8 @@ export const Dates = ({
         </Text>
         {selectedSite && (
           <Text variant="body" className={styles.selected}>
-            {campgroundName} • {selectedSitesCount}{' '}
+            {campgroundName} {'  •  '} {selectedSitesCount}{' '}
             {selectedSitesCount === 1 ? 'Site' : 'Sites'}
-            {selectedSite.name && ` (${selectedSite.name})`}
           </Text>
         )}
       </div>
