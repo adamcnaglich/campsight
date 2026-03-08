@@ -29,7 +29,6 @@
 .title {
   font-size: 28px;
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
 .subtitle {
@@ -107,13 +106,30 @@
 
 @media (max-width: 480px) {
   .header {
-    flex-direction: column;
-    gap: 12px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .headerContent {
+    display: contents;
+  }
+
+  .header > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .subtitle {
+    order: 3;
+    flex-basis: 100%;
+    margin-right: 0;
+    margin-top: 4px;
   }
 
   .addBtn {
-    align-self: stretch;
-    text-align: center;
+    order: 2;
+    flex-shrink: 0;
   }
 
   .title {
