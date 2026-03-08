@@ -82,9 +82,9 @@
 
 .cardRowLocation {
   color: var(--color-text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
+  // white-space: nowrap;
 }
 
 .cardRowValue {
@@ -226,7 +226,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   &:hover:not(:disabled) {

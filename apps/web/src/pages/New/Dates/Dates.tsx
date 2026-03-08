@@ -4,6 +4,7 @@ import type { DateRange } from 'react-day-picker';
 import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
+import { formatDateRange } from '../../../lib/dateUtils';
 import styles from './Dates.module.scss';
 import './date-picker.scss';
 
@@ -17,22 +18,6 @@ const toISODateString = (date: Date): string => {
 const parseISODateString = (str: string): Date => {
   const [year, month, day] = str.split('-').map(Number);
   return new Date(year, month - 1, day);
-};
-
-const formatDateRange = (start: string, end: string): string => {
-  if (!start || !end) return '';
-  const startDate = parseISODateString(start);
-  const endDate = parseISODateString(end);
-  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
-  const startStr = startDate.toLocaleDateString('en-US', options);
-  const endStr = endDate.toLocaleDateString('en-US', options);
-  if (start === end) {
-    return startStr;
-  }
-  if (startDate.getMonth() === endDate.getMonth()) {
-    return `${startStr} - ${endDate.getDate()}`;
-  }
-  return `${startStr} - ${endStr}`;
 };
 
 export interface DatesProps {

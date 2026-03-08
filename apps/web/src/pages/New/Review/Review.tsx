@@ -6,22 +6,8 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
+import { formatDateRange } from '../../../lib/dateUtils';
 import styles from './Review.module.scss';
-
-const formatDateRange = (start: string, end: string): string => {
-  if (!start || !end) return '';
-  const [y1, m1, d1] = start.split('-').map(Number);
-  const [y2, m2, d2] = end.split('-').map(Number);
-  const startDate = new Date(y1, m1 - 1, d1);
-  const endDate = new Date(y2, m2 - 1, d2);
-  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
-  const startStr = startDate.toLocaleDateString('en-US', options);
-  const endStr = endDate.toLocaleDateString('en-US', options);
-  if (startDate.getMonth() === endDate.getMonth()) {
-    return `${startStr} - ${endDate.getDate()}`;
-  }
-  return `${startStr} - ${endStr}`;
-};
 
 const EditIcon = () => {
   return (
@@ -116,7 +102,8 @@ export const Review = ({
   const getImageForSingleSite = () => {
     const site = selectedSites[0];
     if (site?.previewImageUrl) return site.previewImageUrl;
-    if (selectedFacility?.previewImageUrl) return selectedFacility.previewImageUrl;
+    if (selectedFacility?.previewImageUrl)
+      return selectedFacility.previewImageUrl;
     return null;
   };
 
@@ -278,7 +265,11 @@ export const Review = ({
               ) : (
                 <div className={styles.siteImagePlaceholder}>
                   <span className={styles.siteImageIcon}>🏕️</span>
-                  <Text variant="body-sm" className={styles.siteImageText} as="p">
+                  <Text
+                    variant="body-sm"
+                    className={styles.siteImageText}
+                    as="p"
+                  >
                     Site photo
                   </Text>
                 </div>
