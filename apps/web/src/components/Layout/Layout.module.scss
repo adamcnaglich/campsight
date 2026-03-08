@@ -35,4 +35,9 @@
   .main {
     padding: 16px 12px;
   }
+
+  .layout:has([data-fill-layout]) {
+    height: unset;
+    overflow: unset;
+  }
 }

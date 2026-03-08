@@ -181,28 +181,50 @@
   .twoColumnLayout {
     grid-template-columns: 1fr;
     margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    flex-direction: column-reverse;
+    gap: 40px;
+  }
+
+  .listColumn {
+    flex: 1;
+    min-height: 0;
   }
 
   .mapColumn {
-    display: none;
+    height: 200px;
+    padding-bottom: 0;
+    flex-shrink: 0;
+    padding-bottom: 0;
   }
 
   .resultsList {
     padding-right: 0;
+    min-height: unset;
+    overflow-y: unset;
   }
 
   .resultCard {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 12px;
-    border-radius: 20px;
     gap: 16px;
+    padding: 12px;
+  }
+
+  .cardContent {
+    gap: 4px;
   }
 
   .cardPhoto {
-    width: 100%;
-    height: 160px;
-    border-radius: 12px;
+    width: 72px;
+    height: 72px;
+  }
+
+  .cardLocation {
+    font-size: var(--text-body-sm-size);
+  }
+
+  .cardName {
+    font-size: var(--text-body-size);
   }
 
   .cardLocation {
