@@ -175,6 +175,14 @@ export const Navbar = () => {
             [styles.mobileMenuOpen]: menuOpen,
           })}
         >
+          <button
+            type="button"
+            className={styles.mobileMenuClose}
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <span aria-hidden>×</span>
+          </button>
           <nav className={styles.mobileNav}>
             {navItems.map((item) => (
               <Button
