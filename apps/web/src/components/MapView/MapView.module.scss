@@ -42,10 +42,11 @@
   height: 10px;
   border-radius: 50%;
   background: #2563eb;
+  border: 1px solid white;
   cursor: pointer;
 
   &[data-selected] {
-    background: #c859e7;
+    background: var(--color-primary-active);
     width: 12px;
     height: 12px;
   }
