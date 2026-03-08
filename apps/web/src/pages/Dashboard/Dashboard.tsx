@@ -95,7 +95,6 @@ export const Dashboard = () => {
             available.
           </Text>
           <Button
-            className={styles.emptyBtn}
             icon={<Plus size={16} aria-hidden />}
             as={({ children, className, ...props }) => (
               <Link to="/new" className={className} {...props}>
@@ -111,11 +110,15 @@ export const Dashboard = () => {
         <div className={styles.grid}>
           {watches.map((watch) => {
             const siteCount = watch.sites.length;
-            const loops = [...new Set(watch.sites.map((s) => s.loop).filter(Boolean))];
+            const loops = [
+              ...new Set(watch.sites.map((s) => s.loop).filter(Boolean)),
+            ];
             const loopStr = loops.length > 0 ? `Loop: ${loops.join(', ')}` : '';
             const siteLabel =
               siteCount === 1
-                ? [`Site: ${watch.sites[0].campsiteName}`, loopStr].filter(Boolean).join(', ')
+                ? [`Site: ${watch.sites[0].campsiteName}`, loopStr]
+                    .filter(Boolean)
+                    .join(', ')
                 : [`${siteCount} Sites`, loopStr].filter(Boolean).join(', ');
 
             return (
