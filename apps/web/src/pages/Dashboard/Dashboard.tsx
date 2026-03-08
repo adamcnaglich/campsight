@@ -56,6 +56,11 @@ export const Dashboard = () => {
     );
   }
 
+  const activeSiteCount =
+    watches
+      ?.filter((w) => w.isActive)
+      .reduce((sum, w) => sum + w.sites.length, 0) ?? 0;
+
   return (
     <div className={styles.dashboard}>
       <div className={styles.header}>
@@ -67,8 +72,8 @@ export const Dashboard = () => {
 
         <div className={styles.headerContent}>
           <Text variant="body" className={styles.subtitle} as="p">
-            Monitoring {watches?.filter((w) => w.isActive).length || 0} campsite
-            {watches?.filter((w) => w.isActive).length !== 1 ? 's' : ''}
+            Monitoring {activeSiteCount} campsite
+            {activeSiteCount !== 1 ? 's' : ''}
           </Text>
           <Button
             className={styles.addBtn}
