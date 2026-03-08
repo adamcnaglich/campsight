@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import styles from './WatchDetail.module.scss';
+import { Button } from '../../components/Button';
+import { EditIcon } from 'lucide-react';
 
 interface SiteAvailabilityData {
   campsiteId: string;
@@ -18,61 +20,28 @@ interface WatchAvailabilityResponse {
   siteAvailability: Record<number, SiteAvailabilityData>;
 }
 
-const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
-
-function SiteCalendar({
-  site,
-  availability,
-  dateRange,
+const DetailItem = ({
+  title,
+  subtitle,
 }: {
-  site: WatchSite;
-  availability: Record<string, string>;
-  dateRange: Date[];
-}) {
-  return (
-    <div className={styles.siteSection}>
-      <div className={styles.siteHeader}>
-        <Text variant="h3">{site.campsiteName}</Text>
-        <a
-          href={`${DETAIL_PAGE}/${site.campsiteId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.recGovLink}
-        >
-          View on Recreation.gov
-        </a>
-      </div>
-
-      <div className={styles.calendar}>
-        {dateRange.map((date) => {
-          const dateKey = date.toISOString().split('T')[0];
-          const status =
-            availability[dateKey] ||
-            availability[`${dateKey}T00:00:00Z`] ||
-            'Unknown';
-
-          return (
-            <div
-              key={dateKey}
-              className={classNames(styles.dayCell, {
-                [styles.available]: status === 'Available',
-                [styles.reserved]: status === 'Reserved',
-                [styles.notAvailable]:
-                  status !== 'Available' && status !== 'Reserved',
-              })}
-              title={`${format(date, 'MMM d, yyyy')}: ${status}`}
-            >
-              <span className={styles.dayNum}>{format(date, 'd')}</span>
-              <span className={styles.dayMonth}>
-                {format(date, 'MMM')}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+  title: string;
+  subtitle: string;
+}) => (
+  <div className={styles.detailItem}>
+    <div className={styles.detailItemContent}>
+      <Text variant="h3">{title}</Text>
+      <Text variant="body" className={styles.detailSubtext}>
+        {subtitle}
+      </Text>
     </div>
-  );
-}
+    {/* dont hook up the edit button yet */}
+    <button className={styles.editButton}>
+      <EditIcon />
+    </button>
+  </div>
+);
+
+const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
 
 export const WatchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,9 +85,65 @@ export const WatchDetail = () => {
   }
 
   const siteCount = watch.sites.length;
-  const title = siteCount === 1
-    ? watch.sites[0].campsiteName
-    : `${siteCount} Sites`;
+  const title =
+    siteCount === 1 ? watch.sites[0].campsiteName : `${siteCount} Sites`;
+
+  return (
+    <div className={styles.page}>
+      <Link to="/dashboard" className={styles.backLink}>
+        <div className={styles.backLinkIcon}>←</div> Back to Dashboard
+      </Link>
+
+      <Text variant="h1">Ausable River Campground</Text>
+
+      <div className={styles.watchInfo}>
+        <div className={styles.watchInfoLeft}>
+          <Text variant="body" className={styles.watchInfoText}>
+            Watching 12 Sites
+          </Text>
+          <span
+            className={classNames(styles.badge, {
+              [styles.badgeActive]: watch.isActive,
+              [styles.badgeInactive]: !watch.isActive,
+            })}
+          >
+            {watch.isActive ? 'Active' : 'Paused'}
+          </span>
+        </div>
+        <div className={styles.watchInfoRight}>
+          <Button variant="outline">Pause</Button>
+          <Button variant="outline" level="danger">
+            Delete Watch
+          </Button>
+        </div>
+      </div>
+
+      <div className={styles.content}>
+        <div>
+          <Text variant="h2" className={styles.sectionTitle}>
+            Details
+          </Text>
+          <div className={styles.details}>
+            <DetailItem
+              title="Porcupine Flat Campground"
+              subtitle="Mio, Michigan"
+            />
+            <DetailItem
+              title="12 Campsites"
+              subtitle="002, 005, 006, 007, 012, 014, 015, 041, 042, 121, 122, 138"
+            />
+            <DetailItem title="Timeframe" subtitle="March 10 - 14" />
+          </div>
+        </div>
+        <div className={styles.mapColumn}>
+          <Text variant="h2">Map</Text>
+          <div className={styles.mapContainer}>
+            {/* <MapView markers={[]} /> */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className={styles.page}>
@@ -186,18 +211,6 @@ export const WatchDetail = () => {
                 </Text>
               </span>
             </div>
-
-            {watch.sites.map((site) => {
-              const avail = siteAvailability[site.id]?.availability || {};
-              return (
-                <SiteCalendar
-                  key={site.id}
-                  site={site}
-                  availability={avail}
-                  dateRange={dateRange}
-                />
-              );
-            })}
           </>
         )}
       </div>
