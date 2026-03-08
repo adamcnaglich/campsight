@@ -227,7 +227,7 @@ export const New = () => {
     mutationFn: (data: CreateWatchDTO) => api.post('/api/watches', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['watches'] });
-      navigate('/');
+      navigate('/dashboard');
     },
   });
 
@@ -235,12 +235,15 @@ export const New = () => {
     e.preventDefault();
     if (selectedSites.length === 0 || !startDate || !endDate) return;
 
-    const firstSite = selectedSites[0];
     createMutation.mutate({
-      campsiteId: firstSite.campsiteId,
-      campsiteName: firstSite.name,
-      campgroundName:
-        selectedFacility?.name || firstSite.campgroundName,
+      campgroundName: selectedFacility?.name || selectedSites[0].campgroundName,
+      recAreaName: selectedSearchName || undefined,
+      imageUrl: selectedFacility?.previewImageUrl || undefined,
+      sites: selectedSites.map((s) => ({
+        campsiteId: s.campsiteId,
+        campsiteName: s.name,
+        loop: s.loop || undefined,
+      })),
       startDate,
       endDate,
     });

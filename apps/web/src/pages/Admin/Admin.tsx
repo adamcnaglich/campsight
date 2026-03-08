@@ -29,9 +29,9 @@ interface Watch {
   id: number;
   userId: string;
   userEmail: string;
-  campsiteId: string;
-  campsiteName: string;
   campgroundName: string;
+  imageUrl: string | null;
+  sites: Array<{ id: number; campsiteId: string; campsiteName: string }>;
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -289,7 +289,7 @@ const WatchesTab = () => {
           <tr>
             <th>ID</th>
             <th>User</th>
-            <th>Campsite</th>
+            <th>Sites</th>
             <th>Campground</th>
             <th>Dates</th>
             <th>Status</th>
@@ -301,7 +301,7 @@ const WatchesTab = () => {
             <tr key={watch.id}>
               <td>{watch.id}</td>
               <td className={styles.userEmail}>{watch.userEmail}</td>
-              <td>{watch.campsiteName}</td>
+              <td>{watch.sites?.map((s: { campsiteName: string }) => s.campsiteName).join(', ') || '—'}</td>
               <td>{watch.campgroundName}</td>
               <td className={styles.dates}>
                 {watch.startDate} → {watch.endDate}
@@ -380,7 +380,7 @@ const ActivityTab = () => {
               <div className={styles.activityDetails}>
                 {activity.type === 'watch_created' && (
                   <>
-                    {details.campsiteName} at {details.campgroundName}
+                    {details.campgroundName}
                   </>
                 )}
                 {activity.type === 'user_registered' && (

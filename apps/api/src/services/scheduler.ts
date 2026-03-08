@@ -16,62 +16,75 @@ let lastRunStatus: 'success' | 'error' | null = null;
 let lastRunError: string | null = null;
 let isCheckInProgress = false;
 
-interface WatchGroup {
+interface WatchSiteEntry {
+  watchSiteId: number;
+  watchId: number;
+  userId: string;
+  campsiteId: string;
+  campsiteName: string;
+  campgroundName: string;
+}
+
+interface SiteGroup {
   campsiteId: string;
   startDate: string;
   endDate: string;
-  watches: Array<{
-    id: number;
-    userId: string;
-    campsiteName: string;
-    campgroundName: string;
-  }>;
+  entries: WatchSiteEntry[];
 }
 
 /**
- * Group active watches by campsiteId + date range to avoid duplicate API calls.
+ * Group active watch sites by campsiteId + date range to avoid duplicate API calls.
  */
-function groupActiveWatches(): WatchGroup[] {
+function groupActiveWatchSites(): SiteGroup[] {
   const activeWatches = db
     .select()
     .from(schema.watches)
     .where(eq(schema.watches.isActive, true))
     .all();
 
-  const groups = new Map<string, WatchGroup>();
+  const groups = new Map<string, SiteGroup>();
 
   for (const watch of activeWatches) {
-    const key = `${watch.campsiteId}:${watch.startDate}:${watch.endDate}`;
-    if (!groups.has(key)) {
-      groups.set(key, {
-        campsiteId: watch.campsiteId,
-        startDate: watch.startDate,
-        endDate: watch.endDate,
-        watches: [],
+    const sites = db
+      .select()
+      .from(schema.watchSites)
+      .where(eq(schema.watchSites.watchId, watch.id))
+      .all();
+
+    for (const site of sites) {
+      const key = `${site.campsiteId}:${watch.startDate}:${watch.endDate}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          campsiteId: site.campsiteId,
+          startDate: watch.startDate,
+          endDate: watch.endDate,
+          entries: [],
+        });
+      }
+      groups.get(key)!.entries.push({
+        watchSiteId: site.id,
+        watchId: watch.id,
+        userId: watch.userId,
+        campsiteId: site.campsiteId,
+        campsiteName: site.campsiteName,
+        campgroundName: watch.campgroundName,
       });
     }
-    groups.get(key)!.watches.push({
-      id: watch.id,
-      userId: watch.userId,
-      campsiteName: watch.campsiteName,
-      campgroundName: watch.campgroundName,
-    });
   }
 
   return Array.from(groups.values());
 }
 
 /**
- * Get the latest availability snapshot for a watch as a map.
+ * Get the latest availability snapshot for a watch site as a map.
  */
-function getLatestSnapshot(watchId: number): AvailabilityMap {
+function getLatestSnapshot(watchSiteId: number): AvailabilityMap {
   const snapshots = db
     .select()
     .from(schema.availabilitySnapshots)
-    .where(eq(schema.availabilitySnapshots.watchId, watchId))
+    .where(eq(schema.availabilitySnapshots.watchSiteId, watchSiteId))
     .all();
 
-  // Keep latest per date
   const map: AvailabilityMap = {};
   const latestTimestamps: Record<string, string> = {};
 
@@ -86,21 +99,20 @@ function getLatestSnapshot(watchId: number): AvailabilityMap {
 }
 
 /**
- * Store new availability data as snapshots.
+ * Store new availability data as snapshots for a watch site.
  */
-function storeSnapshots(watchId: number, availability: AvailabilityMap) {
+function storeSnapshots(watchSiteId: number, availability: AvailabilityMap) {
   const now = new Date().toISOString();
   const values = Object.entries(availability).map(([date, status]) => ({
-    watchId,
+    watchSiteId,
     date,
     status,
     capturedAt: now,
   }));
 
   if (values.length > 0) {
-    // Delete old snapshots for this watch and insert fresh ones
     db.delete(schema.availabilitySnapshots)
-      .where(eq(schema.availabilitySnapshots.watchId, watchId))
+      .where(eq(schema.availabilitySnapshots.watchSiteId, watchSiteId))
       .run();
 
     for (const val of values) {
@@ -124,7 +136,7 @@ async function runCheck() {
   lastRunError = null;
 
   try {
-    const groups = groupActiveWatches();
+    const groups = groupActiveWatchSites();
 
     if (groups.length === 0) {
       log.scheduler.debug('No active watches to check');
@@ -138,6 +150,13 @@ async function runCheck() {
 
     log.scheduler.info({ groupCount: groups.length }, 'Starting check cycle');
 
+    // Collect newly available sites per watch so we can send one notification per watch
+    const watchNotifications = new Map<number, {
+      userId: string;
+      campgroundName: string;
+      sites: Array<{ campsiteId: string; campsiteName: string; newlyAvailableDates: string[] }>;
+    }>();
+
     for (const group of groups) {
       try {
         const currentAvailability = await fetchAvailability(
@@ -146,39 +165,58 @@ async function runCheck() {
           group.endDate
         );
 
-        for (const watch of group.watches) {
-          const previousAvailability = getLatestSnapshot(watch.id);
+        for (const entry of group.entries) {
+          const previousAvailability = getLatestSnapshot(entry.watchSiteId);
           const newlyAvailable = diffAvailability(
             previousAvailability,
             currentAvailability
           );
 
-          // Store fresh snapshot
-          storeSnapshots(watch.id, currentAvailability);
+          storeSnapshots(entry.watchSiteId, currentAvailability);
 
-          // Notify if new dates became available
           if (newlyAvailable.length > 0) {
             log.scheduler.info(
-              { watchId: watch.id, userId: watch.userId, newDates: newlyAvailable.length },
+              { watchSiteId: entry.watchSiteId, watchId: entry.watchId, userId: entry.userId, newDates: newlyAvailable.length },
               'New availability detected',
             );
-            await sendAvailabilityNotification({
-              userId: watch.userId,
-              watchId: watch.id,
-              campsiteId: group.campsiteId,
-              campsiteName: watch.campsiteName,
-              campgroundName: watch.campgroundName,
+
+            if (!watchNotifications.has(entry.watchId)) {
+              watchNotifications.set(entry.watchId, {
+                userId: entry.userId,
+                campgroundName: entry.campgroundName,
+                sites: [],
+              });
+            }
+            watchNotifications.get(entry.watchId)!.sites.push({
+              campsiteId: entry.campsiteId,
+              campsiteName: entry.campsiteName,
               newlyAvailableDates: newlyAvailable,
             });
           }
         }
 
-        // Small delay between API calls to be respectful
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         log.scheduler.error(
           { err: error, campsiteId: group.campsiteId },
           'Error checking campsite availability',
+        );
+      }
+    }
+
+    // Send one notification per watch with all newly available sites
+    for (const [watchId, notification] of watchNotifications) {
+      try {
+        await sendAvailabilityNotification({
+          userId: notification.userId,
+          watchId,
+          campgroundName: notification.campgroundName,
+          sites: notification.sites,
+        });
+      } catch (error) {
+        log.scheduler.error(
+          { err: error, watchId },
+          'Error sending notification',
         );
       }
     }

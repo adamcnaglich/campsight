@@ -1,16 +1,77 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Watch, AvailabilitySnapshot } from '@campsight/shared';
+import { Watch, WatchSite } from '@campsight/shared';
 import { format, parseISO, eachDayOfInterval } from 'date-fns';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import styles from './WatchDetail.module.scss';
 
+interface SiteAvailabilityData {
+  campsiteId: string;
+  campsiteName: string;
+  availability: Record<string, string>;
+}
+
 interface WatchAvailabilityResponse {
   watch: Watch;
+  siteAvailability: Record<number, SiteAvailabilityData>;
+}
+
+const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
+
+function SiteCalendar({
+  site,
+  availability,
+  dateRange,
+}: {
+  site: WatchSite;
   availability: Record<string, string>;
-  snapshots: AvailabilitySnapshot[];
+  dateRange: Date[];
+}) {
+  return (
+    <div className={styles.siteSection}>
+      <div className={styles.siteHeader}>
+        <Text variant="h3">{site.campsiteName}</Text>
+        <a
+          href={`${DETAIL_PAGE}/${site.campsiteId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.recGovLink}
+        >
+          View on Recreation.gov
+        </a>
+      </div>
+
+      <div className={styles.calendar}>
+        {dateRange.map((date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          const status =
+            availability[dateKey] ||
+            availability[`${dateKey}T00:00:00Z`] ||
+            'Unknown';
+
+          return (
+            <div
+              key={dateKey}
+              className={classNames(styles.dayCell, {
+                [styles.available]: status === 'Available',
+                [styles.reserved]: status === 'Reserved',
+                [styles.notAvailable]:
+                  status !== 'Available' && status !== 'Reserved',
+              })}
+              title={`${format(date, 'MMM d, yyyy')}: ${status}`}
+            >
+              <span className={styles.dayNum}>{format(date, 'd')}</span>
+              <span className={styles.dayMonth}>
+                {format(date, 'MMM')}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export const WatchDetail = () => {
@@ -20,7 +81,7 @@ export const WatchDetail = () => {
     queryKey: ['watch-availability', id],
     queryFn: () => api.get(`/api/watches/${id}/availability`),
     enabled: !!id,
-    refetchInterval: 1000 * 60 * 5, // refresh every 5 min
+    refetchInterval: 1000 * 60 * 5,
   });
 
   if (isLoading) {
@@ -42,9 +103,8 @@ export const WatchDetail = () => {
     );
   }
 
-  const { watch, availability } = data;
+  const { watch, siteAvailability } = data;
 
-  // Generate all dates in the range
   let dateRange: Date[] = [];
   try {
     dateRange = eachDayOfInterval({
@@ -55,6 +115,11 @@ export const WatchDetail = () => {
     // Invalid date range
   }
 
+  const siteCount = watch.sites.length;
+  const title = siteCount === 1
+    ? watch.sites[0].campsiteName
+    : `${siteCount} Sites`;
+
   return (
     <div className={styles.page}>
       <Link to="/dashboard" className={styles.backLink}>
@@ -64,7 +129,7 @@ export const WatchDetail = () => {
       <div className={styles.header}>
         <div>
           <Text variant="h1" className={styles.title}>
-            {watch.campsiteName}
+            {title}
           </Text>
           <Text variant="body" className={styles.campground} as="p">
             {watch.campgroundName}
@@ -122,48 +187,19 @@ export const WatchDetail = () => {
               </span>
             </div>
 
-            <div className={styles.calendar}>
-              {dateRange.map((date) => {
-                // The API returns dates as ISO timestamps like "2025-06-15T00:00:00Z"
-                const dateKey = date.toISOString().split('T')[0];
-                // Try various key formats
-                const status =
-                  availability[dateKey] ||
-                  availability[`${dateKey}T00:00:00Z`] ||
-                  'Unknown';
-
-                return (
-                  <div
-                    key={dateKey}
-                    className={classNames(styles.dayCell, {
-                      [styles.available]: status === 'Available',
-                      [styles.reserved]: status === 'Reserved',
-                      [styles.notAvailable]:
-                        status !== 'Available' && status !== 'Reserved',
-                    })}
-                    title={`${format(date, 'MMM d, yyyy')}: ${status}`}
-                  >
-                    <span className={styles.dayNum}>{format(date, 'd')}</span>
-                    <span className={styles.dayMonth}>
-                      {format(date, 'MMM')}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            {watch.sites.map((site) => {
+              const avail = siteAvailability[site.id]?.availability || {};
+              return (
+                <SiteCalendar
+                  key={site.id}
+                  site={site}
+                  availability={avail}
+                  dateRange={dateRange}
+                />
+              );
+            })}
           </>
         )}
-      </div>
-
-      <div className={styles.detailLink}>
-        <a
-          href={`https://www.recreation.gov/camping/campsites/${watch.campsiteId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.recGovLink}
-        >
-          View on Recreation.gov →
-        </a>
       </div>
     </div>
   );

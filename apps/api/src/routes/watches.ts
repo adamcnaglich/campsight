@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db, schema } from '../db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { createWatchSchema, updateWatchSchema } from '@campsight/shared';
 import { log } from '../lib/logger';
 
@@ -9,6 +9,33 @@ const router = Router();
 /** Helper to extract userId set by auth middleware */
 function getUserId(req: Request): string {
   return (req as Request & { userId: string }).userId;
+}
+
+/** Build a Watch response object with its sites array */
+function buildWatchResponse(watchRow: typeof schema.watches.$inferSelect) {
+  const sites = db
+    .select()
+    .from(schema.watchSites)
+    .where(eq(schema.watchSites.watchId, watchRow.id))
+    .all();
+
+  return {
+    id: watchRow.id,
+    userId: watchRow.userId,
+    campgroundName: watchRow.campgroundName,
+    recAreaName: watchRow.recAreaName,
+    imageUrl: watchRow.imageUrl,
+    sites: sites.map((s) => ({
+      id: s.id,
+      campsiteId: s.campsiteId,
+      campsiteName: s.campsiteName,
+      loop: s.loop,
+    })),
+    startDate: watchRow.startDate,
+    endDate: watchRow.endDate,
+    isActive: Boolean(watchRow.isActive),
+    createdAt: watchRow.createdAt,
+  };
 }
 
 /**
@@ -25,10 +52,7 @@ router.get('/', async (req, res: Response) => {
       .orderBy(desc(schema.watches.createdAt))
       .all();
 
-    const data = rows.map((r) => ({
-      ...r,
-      isActive: Boolean(r.isActive),
-    }));
+    const data = rows.map(buildWatchResponse);
 
     log.watches.debug({ userId, count: data.length }, 'Listed watches');
     res.json({ data });
@@ -39,7 +63,7 @@ router.get('/', async (req, res: Response) => {
 });
 
 /**
- * POST /api/watches — Create a new watch
+ * POST /api/watches — Create a new watch with one or more sites
  */
 router.post('/', async (req, res: Response) => {
   const userId = getUserId(req);
@@ -53,20 +77,39 @@ router.post('/', async (req, res: Response) => {
   }
 
   try {
-    const result = db
+    const { sites, ...watchData } = parsed.data;
+
+    const watchRow = db
       .insert(schema.watches)
       .values({
         userId,
-        ...parsed.data,
+        campgroundName: watchData.campgroundName,
+        recAreaName: watchData.recAreaName || null,
+        imageUrl: watchData.imageUrl || null,
+        startDate: watchData.startDate,
+        endDate: watchData.endDate,
       })
       .returning()
       .get();
 
+    for (const site of sites) {
+      db.insert(schema.watchSites)
+        .values({
+          watchId: watchRow.id,
+          campsiteId: site.campsiteId,
+          campsiteName: site.campsiteName,
+          loop: site.loop || null,
+        })
+        .run();
+    }
+
+    const result = buildWatchResponse(watchRow);
+
     log.watches.info(
-      { userId, watchId: result.id, campsiteName: result.campsiteName, campgroundName: result.campgroundName },
+      { userId, watchId: result.id, siteCount: sites.length, campgroundName: result.campgroundName },
       'Watch created',
     );
-    res.status(201).json({ data: { ...result, isActive: Boolean(result.isActive) } });
+    res.status(201).json({ data: result });
   } catch (error) {
     log.watches.error({ err: error, userId }, 'Failed to create watch');
     res.status(500).json({ error: { message: 'Failed to create watch' } });
@@ -93,7 +136,6 @@ router.patch('/:id', async (req, res: Response) => {
   }
 
   try {
-    // Verify ownership
     const existing = db
       .select()
       .from(schema.watches)
@@ -105,15 +147,17 @@ router.patch('/:id', async (req, res: Response) => {
       return res.status(404).json({ error: { message: 'Watch not found' } });
     }
 
-    const result = db
+    const updatedRow = db
       .update(schema.watches)
       .set(parsed.data)
       .where(eq(schema.watches.id, watchId))
       .returning()
       .get();
 
+    const result = buildWatchResponse(updatedRow);
+
     log.watches.info({ userId, watchId, changes: parsed.data }, 'Watch updated');
-    res.json({ data: { ...result, isActive: Boolean(result.isActive) } });
+    res.json({ data: result });
   } catch (error) {
     log.watches.error({ err: error, userId, watchId }, 'Failed to update watch');
     res.status(500).json({ error: { message: 'Failed to update watch' } });
@@ -146,7 +190,7 @@ router.delete('/:id', async (req, res: Response) => {
     db.delete(schema.watches).where(eq(schema.watches.id, watchId)).run();
 
     log.watches.info(
-      { userId, watchId, campsiteName: existing.campsiteName },
+      { userId, watchId, campgroundName: existing.campgroundName },
       'Watch deleted',
     );
     res.json({ data: { success: true } });
@@ -157,7 +201,7 @@ router.delete('/:id', async (req, res: Response) => {
 });
 
 /**
- * GET /api/watches/:id/availability — Latest availability for a watch
+ * GET /api/watches/:id/availability — Latest availability for a watch, grouped by site
  */
 router.get('/:id/availability', async (req, res: Response) => {
   const userId = getUserId(req);
@@ -168,44 +212,55 @@ router.get('/:id/availability', async (req, res: Response) => {
   }
 
   try {
-    // Verify ownership
-    const watch = db
+    const watchRow = db
       .select()
       .from(schema.watches)
       .where(and(eq(schema.watches.id, watchId), eq(schema.watches.userId, userId)))
       .get();
 
-    if (!watch) {
+    if (!watchRow) {
       return res.status(404).json({ error: { message: 'Watch not found' } });
     }
 
-    // Get most recent snapshot for each date
-    const snapshots = db
-      .select()
-      .from(schema.availabilitySnapshots)
-      .where(eq(schema.availabilitySnapshots.watchId, watchId))
-      .orderBy(desc(schema.availabilitySnapshots.capturedAt))
-      .all();
+    const watch = buildWatchResponse(watchRow);
 
-    // Deduplicate: keep only latest per date
-    const latestByDate = new Map<string, typeof snapshots[0]>();
-    for (const snap of snapshots) {
-      if (!latestByDate.has(snap.date)) {
-        latestByDate.set(snap.date, snap);
+    const siteIds = watch.sites.map((s) => s.id);
+
+    // Build availability per site
+    const siteAvailability: Record<number, { campsiteId: string; campsiteName: string; availability: Record<string, string> }> = {};
+
+    if (siteIds.length > 0) {
+      const snapshots = db
+        .select()
+        .from(schema.availabilitySnapshots)
+        .where(inArray(schema.availabilitySnapshots.watchSiteId, siteIds))
+        .orderBy(desc(schema.availabilitySnapshots.capturedAt))
+        .all();
+
+      for (const site of watch.sites) {
+        const siteSnaps = snapshots.filter((s) => s.watchSiteId === site.id);
+        const latestByDate: Record<string, string> = {};
+        for (const snap of siteSnaps) {
+          if (!latestByDate[snap.date]) {
+            latestByDate[snap.date] = snap.status;
+          }
+        }
+        siteAvailability[site.id] = {
+          campsiteId: site.campsiteId,
+          campsiteName: site.campsiteName,
+          availability: latestByDate,
+        };
       }
     }
 
     log.watches.debug(
-      { userId, watchId, snapshotCount: latestByDate.size },
+      { userId, watchId, siteCount: siteIds.length },
       'Fetched availability',
     );
     res.json({
       data: {
-        watch: { ...watch, isActive: Boolean(watch.isActive) },
-        availability: Object.fromEntries(
-          Array.from(latestByDate.entries()).map(([date, snap]) => [date, snap.status])
-        ),
-        snapshots: Array.from(latestByDate.values()),
+        watch,
+        siteAvailability,
       },
     });
   } catch (error) {

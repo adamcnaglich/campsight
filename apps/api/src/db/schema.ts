@@ -25,9 +25,9 @@ export const watches = sqliteTable('watches', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  campsiteId: text('campsite_id').notNull(),
-  campsiteName: text('campsite_name').notNull(),
   campgroundName: text('campground_name').notNull(),
+  recAreaName: text('rec_area_name'),
+  imageUrl: text('image_url'),
   startDate: text('start_date').notNull(), // YYYY-MM-DD
   endDate: text('end_date').notNull(), // YYYY-MM-DD
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
@@ -36,13 +36,25 @@ export const watches = sqliteTable('watches', {
     .$defaultFn(() => new Date().toISOString()),
 });
 
-// ─── Availability Snapshots ────────────────────────────────────────────────────
+// ─── Watch Sites (join table) ─────────────────────────────────────────────────
 
-export const availabilitySnapshots = sqliteTable('availability_snapshots', {
+export const watchSites = sqliteTable('watch_sites', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   watchId: integer('watch_id')
     .notNull()
     .references(() => watches.id, { onDelete: 'cascade' }),
+  campsiteId: text('campsite_id').notNull(),
+  campsiteName: text('campsite_name').notNull(),
+  loop: text('loop'),
+});
+
+// ─── Availability Snapshots ────────────────────────────────────────────────────
+
+export const availabilitySnapshots = sqliteTable('availability_snapshots', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  watchSiteId: integer('watch_site_id')
+    .notNull()
+    .references(() => watchSites.id, { onDelete: 'cascade' }),
   date: text('date').notNull(), // YYYY-MM-DD
   status: text('status').notNull(),
   capturedAt: text('captured_at')

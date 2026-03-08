@@ -14,10 +14,17 @@ export type User = z.infer<typeof userSchema>;
 
 // ─── Watch ─────────────────────────────────────────────────────────────────────
 
-export const createWatchSchema = z.object({
+export const watchSiteSchema = z.object({
   campsiteId: z.string().min(1),
   campsiteName: z.string().min(1),
+  loop: z.string().optional(),
+});
+
+export const createWatchSchema = z.object({
   campgroundName: z.string().min(1),
+  recAreaName: z.string().optional(),
+  imageUrl: z.string().optional(),
+  sites: z.array(watchSiteSchema).min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
 });
@@ -38,12 +45,22 @@ export const updateWatchSchema = z.object({
 
 export type UpdateWatchDTO = z.infer<typeof updateWatchSchema>;
 
+export const watchSiteResponseSchema = z.object({
+  id: z.number(),
+  campsiteId: z.string(),
+  campsiteName: z.string(),
+  loop: z.string().nullable(),
+});
+
+export type WatchSite = z.infer<typeof watchSiteResponseSchema>;
+
 export const watchSchema = z.object({
   id: z.number(),
   userId: z.string(),
-  campsiteId: z.string(),
-  campsiteName: z.string(),
   campgroundName: z.string(),
+  recAreaName: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  sites: z.array(watchSiteResponseSchema),
   startDate: z.string(),
   endDate: z.string(),
   isActive: z.boolean(),
@@ -68,7 +85,7 @@ export type AvailabilityStatus = z.infer<typeof availabilityStatusEnum>;
 
 export const availabilitySnapshotSchema = z.object({
   id: z.number(),
-  watchId: z.number(),
+  watchSiteId: z.number(),
   date: z.string(), // ISO date YYYY-MM-DD
   status: z.string(),
   capturedAt: z.string(),

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db, schema } from '../db';
-import { eq, desc, sql, count } from 'drizzle-orm';
+import { eq, desc, sql, count, inArray } from 'drizzle-orm';
 import { log } from '../lib/logger';
 import {
   getSchedulerStatus,
@@ -112,11 +112,24 @@ router.get('/users/:id', async (req, res: Response) => {
       .orderBy(desc(schema.notificationsLog.sentAt))
       .all();
 
+    const watchesWithSites = watches.map((w) => {
+      const sites = db
+        .select()
+        .from(schema.watchSites)
+        .where(eq(schema.watchSites.watchId, w.id))
+        .all();
+      return {
+        ...w,
+        isActive: Boolean(w.isActive),
+        sites: sites.map((s) => ({ id: s.id, campsiteId: s.campsiteId, campsiteName: s.campsiteName, loop: s.loop })),
+      };
+    });
+
     log.api.info({ adminEmail, userId }, 'Admin fetched user details');
     res.json({
       data: {
         user,
-        watches: watches.map((w) => ({ ...w, isActive: Boolean(w.isActive) })),
+        watches: watchesWithSites,
         notifications,
       },
     });
@@ -165,14 +178,14 @@ router.get('/watches', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
 
   try {
-    const watches = db
+    const watchRows = db
       .select({
         id: schema.watches.id,
         userId: schema.watches.userId,
         userEmail: schema.users.email,
-        campsiteId: schema.watches.campsiteId,
-        campsiteName: schema.watches.campsiteName,
         campgroundName: schema.watches.campgroundName,
+        recAreaName: schema.watches.recAreaName,
+        imageUrl: schema.watches.imageUrl,
         startDate: schema.watches.startDate,
         endDate: schema.watches.endDate,
         isActive: schema.watches.isActive,
@@ -183,7 +196,18 @@ router.get('/watches', async (req, res: Response) => {
       .orderBy(desc(schema.watches.createdAt))
       .all();
 
-    const data = watches.map((w) => ({ ...w, isActive: Boolean(w.isActive) }));
+    const data = watchRows.map((w) => {
+      const sites = db
+        .select()
+        .from(schema.watchSites)
+        .where(eq(schema.watchSites.watchId, w.id))
+        .all();
+      return {
+        ...w,
+        isActive: Boolean(w.isActive),
+        sites: sites.map((s) => ({ id: s.id, campsiteId: s.campsiteId, campsiteName: s.campsiteName, loop: s.loop })),
+      };
+    });
 
     log.api.info({ adminEmail, count: data.length }, 'Admin listed all watches');
     res.json({ data });
@@ -205,14 +229,14 @@ router.get('/watches/:id', async (req, res: Response) => {
   }
 
   try {
-    const watch = db
+    const watchRow = db
       .select({
         id: schema.watches.id,
         userId: schema.watches.userId,
         userEmail: schema.users.email,
-        campsiteId: schema.watches.campsiteId,
-        campsiteName: schema.watches.campsiteName,
         campgroundName: schema.watches.campgroundName,
+        recAreaName: schema.watches.recAreaName,
+        imageUrl: schema.watches.imageUrl,
         startDate: schema.watches.startDate,
         endDate: schema.watches.endDate,
         isActive: schema.watches.isActive,
@@ -223,21 +247,34 @@ router.get('/watches/:id', async (req, res: Response) => {
       .where(eq(schema.watches.id, watchId))
       .get();
 
-    if (!watch) {
+    if (!watchRow) {
       return res.status(404).json({ error: { message: 'Watch not found' } });
     }
 
-    const snapshots = db
+    const sites = db
       .select()
-      .from(schema.availabilitySnapshots)
-      .where(eq(schema.availabilitySnapshots.watchId, watchId))
-      .orderBy(desc(schema.availabilitySnapshots.capturedAt))
+      .from(schema.watchSites)
+      .where(eq(schema.watchSites.watchId, watchId))
       .all();
+
+    const siteIds = sites.map((s) => s.id);
+    const snapshots = siteIds.length > 0
+      ? db
+          .select()
+          .from(schema.availabilitySnapshots)
+          .where(inArray(schema.availabilitySnapshots.watchSiteId, siteIds))
+          .orderBy(desc(schema.availabilitySnapshots.capturedAt))
+          .all()
+      : [];
 
     log.api.info({ adminEmail, watchId }, 'Admin fetched watch details');
     res.json({
       data: {
-        watch: { ...watch, isActive: Boolean(watch.isActive) },
+        watch: {
+          ...watchRow,
+          isActive: Boolean(watchRow.isActive),
+          sites: sites.map((s) => ({ id: s.id, campsiteId: s.campsiteId, campsiteName: s.campsiteName, loop: s.loop })),
+        },
         snapshots,
       },
     });
@@ -272,7 +309,7 @@ router.delete('/watches/:id', async (req, res: Response) => {
     db.delete(schema.watches).where(eq(schema.watches.id, watchId)).run();
 
     log.api.warn(
-      { adminEmail, watchId, userId: watch.userId, campsiteName: watch.campsiteName },
+      { adminEmail, watchId, userId: watch.userId, campgroundName: watch.campgroundName },
       'Admin deleted watch'
     );
     res.json({ data: { success: true } });
@@ -404,7 +441,6 @@ router.get('/activity', async (req, res: Response) => {
         userEmail: schema.users.email,
         details: sql<string>`json_object(
           'watchId', ${schema.watches.id},
-          'campsiteName', ${schema.watches.campsiteName},
           'campgroundName', ${schema.watches.campgroundName}
         )`,
       })

@@ -109,57 +109,67 @@ export const Dashboard = () => {
         </div>
       ) : (
         <div className={styles.grid}>
-          {watches.map((watch) => (
-            <CampgroundCard
-              key={watch.id}
-              imageSrc={`https://picsum.photos/seed/campsite-${watch.id}/600/300`}
-              campsiteName={`Site: ${watch.campsiteName}`}
-              campgroundName={watch.campgroundName}
-              metaLeft="TBD"
-              badgeLabel={watch.isActive ? 'Active' : 'Paused'}
-              badgeActive={watch.isActive}
-              startDate={formatDate(watch.startDate)}
-              endDate={formatDate(watch.endDate)}
-              actions={
-                <>
-                  <Button
-                    variant="outline"
-                    as={({ children, className, ...props }) => (
-                      <Link
-                        to={`/watch/${watch.id}`}
-                        className={className}
-                        {...props}
-                      >
-                        {children}
-                      </Link>
-                    )}
-                  >
-                    Details
-                  </Button>
-                  <Button
-                    variant="outline"
-                    level={!watch.isActive ? 'success' : undefined}
-                    onClick={() => toggleMutation.mutate(watch)}
-                    disabled={toggleMutation.isPending}
-                  >
-                    {watch.isActive ? 'Pause' : 'Resume'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    level="danger"
-                    onClick={() => {
-                      if (confirm('Cancel this watch?')) {
-                        deleteMutation.mutate(watch.id);
-                      }
-                    }}
-                    disabled={deleteMutation.isPending}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              }
-            />
-          ))}
+          {watches.map((watch) => {
+            const siteCount = watch.sites.length;
+            const loops = [...new Set(watch.sites.map((s) => s.loop).filter(Boolean))];
+            const loopStr = loops.length > 0 ? `Loop: ${loops.join(', ')}` : '';
+            const siteLabel =
+              siteCount === 1
+                ? [`Site: ${watch.sites[0].campsiteName}`, loopStr].filter(Boolean).join(', ')
+                : [`${siteCount} Sites`, loopStr].filter(Boolean).join(', ');
+
+            return (
+              <CampgroundCard
+                key={watch.id}
+                imageSrc={watch.imageUrl || undefined}
+                campsiteName={siteLabel}
+                campgroundName={watch.campgroundName}
+                metaLeft={watch.recAreaName || watch.campgroundName}
+                badgeLabel={watch.isActive ? 'Active' : 'Paused'}
+                badgeActive={watch.isActive}
+                startDate={formatDate(watch.startDate)}
+                endDate={formatDate(watch.endDate)}
+                actions={
+                  <>
+                    <Button
+                      variant="outline"
+                      as={({ children, className, ...props }) => (
+                        <Link
+                          to={`/watch/${watch.id}`}
+                          className={className}
+                          {...props}
+                        >
+                          {children}
+                        </Link>
+                      )}
+                    >
+                      Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      level={!watch.isActive ? 'success' : undefined}
+                      onClick={() => toggleMutation.mutate(watch)}
+                      disabled={toggleMutation.isPending}
+                    >
+                      {watch.isActive ? 'Pause' : 'Resume'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      level="danger"
+                      onClick={() => {
+                        if (confirm('Cancel this watch?')) {
+                          deleteMutation.mutate(watch.id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                    >
+                      Delete
+                    </Button>
+                  </>
+                }
+              />
+            );
+          })}
         </div>
       )}
     </div>

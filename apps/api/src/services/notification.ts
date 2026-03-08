@@ -6,13 +6,47 @@ import { log } from '../lib/logger';
 
 const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
 
+interface SiteAvailability {
+  campsiteId: string;
+  campsiteName: string;
+  newlyAvailableDates: string[];
+}
+
 interface NotificationPayload {
   userId: string;
   watchId: number;
-  campsiteId: string;
-  campsiteName: string;
   campgroundName: string;
-  newlyAvailableDates: string[];
+  sites: SiteAvailability[];
+}
+
+function formatDates(dates: string[]): string {
+  return dates
+    .map((d) => {
+      try {
+        return format(parseISO(d), 'MMM do, yyyy');
+      } catch {
+        return d;
+      }
+    })
+    .join(', ');
+}
+
+function buildSiteHtml(site: SiteAvailability): string {
+  const siteUrl = `${DETAIL_PAGE}/${site.campsiteId}`;
+  const formattedDates = formatDates(site.newlyAvailableDates);
+
+  return `
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 12px 0;">
+      <p style="margin: 0 0 4px 0; font-size: 15px; color: #166534; font-weight: 600;">
+        ${site.campsiteName}
+      </p>
+      <p style="margin: 0 0 8px 0; font-size: 14px; color: #166534;">
+        <strong>Available dates:</strong> ${formattedDates}
+      </p>
+      <a href="${siteUrl}" style="font-size: 13px; color: #16a34a; text-decoration: underline;">
+        View on Recreation.gov
+      </a>
+    </div>`;
 }
 
 /**
@@ -22,10 +56,8 @@ interface NotificationPayload {
 export async function sendAvailabilityNotification(
   payload: NotificationPayload
 ): Promise<void> {
-  const { userId, watchId, campsiteId, campsiteName, campgroundName, newlyAvailableDates } =
-    payload;
+  const { userId, watchId, campgroundName, sites } = payload;
 
-  // Look up user email
   const user = db
     .select()
     .from(schema.users)
@@ -37,19 +69,6 @@ export async function sendAvailabilityNotification(
     return;
   }
 
-  const formattedDates = newlyAvailableDates
-    .map((d) => {
-      try {
-        return format(parseISO(d), 'MMM do, yyyy');
-      } catch {
-        return d;
-      }
-    })
-    .join(', ');
-
-  const siteUrl = `${DETAIL_PAGE}/${campsiteId}`;
-
-  // Send email via Resend
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     log.notify.warn('RESEND_API_KEY not set, skipping email');
@@ -59,26 +78,29 @@ export async function sendAvailabilityNotification(
   const resend = new Resend(resendKey);
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'CampSight <noreply@campsight.app>';
 
+  const siteCount = sites.length;
+  const subject = siteCount === 1
+    ? `CampSight — ${sites[0].campsiteName} is now available!`
+    : `CampSight — ${siteCount} sites at ${campgroundName} are now available!`;
+
+  const introText = siteCount === 1
+    ? `Great news! <strong>${sites[0].campsiteName}</strong> at <strong>${campgroundName}</strong> has new availability!`
+    : `Great news! <strong>${siteCount} sites</strong> at <strong>${campgroundName}</strong> have new availability!`;
+
+  const siteSections = sites.map(buildSiteHtml).join('');
+
   try {
     await resend.emails.send({
       from: fromEmail,
       to: user.email,
-      subject: `CampSight — ${campsiteName} is now available!`,
+      subject,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
           <h1 style="color: #1a5632; font-size: 24px;">🏕️ Availability Alert</h1>
           <p style="font-size: 16px; color: #333;">
-            Great news! <strong>${campsiteName}</strong> at <strong>${campgroundName}</strong>
-            has new availability!
+            ${introText}
           </p>
-          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 16px 0;">
-            <p style="margin: 0; font-size: 14px; color: #166534;">
-              <strong>Available dates:</strong> ${formattedDates}
-            </p>
-          </div>
-          <a href="${siteUrl}" style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 8px;">
-            Reserve on Recreation.gov →
-          </a>
+          ${siteSections}
           <p style="font-size: 12px; color: #999; margin-top: 24px;">
             You're receiving this because you set up a watch on CampSight.
           </p>
@@ -87,11 +109,10 @@ export async function sendAvailabilityNotification(
     });
 
     log.notify.info(
-      { userId, watchId, email: user.email, dates: newlyAvailableDates },
+      { userId, watchId, email: user.email, siteCount },
       'Availability notification email sent',
     );
 
-    // Log the notification
     db.insert(schema.notificationsLog)
       .values({
         userId,
