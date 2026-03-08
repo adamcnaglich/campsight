@@ -35,6 +35,7 @@
 .inputWrapper {
   flex: 1;
   min-width: 0;
+  position: relative;
 }
 
 .input {
@@ -53,6 +54,32 @@
 
   &::placeholder {
     color: var(--color-placeholder);
+  }
+}
+
+.inputWithClear {
+  padding-right: 48px;
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-primary-bg);
   }
 }
 
@@ -188,6 +215,14 @@
   .input {
     width: 100%;
     padding: 14px 18px;
+  }
+
+  .inputWithClear {
+    padding-right: 44px;
+  }
+
+  .clearButton {
+    right: 10px;
   }
 
   .trendingSection {

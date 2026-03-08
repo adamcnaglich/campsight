@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import classNames from 'classnames';
-import { MountainSnow, TentTree } from 'lucide-react';
+import { MountainSnow, TentTree, X } from 'lucide-react';
 import { SuggestionResult } from '@campsight/shared';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
@@ -49,6 +49,7 @@ export const Search = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: trendingData, isLoading: trendingLoading } = useQuery({
     queryKey: ['trending'],
@@ -141,6 +142,7 @@ export const Search = ({
         <div ref={dropdownRef} className={styles.dropdownWrapper}>
           <div className={styles.inputWrapper}>
             <input
+              ref={inputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => {
@@ -151,9 +153,25 @@ export const Search = ({
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
               placeholder="e.g. Yosemite, Glacier Point..."
-              className={styles.input}
+              className={classNames(styles.input, {
+                [styles.inputWithClear]: searchQuery.trim().length > 0,
+              })}
               autoComplete="off"
             />
+            {searchQuery.trim().length > 0 && (
+              <button
+                type="button"
+                className={styles.clearButton}
+                onClick={() => {
+                  onSearchQueryChange('');
+                  setHighlightedIndex(-1);
+                  inputRef.current?.focus();
+                }}
+                aria-label="Clear search"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
         </div>
         {showDropdown && (
