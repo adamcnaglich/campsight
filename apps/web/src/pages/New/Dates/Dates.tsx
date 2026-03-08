@@ -4,6 +4,7 @@ import type { DateRange } from 'react-day-picker';
 import { CampsiteSearchResult } from '@campsight/shared';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { formatDateRange } from '../../../lib/dateUtils';
 import styles from './Dates.module.scss';
 import './date-picker.scss';
@@ -63,6 +64,7 @@ export const Dates = ({
 
   const canProceed = !!startDate && !!endDate;
   const today = useMemo(() => new Date(), []);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
     <div className={styles.root}>
@@ -83,7 +85,7 @@ export const Dates = ({
           mode="range"
           selected={selected}
           onSelect={handleSelect}
-          numberOfMonths={2}
+          numberOfMonths={isMobile ? 1 : 2}
           pagedNavigation
           navLayout="around"
           disabled={{ before: today }}

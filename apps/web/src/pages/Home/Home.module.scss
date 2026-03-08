@@ -233,3 +233,108 @@
     transform: translateY(-2px);
   }
 }
+
+/* ─── Mobile ──────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .content {
+    min-height: 80vh;
+    padding: 32px 16px;
+  }
+
+  .heading {
+    margin-bottom: 28px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .learnMore {
+    padding: 48px 16px;
+  }
+
+  .learnMoreInner {
+    h2 {
+      font-size: 22px;
+    }
+
+    p {
+      font-size: 15px;
+    }
+  }
+
+  .featuresSection {
+    padding: 48px 16px;
+  }
+
+  .featuresInner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .feature {
+    padding: 24px 20px;
+  }
+
+  .featureIcon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+
+  .howItWorks {
+    padding: 48px 16px;
+  }
+
+  .howItWorksInner {
+    h2 {
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .stepNumber {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .whySection {
+    padding: 48px 16px;
+  }
+
+  .whyInner {
+    h2 {
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+  }
+
+  .whyContent {
+    p {
+      font-size: 15px;
+    }
+  }
+
+  .ctaSection {
+    padding: 48px 16px;
+  }
+
+  .ctaInner {
+    h2 {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+  }
+}

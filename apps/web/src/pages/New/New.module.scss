@@ -167,3 +167,27 @@
     gap: 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .stepIndicator {
+    margin-bottom: 32px;
+    padding: 0;
+  }
+
+  .stepLabel {
+    display: none;
+  }
+
+  .stepIndicatorItem {
+    gap: 0;
+  }
+
+  .stepConnector {
+    min-width: 12px;
+    margin-top: 10px;
+  }
+
+  .form {
+    gap: 16px;
+  }
+}

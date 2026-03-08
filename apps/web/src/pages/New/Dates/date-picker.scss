@@ -76,3 +76,26 @@
 .rdp-selected.rdp-range_start.rdp-range_end::after {
   content: unset;
 }
+
+@media (max-width: 480px) {
+  .rdp-day {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .rdp-month_caption {
+    margin-bottom: 12px;
+  }
+
+  .rdp-caption_label {
+    font-size: 17px;
+  }
+
+  .rdp-weekdays {
+    height: 44px;
+  }
+
+  .rdp-selected::after {
+    height: 36px;
+  }
+}

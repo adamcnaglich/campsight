@@ -157,11 +157,29 @@
 }
 
 @media (max-width: 480px) {
+  .root {
+    padding: 24px 0 40px 0;
+  }
+
   .searchRow {
     flex-direction: column;
   }
 
   .input {
     width: 100%;
+    padding: 14px 18px;
+  }
+
+  .trendingSection {
+    margin-top: 32px;
+  }
+
+  .trendingHeading {
+    margin: 0 0 16px 4px;
+  }
+
+  .trendingGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }

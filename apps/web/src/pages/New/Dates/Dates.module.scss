@@ -45,3 +45,39 @@
   --rdp-day_button-height: 40px;
   --rdp-disabled-opacity: 0.25;
 }
+
+@media (max-width: 1000px) {
+  .dayPicker {
+    --rdp-months-gap: 40px;
+    --rdp-day_button-width: 20px;
+    --rdp-day_button-height: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dayPicker {
+    --rdp-months-gap: 80px;
+    --rdp-day_button-width: 40px;
+    --rdp-day_button-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .root {
+    gap: 24px;
+  }
+
+  .label {
+    font-size: var(--text-h2-size);
+  }
+
+  .pickerWrapper {
+    padding: 24px 8px;
+    border-radius: 20px;
+  }
+
+  .dayPicker {
+    --rdp-day_button-width: 36px;
+    --rdp-day_button-height: 36px;
+  }
+}

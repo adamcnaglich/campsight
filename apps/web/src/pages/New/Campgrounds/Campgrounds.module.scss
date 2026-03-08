@@ -165,22 +165,40 @@
 /* ─── Map View ───────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
+  .heading {
+    margin: 0 0 16px 4px;
+    font-size: var(--text-h2-size);
+  }
+
   .twoColumnLayout {
     grid-template-columns: 1fr;
+    margin-top: 8px;
   }
 
   .mapColumn {
     display: none;
   }
 
+  .resultsList {
+    padding-right: 0;
+  }
+
   .resultCard {
     flex-direction: column;
     align-items: flex-start;
+    padding: 12px;
+    border-radius: 20px;
+    gap: 16px;
   }
 
   .cardPhoto {
     width: 100%;
     height: 160px;
+    border-radius: 12px;
+  }
+
+  .cardLocation {
+    max-width: none;
   }
 }
 

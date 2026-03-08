@@ -52,3 +52,17 @@
     text-decoration: underline;
   }
 }
+
+@media (max-width: 480px) {
+  .content {
+    padding: 32px 16px 48px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .updated {
+    margin-bottom: 28px;
+  }
+}
