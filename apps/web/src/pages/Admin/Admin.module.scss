@@ -314,6 +314,13 @@
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
 }
 
+.emailDescription {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px 0;
+  max-width: 520px;
+}
+
 .statusSuccess {
   color: var(--color-primary);
   font-weight: 600;

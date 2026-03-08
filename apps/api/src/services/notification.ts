@@ -125,3 +125,38 @@ export async function sendAvailabilityNotification(
     log.notify.error({ err: error, userId, watchId }, 'Failed to send notification email');
   }
 }
+
+/**
+ * Send a test notification email to the given address (e.g. admin testing).
+ * Does not write to notifications_log.
+ */
+export async function sendTestNotificationEmail(to: string): Promise<void> {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) {
+    log.notify.warn('RESEND_API_KEY not set, cannot send test email');
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+
+  const resend = new Resend(resendKey);
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'CampSight <noreply@campsight.app>';
+
+  await resend.emails.send({
+    from: fromEmail,
+    to,
+    subject: 'CampSight — Test notification',
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+        <h1 style="color: #1a5632; font-size: 24px;">🏕️ Test Notification</h1>
+        <p style="font-size: 16px; color: #333;">
+          This is a test email from the CampSight admin panel. If you received this,
+          notification delivery is working correctly.
+        </p>
+        <p style="font-size: 12px; color: #999; margin-top: 24px;">
+          Sent at ${new Date().toISOString()}
+        </p>
+      </div>
+    `,
+  });
+
+  log.notify.info({ to }, 'Test notification email sent');
+}
