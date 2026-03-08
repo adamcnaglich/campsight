@@ -92,7 +92,9 @@ export const Campgrounds = ({
                         )}
                       </div>
                       <div className={styles.cardContent}>
-                        <Text variant="h3">{facility.name}</Text>
+                        <Text variant="h3" className={styles.cardName}>
+                          {facility.name.toLowerCase()}
+                        </Text>
                         <Text
                           variant="body"
                           className={styles.cardLocation}

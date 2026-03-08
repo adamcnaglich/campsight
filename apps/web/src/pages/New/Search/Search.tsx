@@ -171,7 +171,9 @@ export const Search = ({
                     onClick={() => handleSelect(s)}
                     onMouseEnter={() => setHighlightedIndex(i)}
                   >
-                    <span className={styles.suggestionName}>{s.name}</span>
+                    <span className={styles.suggestionName}>
+                      {s.name.toLowerCase()}
+                    </span>
                     <span className={styles.suggestionMeta}>
                       {s.entityType === 'campground'
                         ? 'Campground'

@@ -22,7 +22,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
-  gap: 52px;
+  gap: 44px;
   margin-top: 16px;
   flex: 1;
   min-height: 0;
@@ -129,6 +129,10 @@
   justify-content: center;
   gap: 12px;
   min-width: 0;
+}
+
+.cardName {
+  text-transform: capitalize;
 }
 
 .cardLocation {
