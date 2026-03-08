@@ -101,10 +101,14 @@ export const CampgroundCard = ({
             <Text variant="caption" as="span">
               {startDate}
             </Text>
-            <span className={styles.dateArrow}>→</span>
-            <Text variant="caption" as="span">
-              {endDate}
-            </Text>
+            {startDate !== endDate && (
+              <>
+                <span className={styles.dateArrow}>→</span>
+                <Text variant="caption" as="span">
+                  {endDate}
+                </Text>
+              </>
+            )}
           </div>
         )}
 
