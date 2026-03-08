@@ -113,11 +113,42 @@ export const WatchDetail = () => {
   const startFormatted = format(parseISO(watch.startDate), 'MMMM d');
   const endFormatted = format(parseISO(watch.endDate), 'MMMM d');
 
+  const buttons = (
+    <>
+      <Button
+        variant="outline"
+        level={!watch.isActive ? 'success' : undefined}
+        onClick={() => toggleMutation.mutate(watch)}
+        disabled={toggleMutation.isPending}
+      >
+        {watch.isActive ? 'Pause' : 'Resume'}
+      </Button>
+      <Button
+        variant="outline"
+        level="danger"
+        onClick={() => {
+          if (confirm('Delete this watch?')) {
+            deleteMutation.mutate(watch.id);
+          }
+        }}
+        disabled={deleteMutation.isPending}
+      >
+        Delete
+      </Button>
+    </>
+  );
+
   return (
     <div className={styles.page}>
-      <Link to="/dashboard" className={styles.backLink}>
-        <div className={styles.backLinkIcon}>←</div> Back to Dashboard
-      </Link>
+      <div className={styles.watchDetailHeader}>
+        <Link to="/dashboard" className={styles.backLink}>
+          <div className={styles.backLinkIcon}>←</div>
+          <div>
+            Back <span className={styles.backLinkText}>to Dashboard</span>
+          </div>
+        </Link>
+        <div className={styles.watchDetailHeaderButtons}>{buttons}</div>
+      </div>
 
       <Text variant="h1" className={styles.campgroundName}>
         {watch.campgroundName.toLowerCase()}
@@ -137,28 +168,7 @@ export const WatchDetail = () => {
             {watch.isActive ? 'Active' : 'Paused'}
           </span>
         </div>
-        <div className={styles.watchInfoRight}>
-          <Button
-            variant="outline"
-            level={!watch.isActive ? 'success' : undefined}
-            onClick={() => toggleMutation.mutate(watch)}
-            disabled={toggleMutation.isPending}
-          >
-            {watch.isActive ? 'Pause' : 'Resume'}
-          </Button>
-          <Button
-            variant="outline"
-            level="danger"
-            onClick={() => {
-              if (confirm('Delete this watch?')) {
-                deleteMutation.mutate(watch.id);
-              }
-            }}
-            disabled={deleteMutation.isPending}
-          >
-            Delete Watch
-          </Button>
-        </div>
+        <div className={styles.watchInfoRight}>{buttons}</div>
       </div>
 
       <div className={styles.content}>
@@ -182,7 +192,9 @@ export const WatchDetail = () => {
           </div>
         </div>
         <div className={styles.mapColumn}>
-          <Text variant="h2">Map</Text>
+          <Text variant="h2" className={styles.sectionTitle}>
+            Map
+          </Text>
           <div className={styles.mapContainer}>
             <MapView markers={markers} />
           </div>

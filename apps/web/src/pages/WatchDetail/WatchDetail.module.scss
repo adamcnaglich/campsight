@@ -53,6 +53,10 @@
   text-transform: capitalize;
 }
 
+.watchDetailHeaderButtons {
+  display: none;
+}
+
 .watchInfoText {
   color: var(--color-text-muted);
 }
@@ -179,5 +183,71 @@
   a {
     display: inline-block;
     margin-top: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+  }
+  .detailsColumn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .watchInfoRight {
+    display: none;
+  }
+
+  .watchDetailHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .watchDetailHeaderButtons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .backLink {
+    margin-bottom: 0;
+  }
+
+  .backLinkText {
+    display: none;
+  }
+
+  .campgroundName {
+    margin-top: 32px;
+    font-size: var(--text-h2-size);
+  }
+
+  .sectionTitle {
+    margin-left: 8px;
+    font-size: var(--text-h3-size);
+  }
+
+  .details {
+    padding: 16px 24px;
+    gap: 12px;
+  }
+
+  .detailItem:not(:last-child) {
+    padding-bottom: 12px;
+  }
+
+  .detailItemTitle {
+    font-size: var(--text-body-size);
+  }
+
+  .detailSubtext {
+    font-size: var(--text-body-sm-size);
+  }
+
+  .mapContainer {
+    height: 280px;
   }
 }
