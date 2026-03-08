@@ -1,5 +1,4 @@
 .page {
-  // max-width: 900px;
   animation: fadeIn 0.2s ease;
 }
 
@@ -46,12 +45,17 @@
 .backLink:hover {
   transform: translateX(-2px);
 }
+.backLink:hover .backLinkIcon {
+  color: var(--color-primary);
+}
+
+.campgroundName {
+  text-transform: capitalize;
+}
 
 .watchInfoText {
   color: var(--color-text-muted);
 }
-
-//--color-text-muted
 
 .badge {
   padding: 4px 12px;
@@ -100,6 +104,10 @@
   margin-left: 16px;
 }
 
+.detailsColumn {
+  width: 377px;
+}
+
 .details {
   margin-top: 16px;
   display: flex;
@@ -115,6 +123,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.detailItemTitle {
+  text-transform: capitalize;
 }
 
 .detailItemContent {
@@ -154,8 +166,6 @@
   border: 1px solid var(--color-border);
 }
 
-// --- old
-
 .loading,
 .error {
   text-align: center;
@@ -169,212 +179,5 @@
   a {
     display: inline-block;
     margin-top: 12px;
-  }
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.campground {
-  font-size: 15px;
-  color: var(--color-text-secondary);
-}
-
-.dateRange {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin-bottom: 32px;
-  font-variant-numeric: tabular-nums;
-}
-
-.calendarSection {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-// .sectionTitle {
-//   font-size: 18px;
-//   font-weight: 600;
-//   margin-bottom: 16px;
-// }
-
-.noData {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  padding: 24px 0;
-  text-align: center;
-}
-
-.legend {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 16px;
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.legendDot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 6px;
-}
-
-.dayCell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 4px;
-  border-radius: 6px;
-  cursor: default;
-  transition: transform 0.1s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}
-
-.dayNum {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.dayMonth {
-  font-size: 11px;
-  opacity: 0.8;
-}
-
-.available {
-  background: var(--color-primary-bg);
-  color: var(--color-primary-dark);
-  border: 1px solid var(--color-primary-light);
-}
-
-.reserved {
-  background: var(--color-danger-bg);
-  color: var(--color-danger);
-  border: 1px solid var(--color-danger-light);
-}
-
-.notAvailable {
-  background: var(--color-bg-muted);
-  color: var(--color-not-available);
-  border: 1px solid var(--color-border);
-}
-
-.detailLink {
-  text-align: center;
-}
-
-.recGovLink {
-  display: inline-block;
-  padding: 10px 24px;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--color-primary-dark);
-    text-decoration: none;
-  }
-}
-
-/* ─── Responsive ──────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .title {
-    font-size: 24px;
-  }
-
-  .calendarSection {
-    padding: 16px;
-  }
-
-  .calendar {
-    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-    gap: 4px;
-  }
-
-  .dayCell {
-    padding: 6px 2px;
-  }
-
-  .dayNum {
-    font-size: 14px;
-  }
-
-  .legend {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .title {
-    font-size: 22px;
-  }
-
-  .calendarSection {
-    padding: 12px;
-  }
-
-  .calendar {
-    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
-    gap: 3px;
-  }
-
-  .dayCell {
-    padding: 4px 2px;
-  }
-
-  .dayNum {
-    font-size: 13px;
-  }
-
-  .dayMonth {
-    font-size: 10px;
-  }
-
-  .dateRange {
-    margin-bottom: 20px;
-  }
-
-  .recGovLink {
-    display: block;
-    width: 100%;
-    text-align: center;
   }
 }

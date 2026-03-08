@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Watch, WatchSite } from '@campsight/shared';
-import { format, parseISO, eachDayOfInterval } from 'date-fns';
+import { Watch } from '@campsight/shared';
+import { format, parseISO } from 'date-fns';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
@@ -29,19 +29,19 @@ const DetailItem = ({
 }) => (
   <div className={styles.detailItem}>
     <div className={styles.detailItemContent}>
-      <Text variant="h3">{title}</Text>
+      <Text variant="h3" className={styles.detailItemTitle}>
+        {title}
+      </Text>
       <Text variant="body" className={styles.detailSubtext}>
         {subtitle}
       </Text>
     </div>
     {/* dont hook up the edit button yet */}
     <button className={styles.editButton}>
-      <EditIcon />
+      <EditIcon size={18} />
     </button>
   </div>
 );
-
-const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
 
 export const WatchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,21 +72,12 @@ export const WatchDetail = () => {
     );
   }
 
-  const { watch, siteAvailability } = data;
-
-  let dateRange: Date[] = [];
-  try {
-    dateRange = eachDayOfInterval({
-      start: parseISO(watch.startDate),
-      end: parseISO(watch.endDate),
-    });
-  } catch {
-    // Invalid date range
-  }
+  const { watch } = data;
 
   const siteCount = watch.sites.length;
-  const title =
-    siteCount === 1 ? watch.sites[0].campsiteName : `${siteCount} Sites`;
+  const siteNames = watch.sites.map((s) => s.campsiteName).join(', ');
+  const startFormatted = format(parseISO(watch.startDate), 'MMMM d');
+  const endFormatted = format(parseISO(watch.endDate), 'MMMM d');
 
   return (
     <div className={styles.page}>
@@ -94,12 +85,14 @@ export const WatchDetail = () => {
         <div className={styles.backLinkIcon}>←</div> Back to Dashboard
       </Link>
 
-      <Text variant="h1">Ausable River Campground</Text>
+      <Text variant="h1" className={styles.campgroundName}>
+        {watch.campgroundName.toLowerCase()}
+      </Text>
 
       <div className={styles.watchInfo}>
         <div className={styles.watchInfoLeft}>
           <Text variant="body" className={styles.watchInfoText}>
-            Watching 12 Sites
+            Watching {siteCount} {siteCount === 1 ? 'Site' : 'Sites'}
           </Text>
           <span
             className={classNames(styles.badge, {
@@ -119,20 +112,23 @@ export const WatchDetail = () => {
       </div>
 
       <div className={styles.content}>
-        <div>
+        <div className={styles.detailsColumn}>
           <Text variant="h2" className={styles.sectionTitle}>
             Details
           </Text>
           <div className={styles.details}>
             <DetailItem
-              title="Porcupine Flat Campground"
-              subtitle="Mio, Michigan"
+              title={watch.campgroundName.toLowerCase()}
+              subtitle={watch.recAreaName ?? ''}
             />
             <DetailItem
-              title="12 Campsites"
-              subtitle="002, 005, 006, 007, 012, 014, 015, 041, 042, 121, 122, 138"
+              title={`${siteCount} ${siteCount === 1 ? 'Campsite' : 'Campsites'}`}
+              subtitle={siteNames}
             />
-            <DetailItem title="Timeframe" subtitle="March 10 - 14" />
+            <DetailItem
+              title="Timeframe"
+              subtitle={`${startFormatted} – ${endFormatted}`}
+            />
           </div>
         </div>
         <div className={styles.mapColumn}>
@@ -141,78 +137,6 @@ export const WatchDetail = () => {
             {/* <MapView markers={[]} /> */}
           </div>
         </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className={styles.page}>
-      <Link to="/dashboard" className={styles.backLink}>
-        ← Back to Dashboard
-      </Link>
-
-      <div className={styles.header}>
-        <div>
-          <Text variant="h1" className={styles.title}>
-            {title}
-          </Text>
-          <Text variant="body" className={styles.campground} as="p">
-            {watch.campgroundName}
-          </Text>
-        </div>
-        <span
-          className={classNames(styles.badge, {
-            [styles.badgeActive]: watch.isActive,
-            [styles.badgeInactive]: !watch.isActive,
-          })}
-        >
-          {watch.isActive ? 'Active' : 'Paused'}
-        </span>
-      </div>
-
-      <div className={styles.dateRange}>
-        {watch.startDate} → {watch.endDate}
-      </div>
-
-      <div className={styles.calendarSection}>
-        <Text variant="h2" className={styles.sectionTitle}>
-          Availability Calendar
-        </Text>
-
-        {dateRange.length === 0 ? (
-          <Text variant="body" className={styles.noData} as="p">
-            No availability data yet. The scheduler will check shortly.
-          </Text>
-        ) : (
-          <>
-            <div className={styles.legend}>
-              <span className={styles.legendItem}>
-                <span
-                  className={classNames(styles.legendDot, styles.available)}
-                />
-                <Text variant="body-sm" as="span">
-                  Available
-                </Text>
-              </span>
-              <span className={styles.legendItem}>
-                <span
-                  className={classNames(styles.legendDot, styles.reserved)}
-                />
-                <Text variant="body-sm" as="span">
-                  Reserved
-                </Text>
-              </span>
-              <span className={styles.legendItem}>
-                <span
-                  className={classNames(styles.legendDot, styles.notAvailable)}
-                />
-                <Text variant="body-sm" as="span">
-                  Not Available
-                </Text>
-              </span>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
