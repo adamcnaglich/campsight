@@ -10,6 +10,8 @@ export const users = sqliteTable('users', {
   id: text('id').primaryKey(), // Firebase UID
   email: text('email').notNull(),
   displayName: text('display_name'),
+  approved: integer('approved', { mode: 'boolean' }).notNull().default(false),
+  approvalToken: text('approval_token'),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

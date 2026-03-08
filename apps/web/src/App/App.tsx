@@ -10,9 +10,25 @@ import { Settings } from '../pages/Settings';
 import { Admin } from '../pages/Admin';
 import { DS } from '../pages/DS';
 import { Terms } from '../pages/Terms';
+import { Request as RequestAccessPage } from '../pages/Request';
+
+const RequestRoute = () => {
+  const { user, loading, accessStatus } = useAuthContext();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (accessStatus.approved === true) return <Navigate to="/dashboard" replace />;
+  if (accessStatus.loading || accessStatus.approved === null) {
+    return (
+      <div style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}>
+        Loading...
+      </div>
+    );
+  }
+  return <RequestAccessPage />;
+};
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, accessStatus } = useAuthContext();
 
   if (loading) {
     return (
@@ -26,6 +42,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (accessStatus.loading || accessStatus.approved === null) {
+    return (
+      <div
+        style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  if (accessStatus.approved === false) {
+    return <Navigate to="/request" replace />;
   }
 
   return <Layout>{children}</Layout>;
@@ -49,6 +79,7 @@ export const App = () => {
       <Route path="/" element={<Home />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/ds" element={<DS />} />
+      <Route path="/request" element={<RequestRoute />} />
       <Route
         path="/dashboard"
         element={
