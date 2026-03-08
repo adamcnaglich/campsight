@@ -103,12 +103,19 @@ export const New = () => {
     [goToStep],
   );
 
-  const selectFacility = useCallback(
-    (facility: CampgroundSearchResult) => {
-      fetchCampsites(facility.entityId, facility);
-    },
-    [fetchCampsites],
-  );
+  const selectFacility = useCallback((facility: CampgroundSearchResult) => {
+    setSelectedFacility(facility);
+  }, []);
+
+  const clearCampgroundSelection = useCallback(() => {
+    setSelectedFacility(null);
+  }, []);
+
+  const confirmCampgroundSelection = useCallback(() => {
+    if (selectedFacility) {
+      fetchCampsites(selectedFacility.entityId, selectedFacility);
+    }
+  }, [selectedFacility, fetchCampsites]);
 
   const handleSelectCampground = useCallback(
     async (
@@ -352,6 +359,8 @@ export const New = () => {
               searchResults={searchResults}
               selectedFacility={selectedFacility}
               onSelectFacility={selectFacility}
+              onClearSelection={clearCampgroundSelection}
+              onContinue={confirmCampgroundSelection}
               onChange={handleCampgroundChange}
             />
           )}

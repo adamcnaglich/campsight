@@ -3,6 +3,7 @@ import { CampgroundSearchResult } from '@campsight/shared';
 import classNames from 'classnames';
 import { Text } from '../../../components/Text';
 import { MapView, MapMarker } from '../../../components/MapView';
+import { SelectionFooter } from '../../../components/SelectionFooter';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
@@ -10,6 +11,8 @@ export interface CampgroundsProps {
   searchResults: CampgroundSearchResult[];
   selectedFacility: CampgroundSearchResult | null;
   onSelectFacility: (facility: CampgroundSearchResult) => void;
+  onClearSelection: () => void;
+  onContinue: () => void;
   onChange: () => void;
 }
 
@@ -43,6 +46,8 @@ export const Campgrounds = ({
   searchResults,
   selectedFacility,
   onSelectFacility,
+  onClearSelection,
+  onContinue,
 }: CampgroundsProps) => {
   const markers: MapMarker[] = useMemo(
     () =>
@@ -67,7 +72,11 @@ export const Campgrounds = ({
                 {searchDisplayName || selectedFacility?.name}
               </Text>
             )}
-            <ul className={styles.resultsList}>
+            <ul
+              className={classNames(styles.resultsList, {
+                [styles.resultsListWithFooter]: !!selectedFacility,
+              })}
+            >
               {searchResults.map((facility, i) => {
                 const isSelected =
                   selectedFacility?.entityId === facility.entityId;
@@ -131,6 +140,13 @@ export const Campgrounds = ({
           Run a search in step 1 to see campgrounds.
         </Text>
       )}
+
+      <SelectionFooter
+        continueLabel="Continue"
+        onClear={onClearSelection}
+        onContinue={onContinue}
+        visible={!!selectedFacility}
+      />
     </div>
   );
 };
