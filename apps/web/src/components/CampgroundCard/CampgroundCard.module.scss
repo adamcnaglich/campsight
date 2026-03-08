@@ -142,24 +142,7 @@
 }
 
 @media (max-width: 480px) {
-  .cardMeta {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .campsiteName,
-  .campgroundName {
-    margin-left: 16px;
-    margin-right: 16px;
-  }
-
-  .dates {
-    margin-left: 16px;
-    margin-right: 16px;
-  }
-
-  .cardActions {
-    padding-left: 16px;
-    padding-right: 16px;
+  .card {
+    padding: 16px;
   }
 }
