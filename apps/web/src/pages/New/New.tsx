@@ -5,6 +5,7 @@ import {
   CampgroundSearchResult,
   CampsiteSearchResult,
   CreateWatchDTO,
+  FacilityDetail,
 } from '@campsight/shared';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
@@ -46,7 +47,6 @@ export const New = () => {
   );
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [skippedStep2, setSkippedStep2] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const goToStep = useCallback((step: number) => {
@@ -67,7 +67,6 @@ export const New = () => {
       setStartDate('');
       setEndDate('');
       setHighestStepReached(1);
-      setSkippedStep2(false);
       try {
         const results = await api.get<CampgroundSearchResult[]>(
           `/api/campsites/search?recAreaId=${encodeURIComponent(recAreaId)}`,
@@ -112,7 +111,7 @@ export const New = () => {
   );
 
   const handleSelectCampground = useCallback(
-    (
+    async (
       facilityId: string,
       campgroundName: string,
       options?: {
@@ -126,8 +125,8 @@ export const New = () => {
       setStartDate('');
       setEndDate('');
       setHighestStepReached(1);
-      setSkippedStep2(true);
-      setSelectedFacility({
+
+      const preselected: CampgroundSearchResult = {
         entityId: facilityId,
         name: campgroundName,
         city: options?.city ?? '',
@@ -137,8 +136,35 @@ export const New = () => {
         longitude: '',
         averageRating: null,
         numberOfRatings: 0,
-      });
+      };
+      setSelectedFacility(preselected);
+      setSelectedSearchName(campgroundName);
+
       fetchCampsites(facilityId);
+
+      try {
+        const detail = await api.get<FacilityDetail>(
+          `/api/campsites/facility/${encodeURIComponent(facilityId)}`,
+        );
+
+        if (detail.parentRecAreaName) {
+          setSelectedSearchName(detail.parentRecAreaName);
+        }
+
+        if (detail.parentRecAreaId) {
+          const results = await api.get<CampgroundSearchResult[]>(
+            `/api/campsites/search?recAreaId=${encodeURIComponent(detail.parentRecAreaId)}`,
+          );
+          setSearchResults(results);
+
+          const match = results.find((r) => r.entityId === facilityId);
+          if (match) {
+            setSelectedFacility(match);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch sibling campgrounds:', err);
+      }
     },
     [fetchCampsites],
   );
@@ -177,7 +203,6 @@ export const New = () => {
     setSelectedFacility(null);
     setCampsites([]);
     setSelectedSites([]);
-    setSkippedStep2(false);
     goToStep(1);
   }, [goToStep]);
 
@@ -191,7 +216,6 @@ export const New = () => {
     setStartDate('');
     setEndDate('');
     setHighestStepReached(1);
-    setSkippedStep2(false);
     goToStep(1);
   }, [goToStep]);
 
@@ -224,12 +248,7 @@ export const New = () => {
 
   const isStepComplete = (step: number) => step < highestStepReached;
 
-  const canGoToStep = (step: number) => {
-    if (skippedStep2 && step === 2) return false;
-    return step <= highestStepReached;
-  };
-
-  const visibleSteps = skippedStep2 ? STEPS.filter((s) => s.id !== 2) : STEPS;
+  const canGoToStep = (step: number) => step <= highestStepReached;
 
   const campgroundName =
     selectedFacility?.name || selectedSites[0]?.campgroundName || '';
@@ -243,11 +262,11 @@ export const New = () => {
     >
       {currentStep !== 1 && (
       <div className={styles.stepIndicator}>
-        {visibleSteps.map((step, index) => {
+        {STEPS.map((step, index) => {
           const isActive = step.id === currentStep;
           const complete = isStepComplete(step.id);
           const accessible = canGoToStep(step.id);
-          const isLast = index === visibleSteps.length - 1;
+          const isLast = index === STEPS.length - 1;
           const connectorComplete = step.id < currentStep;
           const displayNumber = index + 1;
 

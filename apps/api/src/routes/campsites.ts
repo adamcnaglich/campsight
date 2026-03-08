@@ -4,12 +4,14 @@ import {
   SuggestionResult,
   CampgroundSearchResult,
   CampsiteSearchResult,
+  FacilityDetail,
 } from '@campsight/shared';
 import { log } from '../lib/logger';
 
 const router = Router();
 
 const RECREATION_GOV_BASE = 'https://www.recreation.gov/api';
+const RIDB_BASE = 'https://ridb.recreation.gov/api/v1';
 
 function getUserId(req: Request): string {
   return (req as Request & { userId: string }).userId;
@@ -48,6 +50,55 @@ router.get('/suggest', async (req, res: Response) => {
   } catch (error) {
     log.campsites.error({ err: error, query }, 'Failed to fetch suggestions');
     res.status(502).json({ error: { message: 'Failed to fetch suggestions' } });
+  }
+});
+
+// ─── Facility Detail (RIDB) ──────────────────────────────────────────────────
+
+router.get('/facility/:facilityId', async (req, res: Response) => {
+  const { facilityId } = req.params;
+  const apiKey = process.env.RIDB_API_KEY;
+
+  if (!apiKey) {
+    log.campsites.error('RIDB_API_KEY is not configured');
+    return res.status(500).json({ error: { message: 'RIDB API key not configured' } });
+  }
+
+  try {
+    const response = await axios.get(`${RIDB_BASE}/facilities/${facilityId}`, {
+      headers: { apikey: apiKey },
+    });
+
+    const data = response.data as Record<string, unknown>;
+    const parentRecAreaId = String(data.ParentRecAreaID ?? '');
+
+    let parentRecAreaName = '';
+    if (parentRecAreaId) {
+      try {
+        const recAreaResponse = await axios.get(
+          `${RIDB_BASE}/recareas/${parentRecAreaId}`,
+          { headers: { apikey: apiKey } },
+        );
+        parentRecAreaName = String(
+          (recAreaResponse.data as Record<string, unknown>).RecAreaName ?? '',
+        );
+      } catch {
+        log.campsites.warn({ facilityId, parentRecAreaId }, 'Failed to fetch parent rec area name');
+      }
+    }
+
+    const result: FacilityDetail = {
+      facilityId: String(data.FacilityID ?? facilityId),
+      facilityName: String(data.FacilityName ?? ''),
+      parentRecAreaId,
+      parentRecAreaName,
+    };
+
+    log.campsites.info({ facilityId, parentRecAreaId, parentRecAreaName }, 'Facility detail fetched');
+    res.json({ data: result });
+  } catch (error) {
+    log.campsites.error({ err: error, facilityId }, 'Failed to fetch facility detail');
+    res.status(502).json({ error: { message: 'Failed to fetch facility detail' } });
   }
 });
 

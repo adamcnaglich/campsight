@@ -130,6 +130,13 @@ export interface CampgroundSearchResult {
   numberOfRatings: number;
 }
 
+export interface FacilityDetail {
+  facilityId: string;
+  facilityName: string;
+  parentRecAreaId: string;
+  parentRecAreaName: string;
+}
+
 export interface CampsiteSearchResult {
   campsiteId: string;
   name: string;
