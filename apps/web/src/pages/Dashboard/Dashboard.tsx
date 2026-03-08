@@ -72,7 +72,7 @@ export const Dashboard = () => {
             height="100%"
             className={styles.emptyImage}
           />
-          <Text variant="h1">No watches yet</Text>
+          <Text variant="h1">No Watches Yet</Text>
           <Text variant="body" className={styles.emptyText}>
             Start monitoring campsites to get notified when they become
             available.
