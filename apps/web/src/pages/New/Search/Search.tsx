@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import classNames from 'classnames';
+import { MountainSnow, TentTree } from 'lucide-react';
 import { SuggestionResult } from '@campsight/shared';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
@@ -171,14 +172,23 @@ export const Search = ({
                     onClick={() => handleSelect(s)}
                     onMouseEnter={() => setHighlightedIndex(i)}
                   >
-                    <span className={styles.suggestionName}>
-                      {s.name.toLowerCase()}
+                    <span className={styles.suggestionIcon}>
+                      {s.entityType === 'campground' ? (
+                        <TentTree size={28} />
+                      ) : (
+                        <MountainSnow size={28} />
+                      )}
                     </span>
-                    <span className={styles.suggestionMeta}>
-                      {s.entityType === 'campground'
-                        ? 'Campground'
-                        : 'Rec Area'}
-                      {s.stateCode && ` · ${s.stateCode}`}
+                    <span className={styles.suggestionContent}>
+                      <span className={styles.suggestionName}>
+                        {s.name.toLowerCase()}
+                      </span>
+                      <span className={styles.suggestionMeta}>
+                        {s.entityType === 'campground'
+                          ? 'Campground'
+                          : 'Rec Area'}
+                        {s.stateCode && ` • ${s.stateCode}`}
+                      </span>
                     </span>
                   </button>
                 </li>

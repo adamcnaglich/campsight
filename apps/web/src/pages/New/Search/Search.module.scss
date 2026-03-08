@@ -58,7 +58,7 @@
 
 .suggestionsList {
   position: absolute;
-  top: calc(100% + 16px);
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   padding: 0;
@@ -71,12 +71,16 @@
   z-index: 10;
   padding: 12px;
   max-height: 394px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .suggestionItem {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   padding: 10px 14px;
   border: none;
@@ -85,7 +89,6 @@
   font-size: var(--text-body-sm-size);
   cursor: pointer;
   transition: background 0.1s ease;
-  gap: 2px;
   border-radius: 8px;
 
   &:hover,
@@ -101,6 +104,22 @@
 .suggestionItem:hover,
 .suggestionItemHighlighted {
   background: var(--color-primary-bg);
+}
+
+.suggestionIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.suggestionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .suggestionName {
