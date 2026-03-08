@@ -82,9 +82,6 @@
 
 .cardRowLocation {
   color: var(--color-text-muted);
-  // overflow: hidden;
-  // text-overflow: ellipsis;
-  // white-space: nowrap;
 }
 
 .cardRowValue {
@@ -108,7 +105,7 @@
 
 .siteImage {
   width: 100%;
-  height: 100%;
+  height: 500px;
   min-height: 0;
   border-radius: 32px;
   object-fit: cover;
@@ -139,41 +136,6 @@
   margin: 0;
 }
 
-/* ─── Carousel (multiple sites) ────────────────────────────────────── */
-
-.carousel {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  border-radius: 32px;
-  overflow: hidden;
-}
-
-.carouselTrack {
-  display: flex;
-  height: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  scrollbar-width: none;
-}
-
-.carouselSlide {
-  flex: 0 0 100%;
-  width: 100%;
-  height: 100%;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  position: relative;
-  min-height: 0;
-}
-
 .singleImageWrapper {
   position: relative;
   width: 100%;
@@ -185,90 +147,6 @@
   .siteImage,
   .siteImagePlaceholder {
     border-radius: 32px;
-  }
-}
-
-.carouselFooter {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 16px;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.6),
-    rgba(0, 0, 0, 0.2) 60%,
-    transparent
-  );
-  display: flex;
-  align-items: flex-end;
-}
-
-.carouselFooterText {
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  margin: 0;
-  font-weight: 500;
-}
-
-.carouselArrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.2s ease,
-    opacity 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  &:hover:not(:disabled) {
-    background: white;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.carouselDots {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 1;
-}
-
-.carouselDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.8);
-  }
-
-  &[aria-current='true'] {
-    background: white;
-    width: 10px;
-    height: 10px;
   }
 }
 
