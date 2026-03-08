@@ -103,8 +103,20 @@ export const Campsites = ({
                   size="small"
                   level="success"
                   className={styles.selectAllButton}
+                  onClick={() => {
+                    if (hasSelection) {
+                      onClearSelection();
+                    } else {
+                      const selectedIds = new Set(
+                        selectedSites.map((s) => s.campsiteId)
+                      );
+                      campsites
+                        .filter((s) => !selectedIds.has(s.campsiteId))
+                        .forEach((site) => onToggleSite(site));
+                    }
+                  }}
                 >
-                  Select all
+                  {hasSelection ? 'Select None' : 'Select all'}
                 </Button>
               </div>
             )}
