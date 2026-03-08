@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
-import { CampgroundSearchResult, CampsiteSearchResult } from '@campsight/shared';
+import {
+  CampgroundSearchResult,
+  CampsiteSearchResult,
+} from '@campsight/shared';
 import classNames from 'classnames';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
 import { MapView, MapMarker } from '../../../components/MapView';
 import styles from './Campsites.module.scss';
+import { Button } from '../../../components/Button';
 
 export interface CampsitesProps {
   facility: CampgroundSearchResult | null;
@@ -38,11 +42,12 @@ function naturalCompare(a: string, b: string): number {
 
 function buildDetailLine(site: CampsiteSearchResult): string {
   const parts: string[] = [];
-  if (site.type) parts.push(site.type);
+  if (site.type) parts.push(site.type.toLowerCase());
   if (site.typeOfUse) parts.push(site.typeOfUse);
-  if (site.maxOccupants != null) parts.push(`${site.maxOccupants} max occupants`);
+  if (site.maxOccupants != null)
+    parts.push(`${site.maxOccupants} max occupants`);
   if (site.maxVehicles != null) parts.push(`${site.maxVehicles} max vehicles`);
-  return parts.join(' - ');
+  return parts.join('  •  ');
 }
 
 export const Campsites = ({
@@ -89,9 +94,19 @@ export const Campsites = ({
         <div className={styles.twoColumnLayout}>
           <div className={styles.listColumn}>
             {facility && (
-              <Text variant="h1" className={styles.heading}>
-                {facility.name.toLowerCase()}
-              </Text>
+              <div className={styles.headingContainer}>
+                <Text variant="h1" className={styles.heading}>
+                  {facility.name.toLowerCase()}
+                </Text>
+                <Button
+                  variant="ghost"
+                  size="small"
+                  level="success"
+                  className={styles.selectAllButton}
+                >
+                  Select all
+                </Button>
+              </div>
             )}
             <ul
               className={classNames(styles.campsiteList, {

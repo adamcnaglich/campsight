@@ -137,6 +137,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 360px;
 }
 
 .cardRating {
@@ -151,19 +152,14 @@
 }
 
 .star {
-  color: var(--color-border);
-  font-size: 16px;
-  line-height: 1;
-
-  &.starFilled {
-    color: #f59e0b;
-  }
+  color: var(--color-primary);
+  font-size: 18px;
 }
 
 .ratingNumber {
   font-weight: var(--font-weight-regular);
   color: black;
-  margin-left: 16px;
+  margin-left: 10px;
 }
 
 /* ─── Map View ───────────────────────────────────────────────── */

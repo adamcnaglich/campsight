@@ -49,11 +49,15 @@ export const CampgroundCard = ({
       className={combinedClassName}
       {...(isButton ? { type: 'button' as const, onClick } : {})}
     >
-      {imageSrc && (
-        <div className={styles.cardImage}>
+      <div className={styles.cardImage}>
+        {imageSrc ? (
           <img src={imageSrc} alt={imageAlt} width={336} height={240} />
-        </div>
-      )}
+        ) : (
+          <div className={styles.cardImagePlaceholder} aria-hidden>
+            <span className={styles.placeholderIcon}>🏕️</span>
+          </div>
+        )}
+      </div>
 
       <div
         className={classNames(styles.cardContent, {

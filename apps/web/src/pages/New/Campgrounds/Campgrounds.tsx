@@ -26,18 +26,13 @@ function StarRating({
     <div className={styles.cardRating}>
       <div className={styles.stars}>
         {Array.from({ length: 5 }).map((_, idx) => (
-          <span
-            key={idx}
-            className={classNames(styles.star, {
-              [styles.starFilled]: idx < filled,
-            })}
-          >
-            ★
+          <span key={idx} className={styles.star}>
+            {idx < filled ? '★' : '☆'}
           </span>
         ))}
       </div>
       <Text variant="caption" className={styles.ratingNumber}>
-        {rating != null ? `${rating.toFixed(1)} (${count})` : '(N/A)'}
+        {rating != null ? `(${count})` : '(N/A)'}
       </Text>
     </div>
   );
@@ -105,7 +100,7 @@ export const Campgrounds = ({
                         >
                           {[facility.city, facility.stateCode]
                             .filter(Boolean)
-                            .join(', ') || 'Location not available'}
+                            .join(', ') || 'Location not available'}{' '}
                         </Text>
                         <StarRating
                           rating={facility.averageRating}
@@ -121,9 +116,7 @@ export const Campgrounds = ({
           <div className={styles.mapColumn}>
             <MapView
               markers={markers}
-              selectedIds={
-                selectedFacility ? [selectedFacility.entityId] : []
-              }
+              selectedIds={selectedFacility ? [selectedFacility.entityId] : []}
               onMarkerClick={(id) => {
                 const facility = searchResults.find((f) => f.entityId === id);
                 if (facility) onSelectFacility(facility);

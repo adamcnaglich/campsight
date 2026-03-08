@@ -71,30 +71,30 @@
   /* Type scale (1.25 modular scale) */
   --text-h1-size: 2rem; /* 32px */
   --text-h1-weight: var(--font-weight-bold);
-  --text-h1-line-height: var(--text-h1-size);
+  --text-h1-line-height: initial;
   --text-h1-letter-spacing: -0.02em;
   --text-h2-size: 1.5rem; /* 24px */
   --text-h2-weight: var(--font-weight-bold);
-  --text-h2-line-height: var(--text-h2-size);
+  --text-h2-line-height: initial;
   --text-h2-letter-spacing: -0.01em;
   --text-h3-size: 1.25rem; /* 20px */
   --text-h3-weight: var(--font-weight-semibold);
-  --text-h3-line-height: var(--text-h3-size);
+  --text-h3-line-height: initial;
   --text-h4-size: 1.125rem; /* 18px */
   --text-h4-weight: var(--font-weight-semibold);
-  --text-h4-line-height: var(--text-h4-size);
+  --text-h4-line-height: initial;
   --text-h5-size: 1rem; /* 16px */
   --text-h5-weight: var(--font-weight-semibold);
-  --text-h5-line-height: var(--text-h5-size);
+  --text-h5-line-height: initial;
   --text-body-size: 1rem; /* 16px */
   --text-body-weight: var(--font-weight-regular);
-  --text-body-line-height: var(--text-body-size);
+  --text-body-line-height: initial;
   --text-body-sm-size: 0.875rem; /* 14px */
   --text-body-sm-weight: var(--font-weight-regular);
-  --text-body-sm-line-height: var(--text-body-sm-size);
+  --text-body-sm-line-height: initial;
   --text-caption-size: 0.75rem; /* 12px */
   --text-caption-weight: var(--font-weight-bold);
-  --text-caption-line-height: var(--text-caption-size);
+  --text-caption-line-height: initial;
 }
 
 html {

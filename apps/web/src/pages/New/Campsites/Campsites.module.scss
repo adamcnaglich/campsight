@@ -6,9 +6,19 @@
   min-height: 0;
 }
 
-.heading {
+.headingContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin: 0 0 32px 16px;
+}
+
+.heading {
   text-transform: capitalize;
+}
+
+.selectAllButton {
+  background-color: transparent;
 }
 
 .hint {
@@ -162,7 +172,7 @@
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: pre;
 }
 
 /* ─── Map View ───────────────────────────────────────────────── */
