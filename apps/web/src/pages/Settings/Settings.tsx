@@ -1,9 +1,10 @@
 import { useAuthContext } from '../../context/AuthContext';
 import { Text } from '../../components/Text';
+import { Button } from '../../components/Button';
 import styles from './Settings.module.scss';
 
 export const Settings = () => {
-  const { user } = useAuthContext();
+  const { user, signOut } = useAuthContext();
 
   return (
     <div className={styles.page}>
@@ -72,6 +73,12 @@ export const Settings = () => {
         <Text variant="body-sm" className={styles.version} as="p">
           Version 1.0.0
         </Text>
+      </div>
+
+      <div className={styles.signOutSection}>
+        <Button variant="outline" level="danger" onClick={() => signOut()}>
+          Sign out
+        </Button>
       </div>
     </div>
   );

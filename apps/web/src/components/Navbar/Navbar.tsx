@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 import { useAuthContext } from '../../context/AuthContext';
@@ -8,31 +8,14 @@ import { Button } from '../Button';
 import styles from './Navbar.module.scss';
 
 export const Navbar = () => {
-  const { user, signOut } = useAuthContext();
+  const { user } = useAuthContext();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
-  const avatarMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!avatarMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        avatarMenuRef.current &&
-        !avatarMenuRef.current.contains(e.target as Node)
-      ) {
-        setAvatarMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [avatarMenuOpen]);
 
   const logoHref = location.pathname === '/' ? '/' : '/dashboard';
 
   useEffect(() => {
     setMenuOpen(false);
-    setAvatarMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -49,7 +32,6 @@ export const Navbar = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/new', label: 'New Watch' },
-    { path: '/settings', label: 'Settings' },
   ];
 
   const userIsAdmin = isAdmin(user?.email);
@@ -107,41 +89,25 @@ export const Navbar = () => {
                 )}
               </nav>
 
-              <div className={styles.userSection} ref={avatarMenuRef}>
-                <button
-                  type="button"
+              <div className={styles.userSection}>
+                <Link
+                  to="/settings"
                   className={styles.avatarButton}
-                  onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
-                  aria-label="User menu"
-                  aria-expanded={avatarMenuOpen}
-                  aria-haspopup="true"
+                  aria-label="Settings"
                 >
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt=""
-                      className={styles.avatar}
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span className={styles.avatarPlaceholder}>
-                      {user.displayName?.[0] || user.email?.[0] || '?'}
-                    </span>
-                  )}
-                </button>
-                {avatarMenuOpen && (
-                  <div className={styles.avatarPopover}>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setAvatarMenuOpen(false);
-                        signOut();
-                      }}
-                    >
-                      Sign out
-                    </Button>
-                  </div>
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt=""
+                    className={styles.avatar}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className={styles.avatarPlaceholder}>
+                    {user.displayName?.[0] || user.email?.[0] || '?'}
+                  </span>
                 )}
+                </Link>
               </div>
             </>
           ) : (
@@ -219,23 +185,25 @@ export const Navbar = () => {
             )}
           </nav>
           <div className={styles.mobileUserSection}>
-            {user.photoURL && (
-              <img
-                src={user.photoURL}
-                alt=""
-                className={styles.avatar}
-                referrerPolicy="no-referrer"
-              />
-            )}
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setMenuOpen(false);
-                signOut();
-              }}
+            <Link
+              to="/settings"
+              className={styles.mobileSettingsLink}
+              onClick={() => setMenuOpen(false)}
             >
-              Sign out
-            </Button>
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  className={styles.avatar}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className={styles.avatarPlaceholder}>
+                  {user.displayName?.[0] || user.email?.[0] || '?'}
+                </span>
+              )}
+              <span>Settings</span>
+            </Link>
           </div>
         </aside>
       )}
