@@ -63,122 +63,130 @@ export const Dashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      <div className={styles.header}>
-        <div>
-          <Text variant="h1" className={styles.title}>
-            Your Watches
-          </Text>
-        </div>
-
-        <div className={styles.headerContent}>
-          <Text variant="body" className={styles.subtitle} as="p">
-            Monitoring {activeSiteCount} campsite
-            {activeSiteCount !== 1 ? 's' : ''}
-          </Text>
-          <Button
-            className={styles.addBtn}
-            icon={<Plus size={16} aria-hidden />}
-            as={({ children, className, ...props }) => (
-              <Link to="/new" className={className} {...props}>
-                {children}
-              </Link>
-            )}
-            variant="primary"
-            size="small"
-          >
-            New Watch
-          </Button>
-        </div>
-      </div>
-
       {!watches?.length ? (
         <div className={styles.empty}>
-          <span className={styles.emptyIcon}>🔭</span>
-          <Text variant="h2">No watches yet</Text>
-          <Text variant="body">
+          <img
+            src="/dash-hero.webp"
+            alt="No watches yet"
+            width="100%"
+            height="100%"
+            className={styles.emptyImage}
+          />
+          <Text variant="h1">No watches yet</Text>
+          <Text variant="body" className={styles.emptyText}>
             Start monitoring campsites to get notified when they become
             available.
           </Text>
           <Button
-            icon={<Plus size={16} aria-hidden />}
             as={({ children, className, ...props }) => (
               <Link to="/new" className={className} {...props}>
                 {children}
               </Link>
             )}
             variant="primary"
+            size="large"
           >
-            Add your first watch
+            Start A New Watch
           </Button>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {watches.map((watch) => {
-            const siteCount = watch.sites.length;
-            const loops = [
-              ...new Set(watch.sites.map((s) => s.loop).filter(Boolean)),
-            ];
-            const loopStr = loops.length > 0 ? `Loop: ${loops.join(', ')}` : '';
-            const siteLabel =
-              siteCount === 1
-                ? [`Site: ${watch.sites[0].campsiteName}`, loopStr]
-                    .filter(Boolean)
-                    .join(', ')
-                : [`${siteCount} Sites`, loopStr].filter(Boolean).join(', ');
+        <>
+          <div className={styles.header}>
+            <div>
+              <Text variant="h1" className={styles.title}>
+                Your Watches
+              </Text>
+            </div>
 
-            return (
-              <CampgroundCard
-                key={watch.id}
-                imageSrc={watch.imageUrl || undefined}
-                campsiteName={siteLabel}
-                campgroundName={watch.campgroundName}
-                metaLeft={watch.recAreaName || watch.campgroundName}
-                badgeLabel={watch.isActive ? 'Active' : 'Paused'}
-                badgeActive={watch.isActive}
-                startDate={formatDate(watch.startDate)}
-                endDate={formatDate(watch.endDate)}
-                actions={
-                  <>
-                    <Button
-                      variant="outline"
-                      as={({ children, className, ...props }) => (
-                        <Link
-                          to={`/watch/${watch.id}`}
-                          className={className}
-                          {...props}
-                        >
-                          {children}
-                        </Link>
-                      )}
-                    >
-                      Details
-                    </Button>
-                    <Button
-                      variant="outline"
-                      level={!watch.isActive ? 'success' : undefined}
-                      onClick={() => toggleMutation.mutate(watch)}
-                      disabled={toggleMutation.isPending}
-                    >
-                      {watch.isActive ? 'Pause' : 'Resume'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      level="danger"
-                      onClick={() => {
-                        if (confirm('Cancel this watch?')) {
-                          deleteMutation.mutate(watch.id);
-                        }
-                      }}
-                      disabled={deleteMutation.isPending}
-                    >
-                      Delete
-                    </Button>
-                  </>
-                }
-              />
-            );
-          })}
-        </div>
+            <div className={styles.headerContent}>
+              <Text variant="body" className={styles.subtitle} as="p">
+                Monitoring {activeSiteCount} campsite
+                {activeSiteCount !== 1 ? 's' : ''}
+              </Text>
+              <Button
+                className={styles.addBtn}
+                icon={<Plus size={16} aria-hidden />}
+                as={({ children, className, ...props }) => (
+                  <Link to="/new" className={className} {...props}>
+                    {children}
+                  </Link>
+                )}
+                variant="primary"
+                size="small"
+              >
+                New Watch
+              </Button>
+            </div>
+          </div>
+          <div className={styles.grid}>
+            {watches.map((watch) => {
+              const siteCount = watch.sites.length;
+              const loops = [
+                ...new Set(watch.sites.map((s) => s.loop).filter(Boolean)),
+              ];
+              const loopStr =
+                loops.length > 0 ? `Loop: ${loops.join(', ')}` : '';
+              const siteLabel =
+                siteCount === 1
+                  ? [`Site: ${watch.sites[0].campsiteName}`, loopStr]
+                      .filter(Boolean)
+                      .join(', ')
+                  : [`${siteCount} Sites`, loopStr].filter(Boolean).join(', ');
+
+              return (
+                <CampgroundCard
+                  key={watch.id}
+                  imageSrc={watch.imageUrl || undefined}
+                  campsiteName={siteLabel}
+                  campgroundName={watch.campgroundName}
+                  metaLeft={watch.recAreaName || watch.campgroundName}
+                  badgeLabel={watch.isActive ? 'Active' : 'Paused'}
+                  badgeActive={watch.isActive}
+                  startDate={formatDate(watch.startDate)}
+                  endDate={formatDate(watch.endDate)}
+                  actions={
+                    <>
+                      <Button
+                        variant="outline"
+                        as={({ children, className, ...props }) => (
+                          <Link
+                            to={`/watch/${watch.id}`}
+                            className={className}
+                            {...props}
+                          >
+                            {children}
+                          </Link>
+                        )}
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        level={!watch.isActive ? 'success' : undefined}
+                        onClick={() => toggleMutation.mutate(watch)}
+                        disabled={toggleMutation.isPending}
+                      >
+                        {watch.isActive ? 'Pause' : 'Resume'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        level="danger"
+                        onClick={() => {
+                          if (confirm('Cancel this watch?')) {
+                            deleteMutation.mutate(watch.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  }
+                />
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
