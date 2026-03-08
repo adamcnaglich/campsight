@@ -1,45 +1,6 @@
-.root {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1;
-  min-height: 0;
-}
-
-.heading {
-  margin: 0 0 32px 16px;
-  text-transform: capitalize;
-}
-
 .hint {
   font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
-}
-
-/* ─── Two Column Layout ───────────────────────────────────────────── */
-
-.twoColumnLayout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr;
-  gap: 44px;
-  margin-top: 16px;
-  flex: 1;
-  min-height: 0;
-}
-
-.listColumn {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  width: 550px;
-}
-
-.mapColumn {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding-bottom: 24px;
 }
 
 /* ─── List & Cards ───────────────────────────────────────────────── */
@@ -55,7 +16,7 @@
   padding-right: 12px;
 
   &.resultsListWithFooter {
-    padding-bottom: 88px; /* Space for fixed SelectionFooter */
+    padding-bottom: 88px;
   }
 }
 
@@ -171,36 +132,9 @@
   margin-left: 10px;
 }
 
-/* ─── Map View ───────────────────────────────────────────────── */
+/* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .heading {
-    margin: 0 0 16px 4px;
-    font-size: var(--text-h2-size);
-  }
-
-  .twoColumnLayout {
-    grid-template-columns: 1fr;
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    flex-direction: column-reverse;
-    gap: 40px;
-  }
-
-  .listColumn {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-  }
-
-  .mapColumn {
-    height: 200px;
-    padding-bottom: 0;
-    flex-shrink: 0;
-    padding-bottom: 0;
-  }
-
   .resultsList {
     padding-right: 0;
     min-height: unset;
@@ -231,16 +165,5 @@
 
   .cardLocation {
     max-width: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .twoColumnLayout {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-
-  .mapPlaceholder {
-    min-height: 200px;
   }
 }

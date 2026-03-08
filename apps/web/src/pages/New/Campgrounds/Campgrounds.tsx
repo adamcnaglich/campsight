@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { Text } from '../../../components/Text';
 import { MapView, MapMarker } from '../../../components/MapView';
 import { SelectionFooter } from '../../../components/SelectionFooter';
+import { StepLayout } from '../../../components/StepLayout';
 import styles from './Campgrounds.module.scss';
 
 export interface CampgroundsProps {
@@ -63,90 +64,85 @@ export const Campgrounds = ({
   );
 
   return (
-    <div className={styles.root}>
-      {searchResults.length > 0 ? (
-        <div className={styles.twoColumnLayout}>
-          <div className={styles.listColumn}>
-            {(searchDisplayName || selectedFacility?.name) && (
-              <Text variant="h1" className={styles.heading}>
-                {searchDisplayName || selectedFacility?.name}
-              </Text>
-            )}
-            <ul
-              className={classNames(styles.resultsList, {
-                [styles.resultsListWithFooter]: !!selectedFacility,
-              })}
-            >
-              {searchResults.map((facility, i) => {
-                const isSelected =
-                  selectedFacility?.entityId === facility.entityId;
-                return (
-                  <li key={`${facility.entityId}-${i}`}>
-                    <button
-                      type="button"
-                      className={classNames(styles.resultCard, {
-                        [styles.resultCardSelected]: isSelected,
-                      })}
-                      onClick={() => onSelectFacility(facility)}
-                    >
-                      <div className={styles.cardPhoto}>
-                        {facility.previewImageUrl ? (
-                          <img
-                            src={facility.previewImageUrl}
-                            alt={facility.name}
-                            className={styles.cardImage}
-                          />
-                        ) : (
-                          <div className={styles.photoPlaceholder}>📷</div>
-                        )}
-                      </div>
-                      <div className={styles.cardContent}>
-                        <Text variant="h3" className={styles.cardName}>
-                          {facility.name.toLowerCase()}
-                        </Text>
-                        <Text
-                          variant="body"
-                          className={styles.cardLocation}
-                          as="p"
-                        >
-                          {[facility.city, facility.stateCode]
-                            .filter(Boolean)
-                            .join(', ') || 'Location not available'}{' '}
-                        </Text>
-                        <StarRating
-                          rating={facility.averageRating}
-                          count={facility.numberOfRatings}
-                        />
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          <div className={styles.mapColumn}>
-            <MapView
-              markers={markers}
-              selectedIds={selectedFacility ? [selectedFacility.entityId] : []}
-              onMarkerClick={(id) => {
-                const facility = searchResults.find((f) => f.entityId === id);
-                if (facility) onSelectFacility(facility);
-              }}
-            />
-          </div>
-        </div>
-      ) : (
+    <StepLayout
+      heading={searchDisplayName || selectedFacility?.name}
+      isEmpty={searchResults.length === 0}
+      emptyState={
         <Text variant="body-sm" className={styles.hint} as="p">
           Run a search in step 1 to see campgrounds.
         </Text>
-      )}
-
-      <SelectionFooter
-        continueLabel="Continue"
-        onClear={onClearSelection}
-        onContinue={onContinue}
-        visible={!!selectedFacility}
-      />
-    </div>
+      }
+      left={
+        <ul
+          className={classNames(styles.resultsList, {
+            [styles.resultsListWithFooter]: !!selectedFacility,
+          })}
+        >
+          {searchResults.map((facility, i) => {
+            const isSelected =
+              selectedFacility?.entityId === facility.entityId;
+            return (
+              <li key={`${facility.entityId}-${i}`}>
+                <button
+                  type="button"
+                  className={classNames(styles.resultCard, {
+                    [styles.resultCardSelected]: isSelected,
+                  })}
+                  onClick={() => onSelectFacility(facility)}
+                >
+                  <div className={styles.cardPhoto}>
+                    {facility.previewImageUrl ? (
+                      <img
+                        src={facility.previewImageUrl}
+                        alt={facility.name}
+                        className={styles.cardImage}
+                      />
+                    ) : (
+                      <div className={styles.photoPlaceholder}>📷</div>
+                    )}
+                  </div>
+                  <div className={styles.cardContent}>
+                    <Text variant="h3" className={styles.cardName}>
+                      {facility.name.toLowerCase()}
+                    </Text>
+                    <Text
+                      variant="body"
+                      className={styles.cardLocation}
+                      as="p"
+                    >
+                      {[facility.city, facility.stateCode]
+                        .filter(Boolean)
+                        .join(', ') || 'Location not available'}{' '}
+                    </Text>
+                    <StarRating
+                      rating={facility.averageRating}
+                      count={facility.numberOfRatings}
+                    />
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      }
+      right={
+        <MapView
+          markers={markers}
+          selectedIds={selectedFacility ? [selectedFacility.entityId] : []}
+          onMarkerClick={(id) => {
+            const facility = searchResults.find((f) => f.entityId === id);
+            if (facility) onSelectFacility(facility);
+          }}
+        />
+      }
+      footer={
+        <SelectionFooter
+          continueLabel="Continue"
+          onClear={onClearSelection}
+          onContinue={onContinue}
+          visible={!!selectedFacility}
+        />
+      }
+    />
   );
 };

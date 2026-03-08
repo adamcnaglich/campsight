@@ -7,8 +7,9 @@ import classNames from 'classnames';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
 import { MapView, MapMarker } from '../../../components/MapView';
-import styles from './Campsites.module.scss';
+import { StepLayout } from '../../../components/StepLayout';
 import { Button } from '../../../components/Button';
+import styles from './Campsites.module.scss';
 
 export interface CampsitesProps {
   facility: CampgroundSearchResult | null;
@@ -85,115 +86,108 @@ export const Campsites = ({
   );
 
   return (
-    <div className={styles.root}>
-      {loading ? (
-        <Text variant="body-sm" className={styles.hint} as="p">
-          Loading campsites...
-        </Text>
-      ) : campsites.length > 0 ? (
-        <div className={styles.twoColumnLayout}>
-          <div className={styles.listColumn}>
-            {facility && (
-              <div className={styles.headingContainer}>
-                <Text variant="h1" className={styles.heading}>
-                  {facility.name.toLowerCase()}
-                </Text>
-                <Button
-                  variant="ghost"
-                  size="small"
-                  level="success"
-                  className={styles.selectAllButton}
-                  onClick={() => {
-                    if (hasSelection) {
-                      onClearSelection();
-                    } else {
-                      const selectedIds = new Set(
-                        selectedSites.map((s) => s.campsiteId)
-                      );
-                      campsites
-                        .filter((s) => !selectedIds.has(s.campsiteId))
-                        .forEach((site) => onToggleSite(site));
-                    }
-                  }}
-                >
-                  {hasSelection ? 'Select None' : 'Select all'}
-                </Button>
-              </div>
-            )}
-            <ul
-              className={classNames(styles.campsiteList, {
-                [styles.campsiteListWithFooter]: hasSelection,
-              })}
-            >
-              {sortedCampsites.map((site) => {
-                const isSelected = selectedSites.some(
-                  (s) => s.campsiteId === site.campsiteId,
-                );
-                const detailLine = buildDetailLine(site);
-                return (
-                  <li key={site.campsiteId}>
-                    <button
-                      type="button"
-                      className={classNames(styles.campsiteCard, {
-                        [styles.campsiteCardSelected]: isSelected,
-                      })}
-                      onClick={() => onToggleSite(site)}
-                    >
-                      <div className={styles.cardPhoto}>
-                        {site.previewImageUrl ? (
-                          <img
-                            src={site.previewImageUrl}
-                            alt={`Site ${site.name}`}
-                            className={styles.cardImage}
-                          />
-                        ) : (
-                          <div className={styles.photoPlaceholder}>🏕️</div>
-                        )}
-                      </div>
-                      <div className={styles.cardContent}>
-                        <Text variant="h3" className={styles.cardTitle}>
-                          Site: {site.name}
-                          {site.loop ? `, Loop: ${site.loop}` : ''}
-                        </Text>
-                        {detailLine && (
-                          <Text
-                            variant="caption"
-                            className={styles.cardDetail}
-                            as="p"
-                          >
-                            {detailLine}
-                          </Text>
-                        )}
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          <div className={styles.mapColumn}>
-            <MapView
-              markers={markers}
-              selectedIds={selectedMarkerIds}
-              onMarkerClick={(id) => {
-                const site = campsites.find((s) => s.campsiteId === id);
-                if (site) onToggleSite(site);
-              }}
-            />
-          </div>
-        </div>
-      ) : (
+    <StepLayout
+      heading={facility ? facility.name.toLowerCase() : undefined}
+      headingAction={
+        <Button
+          variant="ghost"
+          size="small"
+          level="success"
+          className={styles.selectAllButton}
+          onClick={() => {
+            if (hasSelection) {
+              onClearSelection();
+            } else {
+              const selectedIds = new Set(
+                selectedSites.map((s) => s.campsiteId)
+              );
+              campsites
+                .filter((s) => !selectedIds.has(s.campsiteId))
+                .forEach((site) => onToggleSite(site));
+            }
+          }}
+        >
+          {hasSelection ? 'Select None' : 'Select all'}
+        </Button>
+      }
+      loading={loading}
+      loadingMessage="Loading campsites..."
+      isEmpty={campsites.length === 0}
+      emptyState={
         <Text variant="body-sm" className={styles.hint} as="p">
           No campsites found for this campground.
         </Text>
-      )}
-
-      <SelectionFooter
-        continueLabel={`Continue with ${selectedSites.length} ${selectedSites.length === 1 ? 'Site' : 'Sites'}`}
-        onClear={onClearSelection}
-        onContinue={onContinue}
-        visible={hasSelection}
-      />
-    </div>
+      }
+      left={
+        <ul
+          className={classNames(styles.campsiteList, {
+            [styles.campsiteListWithFooter]: hasSelection,
+          })}
+        >
+          {sortedCampsites.map((site) => {
+            const isSelected = selectedSites.some(
+              (s) => s.campsiteId === site.campsiteId,
+            );
+            const detailLine = buildDetailLine(site);
+            return (
+              <li key={site.campsiteId}>
+                <button
+                  type="button"
+                  className={classNames(styles.campsiteCard, {
+                    [styles.campsiteCardSelected]: isSelected,
+                  })}
+                  onClick={() => onToggleSite(site)}
+                >
+                  <div className={styles.cardPhoto}>
+                    {site.previewImageUrl ? (
+                      <img
+                        src={site.previewImageUrl}
+                        alt={`Site ${site.name}`}
+                        className={styles.cardImage}
+                      />
+                    ) : (
+                      <div className={styles.photoPlaceholder}>🏕️</div>
+                    )}
+                  </div>
+                  <div className={styles.cardContent}>
+                    <Text variant="h3" className={styles.cardTitle}>
+                      Site: {site.name}
+                      {site.loop ? `, Loop: ${site.loop}` : ''}
+                    </Text>
+                    {detailLine && (
+                      <Text
+                        variant="caption"
+                        className={styles.cardDetail}
+                        as="p"
+                      >
+                        {detailLine}
+                      </Text>
+                    )}
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      }
+      right={
+        <MapView
+          markers={markers}
+          selectedIds={selectedMarkerIds}
+          onMarkerClick={(id) => {
+            const site = campsites.find((s) => s.campsiteId === id);
+            if (site) onToggleSite(site);
+          }}
+        />
+      }
+      footer={
+        <SelectionFooter
+          continueLabel={`Continue with ${selectedSites.length} ${selectedSites.length === 1 ? 'Site' : 'Sites'}`}
+          onClear={onClearSelection}
+          onContinue={onContinue}
+          visible={hasSelection}
+        />
+      }
+    />
   );
 };
