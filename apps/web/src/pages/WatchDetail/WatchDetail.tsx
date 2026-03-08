@@ -1,5 +1,5 @@
-import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Watch } from '@campsight/shared';
 import { format, parseISO } from 'date-fns';
 import classNames from 'classnames';
@@ -45,12 +45,31 @@ const DetailItem = ({
 
 export const WatchDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<WatchAvailabilityResponse>({
     queryKey: ['watch-availability', id],
     queryFn: () => api.get(`/api/watches/${id}/availability`),
     enabled: !!id,
     refetchInterval: 1000 * 60 * 5,
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (watch: Watch) =>
+      api.patch(`/api/watches/${watch.id}`, { isActive: !watch.isActive }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['watch-availability', id] });
+      queryClient.invalidateQueries({ queryKey: ['watches'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (watchId: number) => api.delete(`/api/watches/${watchId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['watches'] });
+      navigate('/dashboard');
+    },
   });
 
   if (isLoading) {
@@ -104,8 +123,24 @@ export const WatchDetail = () => {
           </span>
         </div>
         <div className={styles.watchInfoRight}>
-          <Button variant="outline">Pause</Button>
-          <Button variant="outline" level="danger">
+          <Button
+            variant="outline"
+            level={!watch.isActive ? 'success' : undefined}
+            onClick={() => toggleMutation.mutate(watch)}
+            disabled={toggleMutation.isPending}
+          >
+            {watch.isActive ? 'Pause' : 'Resume'}
+          </Button>
+          <Button
+            variant="outline"
+            level="danger"
+            onClick={() => {
+              if (confirm('Delete this watch?')) {
+                deleteMutation.mutate(watch.id);
+              }
+            }}
+            disabled={deleteMutation.isPending}
+          >
             Delete Watch
           </Button>
         </div>
