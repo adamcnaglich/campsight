@@ -55,6 +55,8 @@ export function runMigrations() {
   // Backfill columns that may be missing on existing multi-site databases
   addColumnIfMissing('watches', 'rec_area_name', 'TEXT');
   addColumnIfMissing('watch_sites', 'loop', 'TEXT');
+  addColumnIfMissing('watch_sites', 'latitude', 'TEXT');
+  addColumnIfMissing('watch_sites', 'longitude', 'TEXT');
 
   // Indexes
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_user_id ON watches(user_id)`);
@@ -91,7 +93,9 @@ function createFreshSchema() {
       watch_id INTEGER NOT NULL REFERENCES watches(id) ON DELETE CASCADE,
       campsite_id TEXT NOT NULL,
       campsite_name TEXT NOT NULL,
-      loop TEXT
+      loop TEXT,
+      latitude TEXT,
+      longitude TEXT
     )
   `);
 

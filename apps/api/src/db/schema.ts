@@ -46,6 +46,8 @@ export const watchSites = sqliteTable('watch_sites', {
   campsiteId: text('campsite_id').notNull(),
   campsiteName: text('campsite_name').notNull(),
   loop: text('loop'),
+  latitude: text('latitude'),
+  longitude: text('longitude'),
 });
 
 // ─── Availability Snapshots ────────────────────────────────────────────────────

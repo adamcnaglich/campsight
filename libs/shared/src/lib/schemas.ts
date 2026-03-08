@@ -18,6 +18,8 @@ export const watchSiteSchema = z.object({
   campsiteId: z.string().min(1),
   campsiteName: z.string().min(1),
   loop: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
 });
 
 export const createWatchSchema = z.object({
@@ -50,6 +52,8 @@ export const watchSiteResponseSchema = z.object({
   campsiteId: z.string(),
   campsiteName: z.string(),
   loop: z.string().nullable(),
+  latitude: z.string().nullable(),
+  longitude: z.string().nullable(),
 });
 
 export type WatchSite = z.infer<typeof watchSiteResponseSchema>;

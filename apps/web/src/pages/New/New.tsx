@@ -243,6 +243,8 @@ export const New = () => {
         campsiteId: s.campsiteId,
         campsiteName: s.name,
         loop: s.loop || undefined,
+        latitude: s.latitude || undefined,
+        longitude: s.longitude || undefined,
       })),
       startDate,
       endDate,

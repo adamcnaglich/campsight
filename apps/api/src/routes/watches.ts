@@ -30,6 +30,8 @@ function buildWatchResponse(watchRow: typeof schema.watches.$inferSelect) {
       campsiteId: s.campsiteId,
       campsiteName: s.campsiteName,
       loop: s.loop,
+      latitude: s.latitude,
+      longitude: s.longitude,
     })),
     startDate: watchRow.startDate,
     endDate: watchRow.endDate,
@@ -99,6 +101,8 @@ router.post('/', async (req, res: Response) => {
           campsiteId: site.campsiteId,
           campsiteName: site.campsiteName,
           loop: site.loop || null,
+          latitude: site.latitude || null,
+          longitude: site.longitude || null,
         })
         .run();
     }

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Watch } from '@campsight/shared';
@@ -5,6 +6,7 @@ import { format, parseISO } from 'date-fns';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
+import { MapView, MapMarker } from '../../components/MapView';
 import styles from './WatchDetail.module.scss';
 import { Button } from '../../components/Button';
 import { EditIcon } from 'lucide-react';
@@ -71,6 +73,19 @@ export const WatchDetail = () => {
       navigate('/dashboard');
     },
   });
+
+  const markers: MapMarker[] = useMemo(
+    () =>
+      (data?.watch.sites ?? [])
+        .filter((s) => s.latitude && s.longitude)
+        .map((s) => ({
+          id: s.campsiteId,
+          lat: Number(s.latitude),
+          lng: Number(s.longitude),
+          label: s.campsiteName,
+        })),
+    [data?.watch.sites],
+  );
 
   if (isLoading) {
     return (
@@ -169,7 +184,7 @@ export const WatchDetail = () => {
         <div className={styles.mapColumn}>
           <Text variant="h2">Map</Text>
           <div className={styles.mapContainer}>
-            {/* <MapView markers={[]} /> */}
+            <MapView markers={markers} />
           </div>
         </div>
       </div>
