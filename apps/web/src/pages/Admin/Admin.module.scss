@@ -151,6 +151,11 @@
   }
 }
 
+.actionsCol {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .userEmail {
   color: var(--color-link);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
