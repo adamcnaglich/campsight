@@ -1,12 +1,20 @@
 import { useAuthContext } from '../../context/AuthContext';
+import { useTheme, type ThemePreference } from '../../context/ThemeContext';
 import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Settings.module.scss';
 
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
+];
+
 export const Settings = () => {
   useDocumentTitle('Settings');
   const { user, signOut } = useAuthContext();
+  const { preference, setPreference } = useTheme();
 
   return (
     <div className={styles.page}>
@@ -16,6 +24,32 @@ export const Settings = () => {
       <Text variant="body-sm" className={styles.subtitle} as="p">
         Manage your account and notification preferences.
       </Text>
+
+      <div className={styles.section}>
+        <Text variant="h2" className={styles.sectionTitle}>
+          Appearance
+        </Text>
+        <div className={styles.field}>
+          <label className={styles.fieldLabel}>Theme</label>
+          <div className={styles.themeOptions} role="group" aria-label="Theme">
+            {THEME_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                className={styles.themeOption}
+                data-active={preference === value || undefined}
+                onClick={() => setPreference(value)}
+                aria-pressed={preference === value}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <Text variant="body-sm" className={styles.fieldDescription} as="p">
+            System uses your device’s light or dark preference.
+          </Text>
+        </div>
+      </div>
 
       <div className={styles.section}>
         <Text variant="h2" className={styles.sectionTitle}>

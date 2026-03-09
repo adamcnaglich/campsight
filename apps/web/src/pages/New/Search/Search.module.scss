@@ -44,6 +44,8 @@
   border: 1px solid var(--color-border);
   border-radius: 16px;
   font-size: var(--text-body-size);
+  background-color: var(--color-surface);
+  color: var(--color-text);
   outline: none;
   transition: border-color 0.15s ease;
   min-width: 0;
@@ -114,6 +116,7 @@
   padding: 10px 14px;
   border: none;
   background: none;
+  color: var(--color-text);
   text-align: left;
   font-size: var(--text-body-sm-size);
   cursor: pointer;
@@ -154,6 +157,7 @@
 .suggestionName {
   font-weight: var(--font-weight-medium);
   text-transform: capitalize;
+  color: var(--color-text);
 }
 
 .suggestionMeta {

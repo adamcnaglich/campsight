@@ -48,7 +48,7 @@
 
   &::after {
     content: '✓';
-    color: white;
+    color: var(--color-on-primary);
     font-weight: var(--font-weight-bold);
     position: absolute;
     top: 18px;
@@ -128,7 +128,7 @@
 
 .ratingNumber {
   font-weight: var(--font-weight-regular);
-  color: black;
+  color: var(--color-text);
   margin-left: 10px;
 }
 

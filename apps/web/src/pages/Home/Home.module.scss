@@ -25,7 +25,7 @@
 .heading {
   font-size: clamp(36px, 6vw, 64px);
   font-weight: 800;
-  color: white;
+  color: var(--color-on-primary);
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
   line-height: 1.15;
   margin-bottom: 40px;
@@ -154,7 +154,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,23 +212,24 @@
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 16px;
-    color: white;
+    color: var(--color-on-primary);
   }
 
   p {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--color-on-primary);
+    opacity: 0.9;
     margin-bottom: 32px;
   }
 }
 
-/* CTA section – inverted style (white on primary gradient) */
+/* CTA section – inverted style (surface on primary gradient) */
 .ctaSectionBtn {
-  background: white !important;
+  background: var(--color-surface) !important;
   color: var(--color-primary) !important;
 
   &:hover {
-    background: white !important;
+    background: var(--color-surface) !important;
     color: var(--color-primary-dark) !important;
     transform: translateY(-2px);
   }
