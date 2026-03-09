@@ -58,6 +58,12 @@ export function runMigrations() {
   addColumnIfMissing('watch_sites', 'latitude', 'TEXT');
   addColumnIfMissing('watch_sites', 'longitude', 'TEXT');
 
+  // Access request: approved + approval_token on users
+  addColumnIfMissing('users', 'approved', 'INTEGER NOT NULL DEFAULT 0');
+  addColumnIfMissing('users', 'approval_token', 'TEXT');
+  // Existing users (no token) keep access; new users get token and approved=0
+  db.run(sql`UPDATE users SET approved = 1 WHERE approval_token IS NULL AND approved = 0`);
+
   // Indexes
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_user_id ON watches(user_id)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_active ON watches(is_active)`);
