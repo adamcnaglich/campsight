@@ -218,6 +218,8 @@ const OverviewTab = () => {
 };
 
 const UsersTab = () => {
+  const queryClient = useQueryClient();
+  const { user: currentUser } = useAuthContext();
   const {
     data: users,
     isLoading,
@@ -226,6 +228,27 @@ const UsersTab = () => {
     queryKey: ['admin', 'users'],
     queryFn: () => api.get('/admin/users'),
   });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => api.delete(`/admin/users/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'watches'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'activity'] });
+    },
+  });
+
+  const handleDeleteUser = (user: User) => {
+    if (
+      !window.confirm(
+        `Delete ${user.email}? This will permanently remove the user and all their watches and data.`
+      )
+    ) {
+      return;
+    }
+    deleteUserMutation.mutate(user.id);
+  };
 
   if (isLoading)
     return (
@@ -243,6 +266,13 @@ const UsersTab = () => {
 
   return (
     <div className={styles.tableContainer}>
+      {deleteUserMutation.isError && (
+        <div className={styles.error} style={{ padding: 12, margin: 12 }}>
+          {deleteUserMutation.error instanceof Error
+            ? deleteUserMutation.error.message
+            : 'Failed to delete user'}
+        </div>
+      )}
       <table className={styles.table}>
         <thead>
           <tr>
@@ -251,18 +281,36 @@ const UsersTab = () => {
             <th>Watches</th>
             <th>Created</th>
             <th>Last Active</th>
+            <th className={styles.actionsCol}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.email}</td>
-              <td>{user.displayName || '-'}</td>
-              <td>{user.watchCount}</td>
-              <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-              <td>{new Date(user.updatedAt).toLocaleDateString()}</td>
-            </tr>
-          ))}
+          {users.map((user) => {
+            const isCurrentUser = currentUser?.email === user.email;
+            return (
+              <tr key={user.id}>
+                <td>{user.email}</td>
+                <td>{user.displayName || '-'}</td>
+                <td>{user.watchCount}</td>
+                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td>{new Date(user.updatedAt).toLocaleDateString()}</td>
+                <td className={styles.actionsCol}>
+                  <Button
+                    variant="outline"
+                    level="danger"
+                    size="small"
+                    onClick={() => handleDeleteUser(user)}
+                    disabled={isCurrentUser || deleteUserMutation.isPending}
+                    title={isCurrentUser ? 'You cannot delete your own account' : undefined}
+                  >
+                    {deleteUserMutation.isPending && deleteUserMutation.variables === user.id
+                      ? 'Deleting...'
+                      : 'Delete'}
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
