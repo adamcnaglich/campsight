@@ -43,18 +43,134 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 0 32px 16px;
+  margin: 0 0 16px 16px;
+}
+
+.headingContainerNoSearch {
+  margin-bottom: 32px;
+}
+
+/* Steps with search (2 & 3): no left indent on header or search row */
+.headingContainerWithSearch {
+  margin-left: 0;
 }
 
 .heading {
   text-transform: capitalize;
 }
 
+/* ─── Search row (optional; headingAction sits on same row as input) ─── */
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 0 16px;
+  min-width: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 32px;
+}
+
+.searchRowNoIndent {
+  margin-left: 0;
+}
+
+/* Margin right so search row and border align with cards (lists use padding-right: 12px) */
+.searchRowAlignCards {
+  margin-right: 12px;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 24px 10px 48px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  font-size: var(--text-body-size);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s ease;
+  min-width: 0;
+
+  &:focus {
+    border-color: var(--color-primary);
+  }
+
+  &::placeholder {
+    color: var(--color-placeholder);
+  }
+}
+
+.searchInputWithClear {
+  padding-right: 48px;
+}
+
+.searchClearButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-primary-bg);
+  }
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .headingContainer {
+  .headingContainer,
+  .headingContainerNoSearch {
     margin: 0 0 16px 4px;
+  }
+
+  .headingContainerWithSearch {
+    margin-left: 0;
+  }
+
+  .searchRow {
+    margin: 0 0 32px 4px;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .searchRowNoIndent {
+    margin-left: 0;
+  }
+
+  .searchRowAlignCards {
+    margin-right: 0;
   }
 
   .heading {

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CampgroundSearchResult } from '@campsight/shared';
 import classNames from 'classnames';
 import { Text } from '../../../components/Text';
@@ -50,9 +50,21 @@ export const Campgrounds = ({
   onClearSelection,
   onContinue,
 }: CampgroundsProps) => {
+  const [searchFilter, setSearchFilter] = useState('');
+
+  const filteredResults = useMemo(
+    () =>
+      searchFilter.trim()
+        ? searchResults.filter((f) =>
+            f.name.toLowerCase().includes(searchFilter.toLowerCase()),
+          )
+        : searchResults,
+    [searchResults, searchFilter],
+  );
+
   const markers: MapMarker[] = useMemo(
     () =>
-      searchResults
+      filteredResults
         .filter((f) => f.latitude && f.longitude)
         .map((f) => ({
           id: f.entityId,
@@ -60,12 +72,15 @@ export const Campgrounds = ({
           lng: Number(f.longitude),
           label: f.name,
         })),
-    [searchResults],
+    [filteredResults],
   );
 
   return (
     <StepLayout
       heading={searchDisplayName || selectedFacility?.name}
+      searchValue={searchFilter}
+      onSearchChange={setSearchFilter}
+      searchPlaceholder="Search campgrounds..."
       isEmpty={searchResults.length === 0}
       emptyState={
         <Text variant="body-sm" className={styles.hint} as="p">
@@ -78,9 +93,8 @@ export const Campgrounds = ({
             [styles.resultsListWithFooter]: !!selectedFacility,
           })}
         >
-          {searchResults.map((facility, i) => {
-            const isSelected =
-              selectedFacility?.entityId === facility.entityId;
+          {filteredResults.map((facility, i) => {
+            const isSelected = selectedFacility?.entityId === facility.entityId;
             return (
               <li key={`${facility.entityId}-${i}`}>
                 <button
@@ -105,11 +119,7 @@ export const Campgrounds = ({
                     <Text variant="h3" className={styles.cardName}>
                       {facility.name.toLowerCase()}
                     </Text>
-                    <Text
-                      variant="body"
-                      className={styles.cardLocation}
-                      as="p"
-                    >
+                    <Text variant="body" className={styles.cardLocation} as="p">
                       {[facility.city, facility.stateCode]
                         .filter(Boolean)
                         .join(', ') || 'Location not available'}{' '}

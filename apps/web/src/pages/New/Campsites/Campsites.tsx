@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   CampgroundSearchResult,
   CampsiteSearchResult,
@@ -61,10 +61,19 @@ export const Campsites = ({
   onContinue,
 }: CampsitesProps) => {
   const hasSelection = selectedSites.length > 0;
+  const [searchFilter, setSearchFilter] = useState('');
+
+  const filteredCampsites = useMemo(
+    () =>
+      campsites.filter((s) =>
+        s.name.toLowerCase().includes(searchFilter.toLowerCase()),
+      ),
+    [campsites, searchFilter],
+  );
 
   const sortedCampsites = useMemo(
-    () => [...campsites].sort((a, b) => naturalCompare(a.name, b.name)),
-    [campsites],
+    () => [...filteredCampsites].sort((a, b) => naturalCompare(a.name, b.name)),
+    [filteredCampsites],
   );
 
   const markers: MapMarker[] = useMemo(
@@ -88,11 +97,14 @@ export const Campsites = ({
   return (
     <StepLayout
       heading={facility ? facility.name.toLowerCase() : undefined}
+      searchValue={searchFilter}
+      onSearchChange={setSearchFilter}
+      searchPlaceholder="Search campsites..."
       headingAction={
         <Button
           variant="ghost"
           size="small"
-          level="success"
+          // level="success"
           className={styles.selectAllButton}
           onClick={() => {
             if (hasSelection) {

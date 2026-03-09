@@ -14,6 +14,7 @@
   min-height: 0;
   overflow-y: auto;
   padding-right: 12px;
+  padding-top: 32px;
 
   &.resultsListWithFooter {
     padding-bottom: 88px;
@@ -139,6 +140,7 @@
     padding-right: 0;
     min-height: unset;
     overflow-y: unset;
+    padding-top: 0;
   }
 
   .resultCard {

@@ -9,6 +9,13 @@
 
 /* ─── List & Cards ───────────────────────────────────────────────── */
 
+.selectAllButton {
+  color: var(--color-primary);
+  &:hover {
+    color: var(--color-primary-dark) !important;
+  }
+}
+
 .campsiteList {
   list-style: none;
   display: flex;
@@ -18,6 +25,7 @@
   min-height: 0;
   overflow-y: auto;
   padding-right: 12px;
+  padding-top: 32px;
 
   &.campsiteListWithFooter {
     padding-bottom: 88px;
@@ -134,12 +142,9 @@
 /* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .selectAllButton {
-    display: none;
-  }
-
   .campsiteList {
     padding-right: 0;
+    padding-top: 0;
   }
 
   .campsiteCard {
