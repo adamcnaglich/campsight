@@ -7,6 +7,7 @@ import { isAdmin } from '../../lib/admin';
 import { useAuthContext } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Text } from '../../components/Text';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Admin.module.scss';
 
 interface Stats {
@@ -62,6 +63,7 @@ interface SchedulerStatus {
 type Tab = 'overview' | 'users' | 'watches' | 'activity' | 'scheduler' | 'email';
 
 export const Admin = () => {
+  useDocumentTitle('Admin');
   const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 

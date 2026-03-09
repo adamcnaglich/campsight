@@ -10,6 +10,7 @@ import {
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { Search } from './Search';
 import { Campgrounds } from './Campgrounds';
 import { Campsites } from './Campsites';
@@ -267,69 +268,97 @@ export const New = () => {
 
   const isFillLayout = currentStep === 2 || currentStep === 3;
 
+  const stepTitle = (() => {
+    switch (currentStep) {
+      case 1:
+        return selectedSearchName
+          ? `Search — ${selectedSearchName}`
+          : 'New Watch — Search';
+      case 2:
+        return selectedSearchName
+          ? `Campgrounds — ${selectedSearchName}`
+          : 'New Watch — Campgrounds';
+      case 3:
+        return campgroundName
+          ? `Campsites — ${campgroundName}`
+          : 'New Watch — Campsites';
+      case 4:
+        return campgroundName
+          ? `Dates — ${campgroundName}`
+          : 'New Watch — Dates';
+      case 5:
+        return campgroundName
+          ? `Review — ${campgroundName}`
+          : 'New Watch — Review';
+      default:
+        return 'New Watch';
+    }
+  })();
+  useDocumentTitle(stepTitle);
+
   return (
     <div
       className={classNames(styles.page, { [styles.pageFill]: isFillLayout })}
       data-fill-layout={isFillLayout ? '' : undefined}
     >
       {currentStep !== 1 && (
-      <div className={styles.stepIndicator}>
-        {STEPS.map((step, index) => {
-          const isActive = step.id === currentStep;
-          const complete = isStepComplete(step.id);
-          const accessible = canGoToStep(step.id);
-          const isLast = index === STEPS.length - 1;
-          const connectorComplete = step.id < currentStep;
-          const displayNumber = index + 1;
+        <div className={styles.stepIndicator}>
+          {STEPS.map((step, index) => {
+            const isActive = step.id === currentStep;
+            const complete = isStepComplete(step.id);
+            const accessible = canGoToStep(step.id);
+            const isLast = index === STEPS.length - 1;
+            const connectorComplete = step.id < currentStep;
+            const displayNumber = index + 1;
 
-          return (
-            <Fragment key={step.id}>
-              <button
-                type="button"
-                className={classNames(styles.stepIndicatorItem, {
-                  [styles.stepIndicatorItemDisabled]: !accessible,
-                })}
-                onClick={() => {
-                  if (accessible) {
-                    if (step.id === 1) setSearchQuery('');
-                    goToStep(step.id);
-                  }
-                }}
-                disabled={!accessible}
-                aria-current={isActive ? 'step' : undefined}
-              >
-                <div
-                  className={classNames(styles.stepCircle, {
-                    [styles.stepCircleActive]: isActive,
-                    [styles.stepCircleComplete]: complete,
-                    [styles.stepCircleDisabled]: !accessible,
+            return (
+              <Fragment key={step.id}>
+                <button
+                  type="button"
+                  className={classNames(styles.stepIndicatorItem, {
+                    [styles.stepIndicatorItemDisabled]: !accessible,
                   })}
+                  onClick={() => {
+                    if (accessible) {
+                      if (step.id === 1) setSearchQuery('');
+                      goToStep(step.id);
+                    }
+                  }}
+                  disabled={!accessible}
+                  aria-current={isActive ? 'step' : undefined}
                 >
-                  {displayNumber}
-                </div>
-                <Text
-                  variant="body-sm"
-                  as="span"
-                  className={classNames(styles.stepLabel, {
-                    [styles.stepLabelActive]: isActive,
-                    [styles.stepLabelComplete]: complete,
-                    [styles.stepLabelDisabled]: !accessible,
-                  })}
-                >
-                  {step.label}
-                </Text>
-              </button>
-              {!isLast && (
-                <div
-                  className={classNames(styles.stepConnector, {
-                    [styles.stepConnectorComplete]: connectorComplete,
-                  })}
-                />
-              )}
-            </Fragment>
-          );
-        })}
-      </div>
+                  <div
+                    className={classNames(styles.stepCircle, {
+                      [styles.stepCircleActive]: isActive,
+                      [styles.stepCircleComplete]: complete,
+                      [styles.stepCircleDisabled]: !accessible,
+                    })}
+                  >
+                    {displayNumber}
+                  </div>
+                  <Text
+                    variant="body-sm"
+                    as="span"
+                    className={classNames(styles.stepLabel, {
+                      [styles.stepLabelActive]: isActive,
+                      [styles.stepLabelComplete]: complete,
+                      [styles.stepLabelDisabled]: !accessible,
+                    })}
+                  >
+                    {step.label}
+                  </Text>
+                </button>
+                {!isLast && (
+                  <div
+                    className={classNames(styles.stepConnector, {
+                      [styles.stepConnectorComplete]: connectorComplete,
+                    })}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
+        </div>
       )}
 
       <form

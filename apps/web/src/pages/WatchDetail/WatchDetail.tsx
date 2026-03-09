@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import { MapView, MapMarker } from '../../components/MapView';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './WatchDetail.module.scss';
 import { Button } from '../../components/Button';
 import { EditIcon } from 'lucide-react';
@@ -56,6 +57,8 @@ export const WatchDetail = () => {
     enabled: !!id,
     refetchInterval: 1000 * 60 * 5,
   });
+
+  useDocumentTitle(data?.watch?.campgroundName ?? (id ? 'Watch' : undefined));
 
   const toggleMutation = useMutation({
     mutationFn: (watch: Watch) =>

@@ -6,6 +6,7 @@ import { api } from '../../lib/api';
 import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
 import { CampgroundCard } from '../../components/CampgroundCard';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Dashboard.module.scss';
 
 const formatDate = (isoDate: string): string => {
@@ -18,6 +19,7 @@ const formatDate = (isoDate: string): string => {
 };
 
 export const Dashboard = () => {
+  useDocumentTitle('Dashboard');
   const queryClient = useQueryClient();
 
   const {

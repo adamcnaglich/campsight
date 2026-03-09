@@ -1,9 +1,11 @@
 import { useAuthContext } from '../../context/AuthContext';
 import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Settings.module.scss';
 
 export const Settings = () => {
+  useDocumentTitle('Settings');
   const { user, signOut } = useAuthContext();
 
   return (
