@@ -99,7 +99,7 @@ export const Campsites = ({
               onClearSelection();
             } else {
               const selectedIds = new Set(
-                selectedSites.map((s) => s.campsiteId)
+                selectedSites.map((s) => s.campsiteId),
               );
               campsites
                 .filter((s) => !selectedIds.has(s.campsiteId))
@@ -152,7 +152,7 @@ export const Campsites = ({
                   <div className={styles.cardContent}>
                     <Text variant="h3" className={styles.cardTitle}>
                       Site: {site.name}
-                      {site.loop ? `, Loop: ${site.loop}` : ''}
+                      {site.loop ? `, Loop: ${site.loop.toLowerCase()}` : ''}
                     </Text>
                     {detailLine && (
                       <Text

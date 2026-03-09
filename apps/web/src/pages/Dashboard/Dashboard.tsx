@@ -124,7 +124,9 @@ export const Dashboard = () => {
             {watches.map((watch) => {
               const siteCount = watch.sites.length;
               const loops = [
-                ...new Set(watch.sites.map((s) => s.loop).filter(Boolean)),
+                ...new Set(
+                  watch.sites.map((s) => s.loop?.toLowerCase()).filter(Boolean),
+                ),
               ];
               const loopStr =
                 loops.length > 0 ? `Loop: ${loops.join(', ')}` : '';
