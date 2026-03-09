@@ -66,6 +66,7 @@ export const Review = ({
 
   return (
     <StepLayout
+      className={styles.page}
       heading="Review & Confirm"
       left={
         <div className={styles.cardList}>
@@ -140,11 +141,7 @@ export const Review = ({
           ) : (
             <div className={styles.siteImagePlaceholder}>
               <span className={styles.siteImageIcon}>🏕️</span>
-              <Text
-                variant="body-sm"
-                className={styles.siteImageText}
-                as="p"
-              >
+              <Text variant="body-sm" className={styles.siteImageText} as="p">
                 Campground photo
               </Text>
             </div>

@@ -121,6 +121,9 @@
 /* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
+  .page {
+    padding-bottom: 150px;
+  }
   .siteImage {
     height: 200px;
   }
