@@ -103,7 +103,7 @@
   margin-left: auto;
   padding: 10px 24px;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary);
   border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
@@ -112,7 +112,7 @@
 
   &:hover {
     background: var(--color-primary-dark);
-    color: white;
+    color: var(--color-on-primary);
     text-decoration: none;
   }
 }
@@ -279,7 +279,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--overlay-bg);
     z-index: 199;
     animation: fadeOverlay 0.2s ease;
   }

@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Text } from '../../components/Text';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Terms.module.scss';
 
 export const Terms = () => {
+  useDocumentTitle('Terms of Service');
   return (
     <div className={styles.page}>
       <Navbar />

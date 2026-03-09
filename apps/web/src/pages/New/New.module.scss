@@ -68,7 +68,7 @@
   border-radius: 50%;
   border: none;
   background: var(--color-step-inactive);
-  color: white;
+  color: var(--color-on-primary);
   font-size: 13px;
   font-weight: var(--font-weight-bold);
   display: flex;
@@ -89,7 +89,7 @@
 .stepCircleComplete {
   border-color: var(--color-primary);
   background: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary);
 }
 
 .stepLabelActive,

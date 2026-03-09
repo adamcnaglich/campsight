@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Text } from '../../components/Text';
 import type { ButtonVariant, ButtonLevel } from '../../components/Button';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './DS.module.scss';
 
 const VARIANTS: ButtonVariant[] = ['primary', 'outline', 'ghost'];
@@ -26,6 +27,7 @@ const ButtonSection = ({
 );
 
 export const DS = () => {
+  useDocumentTitle('Design System');
   return (
     <div className={styles.page}>
       <header className={styles.header}>

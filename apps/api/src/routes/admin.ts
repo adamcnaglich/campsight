@@ -9,6 +9,7 @@ import {
   restartScheduler,
   triggerManualCheck,
 } from '../services/scheduler';
+import { sendTestNotificationEmail } from '../services/notification';
 
 const router = Router();
 
@@ -388,6 +389,27 @@ router.get('/notifications', async (req, res: Response) => {
   } catch (error) {
     log.api.error({ err: error, adminEmail }, 'Failed to list notifications');
     res.status(500).json({ error: { message: 'Failed to list notifications' } });
+  }
+});
+
+/**
+ * POST /admin/notifications/test — Send a test notification email to the logged-in admin
+ */
+router.post('/notifications/test', async (req, res: Response) => {
+  const adminEmail = getAdminEmail(req);
+
+  try {
+    await sendTestNotificationEmail(adminEmail);
+    log.api.info({ adminEmail }, 'Admin sent test notification email');
+    res.json({ data: { message: 'Test email sent' } });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail }, 'Failed to send test notification');
+    res.status(500).json({
+      error: {
+        message:
+          error instanceof Error ? error.message : 'Failed to send test notification',
+      },
+    });
   }
 });
 

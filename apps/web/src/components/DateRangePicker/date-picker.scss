@@ -14,7 +14,7 @@
 
 .rdp-weekdays {
   height: 60px;
-  color: #677685;
+  color: var(--color-text-muted);
 }
 
 .rdp-root[data-nav-layout='around'] .rdp-button_next,

@@ -2,10 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Campsight</title>
+    <title>CampSight</title>
     <base href="/" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        var p = localStorage.getItem('campsight-theme');
+        var theme = p === 'dark' || p === 'light' ? p : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

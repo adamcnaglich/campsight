@@ -1,0 +1,25 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.dayPicker {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-months-gap: 80px;
+  --rdp-day_button-width: 40px;
+  --rdp-day_button-height: 40px;
+  --rdp-disabled-opacity: 0.25;
+}
+
+@media (max-width: 768px) {
+  .dayPicker {
+    --rdp-months-gap: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dayPicker {
+    --rdp-day_button-width: 36px;
+    --rdp-day_button-height: 36px;
+  }
+}

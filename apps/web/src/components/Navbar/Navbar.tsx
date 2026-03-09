@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 import { useAuthContext } from '../../context/AuthContext';
 import { isAdmin } from '../../lib/admin';
@@ -10,7 +10,15 @@ import styles from './Navbar.module.scss';
 export const Navbar = () => {
   const { user } = useAuthContext();
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleNewWatchClick = (e: React.MouseEvent) => {
+    if (location.pathname === '/new') {
+      e.preventDefault();
+      navigate('/new', { state: { resetNewWatch: true } });
+    }
+  };
 
   const logoHref = location.pathname === '/' ? '/' : '/dashboard';
 
@@ -56,7 +64,14 @@ export const Navbar = () => {
                     className={styles.navLink}
                     size="compact"
                     as={({ children, className, ...props }) => (
-                      <Link to={item.path} className={className} {...props}>
+                      <Link
+                        to={item.path}
+                        className={className}
+                        onClick={
+                          item.path === '/new' ? handleNewWatchClick : undefined
+                        }
+                        {...props}
+                      >
                         {children}
                       </Link>
                     )}
@@ -156,7 +171,14 @@ export const Navbar = () => {
                 className={styles.navLink}
                 size="compact"
                 as={({ children, className, ...props }) => (
-                  <Link to={item.path} className={className} {...props}>
+                  <Link
+                    to={item.path}
+                    className={className}
+                    onClick={
+                      item.path === '/new' ? handleNewWatchClick : undefined
+                    }
+                    {...props}
+                  >
                     {children}
                   </Link>
                 )}

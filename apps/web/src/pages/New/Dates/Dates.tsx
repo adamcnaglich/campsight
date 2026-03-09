@@ -1,25 +1,9 @@
-import { useMemo } from 'react';
-import { DayPicker } from 'react-day-picker';
-import type { DateRange } from 'react-day-picker';
 import { CampsiteSearchResult } from '@campsight/shared';
+import { DateRangePicker } from '../../../components/DateRangePicker';
 import { SelectionFooter } from '../../../components/SelectionFooter';
 import { Text } from '../../../components/Text';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { formatDateRange } from '../../../lib/dateUtils';
 import styles from './Dates.module.scss';
-import './date-picker.scss';
-
-const toISODateString = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const parseISODateString = (str: string): Date => {
-  const [year, month, day] = str.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
 
 export interface DatesProps {
   selectedSite: CampsiteSearchResult | null;
@@ -44,27 +28,7 @@ export const Dates = ({
   onClearSelection,
   onContinue,
 }: DatesProps) => {
-  const selected: DateRange | undefined = useMemo(() => {
-    if (!startDate) return undefined;
-    return {
-      from: parseISODateString(startDate),
-      to: endDate ? parseISODateString(endDate) : undefined,
-    };
-  }, [startDate, endDate]);
-
-  const handleSelect = (range: DateRange | undefined) => {
-    if (!range?.from) {
-      onStartDateChange('');
-      onEndDateChange('');
-      return;
-    }
-    onStartDateChange(toISODateString(range.from));
-    onEndDateChange(range.to ? toISODateString(range.to) : '');
-  };
-
   const canProceed = !!startDate && !!endDate;
-  const today = useMemo(() => new Date(), []);
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
     <div className={styles.root}>
@@ -80,17 +44,13 @@ export const Dates = ({
         )}
       </div>
       <div className={styles.pickerWrapper}>
-        <DayPicker
-          animate
-          mode="range"
-          selected={selected}
-          onSelect={handleSelect}
-          numberOfMonths={isMobile ? 1 : 2}
-          pagedNavigation
-          navLayout="around"
-          disabled={{ before: today }}
-          defaultMonth={today}
-          className={styles.dayPicker}
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onRangeChange={(start, end) => {
+            onStartDateChange(start);
+            onEndDateChange(end);
+          }}
         />
       </div>
       <SelectionFooter

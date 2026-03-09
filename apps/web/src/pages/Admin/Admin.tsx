@@ -7,6 +7,7 @@ import { isAdmin } from '../../lib/admin';
 import { useAuthContext } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Text } from '../../components/Text';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Admin.module.scss';
 
 interface Stats {
@@ -59,9 +60,10 @@ interface SchedulerStatus {
   lastRunError: string | null;
 }
 
-type Tab = 'overview' | 'users' | 'watches' | 'activity' | 'scheduler';
+type Tab = 'overview' | 'users' | 'watches' | 'activity' | 'scheduler' | 'email';
 
 export const Admin = () => {
+  useDocumentTitle('Admin');
   const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
@@ -121,6 +123,14 @@ export const Admin = () => {
         >
           Activity
         </button>
+        <button
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'email',
+          })}
+          onClick={() => setActiveTab('email')}
+        >
+          Email
+        </button>
       </div>
 
       <div className={styles.content}>
@@ -129,6 +139,7 @@ export const Admin = () => {
         {activeTab === 'watches' && <WatchesTab />}
         {activeTab === 'scheduler' && <SchedulerTab />}
         {activeTab === 'activity' && <ActivityTab />}
+        {activeTab === 'email' && <EmailTab />}
       </div>
     </div>
   );
@@ -404,6 +415,55 @@ const ActivityTab = () => {
           </div>
         );
       })}
+    </div>
+  );
+};
+
+const EmailTab = () => {
+  const { user } = useAuthContext();
+  const sendTestMutation = useMutation({
+    mutationFn: () => api.post('/admin/notifications/test', {}),
+  });
+
+  return (
+    <div className={styles.scheduler}>
+      <div className={styles.schedulerCard}>
+        <div className={styles.schedulerHeader}>
+          <Text variant="h2" className={styles.schedulerTitle}>
+            Test notification email
+          </Text>
+        </div>
+        <div className={styles.schedulerInfo}>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Send to (logged-in user):</span>
+            <span className={styles.infoValue}>{user?.email ?? '—'}</span>
+          </div>
+          <p className={styles.emailDescription}>
+            Sends a test email to verify that notification delivery is configured correctly
+            (Resend API key and from-address).
+          </p>
+        </div>
+        <div className={styles.schedulerActions}>
+          <Button
+            variant="primary"
+            size="small"
+            onClick={() => sendTestMutation.mutate()}
+            disabled={sendTestMutation.isPending || !user?.email}
+          >
+            {sendTestMutation.isPending ? 'Sending...' : 'Send test email'}
+          </Button>
+          {sendTestMutation.isSuccess && (
+            <span className={styles.statusSuccess}>✓ Test email sent. Check your inbox.</span>
+          )}
+          {sendTestMutation.isError && (
+            <span className={styles.statusError}>
+              {sendTestMutation.error instanceof Error
+                ? sendTestMutation.error.message
+                : 'Failed to send'}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

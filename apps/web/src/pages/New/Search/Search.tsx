@@ -144,6 +144,7 @@ export const Search = ({
             <input
               ref={inputRef}
               type="text"
+              name="campsight-location-search"
               value={searchQuery}
               onChange={(e) => {
                 onSearchQueryChange(e.target.value);
@@ -157,6 +158,10 @@ export const Search = ({
                 [styles.inputWithClear]: searchQuery.trim().length > 0,
               })}
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              data-lpignore="true"
+              data-form-type="other"
             />
             {searchQuery.trim().length > 0 && (
               <button

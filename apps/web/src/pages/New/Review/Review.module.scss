@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: black;
+  color: var(--color-text);
   transition: color 0.15s ease;
 
   .editCard:hover & {
@@ -121,6 +121,9 @@
 /* ─── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
+  .page {
+    padding-bottom: 150px;
+  }
   .siteImage {
     height: 200px;
   }
