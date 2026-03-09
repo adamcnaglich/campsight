@@ -1,6 +1,7 @@
 .page {
   max-width: 640px;
   animation: fadeIn 0.2s ease;
+  padding-bottom: 32px;
 }
 
 @keyframes fadeIn {
@@ -97,7 +98,9 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 
   &:hover {
     color: var(--color-text);
