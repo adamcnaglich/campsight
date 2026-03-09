@@ -118,7 +118,7 @@ export const MapView = ({
           defaultZoom={DEFAULT_ZOOM}
           mapId="campsight-map"
           gestureHandling="greedy"
-          disableDefaultUI
+          // disableDefaultUI
           styles={[
             {
               featureType: 'poi',
