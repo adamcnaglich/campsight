@@ -12,7 +12,7 @@ export const Request = () => {
         <div className={styles.logoSection}>
           <span className={styles.logoIcon}>🏕️</span>
           <Text variant="h2" className={styles.title} as="h1">
-            Access requested
+            Access Requested
           </Text>
         </div>
         <Text variant="body" className={styles.message} as="p">
