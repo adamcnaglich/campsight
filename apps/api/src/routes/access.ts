@@ -59,9 +59,11 @@ export function approveAccess(req: Request, res: Response) {
     return;
   }
 
+  const appUrl = (process.env.CORS_ORIGIN || 'http://localhost:4200').replace(/\/$/, '');
+  const redirectUrl = `${appUrl}/access-approved`;
+
   if (user.approved) {
-    const appUrl = process.env.CORS_ORIGIN || 'http://localhost:4200';
-    res.redirect(302, `${appUrl}?access=approved`);
+    res.redirect(302, redirectUrl);
     return;
   }
 
@@ -72,8 +74,7 @@ export function approveAccess(req: Request, res: Response) {
 
   log.auth.info({ userId: user.id, email: user.email }, 'User access approved via link');
 
-  const appUrl = process.env.CORS_ORIGIN || 'http://localhost:4200';
-  res.redirect(302, `${appUrl}?access=approved`);
+  res.redirect(302, redirectUrl);
 }
 
 const router = express.Router();

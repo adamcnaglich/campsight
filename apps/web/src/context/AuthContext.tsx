@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { User } from 'firebase/auth';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
@@ -27,24 +27,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading: false,
   });
 
+  const refetchAccessStatus = useCallback(async () => {
+    if (!authState.user) return;
+    setAccessStatus((s) => ({ ...s, loading: true }));
+    try {
+      const data = await api.get<{ approved: boolean }>('/api/access/status');
+      setAccessStatus({ approved: data.approved, loading: false });
+    } catch {
+      setAccessStatus({ approved: false, loading: false });
+    }
+  }, [authState.user]);
+
   useEffect(() => {
     if (!authState.user) {
       setAccessStatus({ approved: null, loading: false });
       return;
     }
-    setAccessStatus((s) => ({ ...s, loading: true }));
-    api
-      .get<{ approved: boolean }>('/api/access/status')
-      .then((data) => {
-        setAccessStatus({ approved: data.approved, loading: false });
-      })
-      .catch(() => {
-        setAccessStatus({ approved: false, loading: false });
-      });
-  }, [authState.user]);
+    refetchAccessStatus();
+  }, [authState.user, refetchAccessStatus]);
 
   return (
-    <AuthContext.Provider value={{ ...authState, accessStatus }}>
+    <AuthContext.Provider value={{ ...authState, accessStatus, refetchAccessStatus }}>
       {children}
     </AuthContext.Provider>
   );

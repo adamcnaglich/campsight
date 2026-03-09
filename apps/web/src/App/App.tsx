@@ -11,6 +11,7 @@ import { Admin } from '../pages/Admin';
 import { DS } from '../pages/DS';
 import { Terms } from '../pages/Terms';
 import { Request as RequestAccessPage } from '../pages/Request';
+import { AccessApproved } from '../pages/AccessApproved/AccessApproved';
 
 const RequestRoute = () => {
   const { user, loading, accessStatus } = useAuthContext();
@@ -77,6 +78,7 @@ export const App = () => {
         }
       />
       <Route path="/" element={<Home />} />
+      <Route path="/access-approved" element={<AccessApproved />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/ds" element={<DS />} />
       <Route path="/request" element={<RequestRoute />} />
