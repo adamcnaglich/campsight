@@ -96,8 +96,7 @@ export const WatchDetail = () => {
       watchId: number;
       startDate: string;
       endDate: string;
-    }) =>
-      api.patch(`/api/watches/${watchId}`, { startDate, endDate }),
+    }) => api.patch(`/api/watches/${watchId}`, { startDate, endDate }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['watch-availability', id] });
       queryClient.invalidateQueries({ queryKey: ['watches'] });
@@ -187,7 +186,7 @@ export const WatchDetail = () => {
       <div className={styles.watchInfo}>
         <div className={styles.watchInfoLeft}>
           <Text variant="body" className={styles.watchInfoText}>
-            Watching {siteCount} {siteCount === 1 ? 'Site' : 'Sites'}
+            Watching {siteCount} {siteCount === 1 ? 'site' : 'sites'}
           </Text>
           <span
             className={classNames(styles.badge, {
