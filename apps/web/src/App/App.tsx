@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { Layout } from '../components/Layout';
+import { Loader } from '../components/Loader';
 import { Login } from '../pages/Login';
 import { Home } from '../pages/Home';
 import { Dashboard } from '../pages/Dashboard';
@@ -15,15 +16,12 @@ import { AccessApproved } from '../pages/AccessApproved/AccessApproved';
 
 const RequestRoute = () => {
   const { user, loading, accessStatus } = useAuthContext();
-  if (loading) return null;
+  if (loading) return <Loader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (accessStatus.approved === true) return <Navigate to="/dashboard" replace />;
+  if (accessStatus.approved === true)
+    return <Navigate to="/dashboard" replace />;
   if (accessStatus.loading || accessStatus.approved === null) {
-    return (
-      <div style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}>
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
   return <RequestAccessPage />;
 };
@@ -32,13 +30,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, accessStatus } = useAuthContext();
 
   if (loading) {
-    return (
-      <div
-        style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}
-      >
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!user) {
@@ -46,13 +38,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (accessStatus.loading || accessStatus.approved === null) {
-    return (
-      <div
-        style={{ textAlign: 'center', padding: '80px 24px', color: '#64748b' }}
-      >
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   if (accessStatus.approved === false) {
@@ -70,7 +56,9 @@ export const App = () => {
       <Route
         path="/login"
         element={
-          loading ? null : user ? (
+          loading ? (
+            <Loader />
+          ) : user ? (
             <Navigate to="/dashboard" replace />
           ) : (
             <Login />
