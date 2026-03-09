@@ -15,6 +15,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
+  refetchAccessStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
