@@ -21,6 +21,7 @@ interface User {
   id: string;
   email: string;
   displayName: string | null;
+  approved: boolean;
   createdAt: string;
   updatedAt: string;
   watchCount: number;
@@ -278,6 +279,7 @@ const UsersTab = () => {
           <tr>
             <th>Email</th>
             <th>Display Name</th>
+            <th>Approval</th>
             <th>Watches</th>
             <th>Created</th>
             <th>Last Active</th>
@@ -291,6 +293,16 @@ const UsersTab = () => {
               <tr key={user.id}>
                 <td>{user.email}</td>
                 <td>{user.displayName || '-'}</td>
+                <td>
+                  <span
+                    className={classNames(styles.approvalBadge, {
+                      [styles.approvalApproved]: user.approved,
+                      [styles.approvalPending]: !user.approved,
+                    })}
+                  >
+                    {user.approved ? 'Approved' : 'Pending'}
+                  </span>
+                </td>
                 <td>{user.watchCount}</td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>{new Date(user.updatedAt).toLocaleDateString()}</td>

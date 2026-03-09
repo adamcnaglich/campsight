@@ -65,6 +65,7 @@ router.get('/users', async (req, res: Response) => {
         id: schema.users.id,
         email: schema.users.email,
         displayName: schema.users.displayName,
+        approved: schema.users.approved,
         createdAt: schema.users.createdAt,
         updatedAt: schema.users.updatedAt,
         watchCount: sql<number>`(SELECT COUNT(*) FROM ${schema.watches} WHERE ${schema.watches.userId} = ${schema.users.id})`,
