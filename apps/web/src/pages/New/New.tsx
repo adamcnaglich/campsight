@@ -111,6 +111,11 @@ export const New = () => {
 
   const clearCampgroundSelection = useCallback(() => {
     setSelectedFacility(null);
+    setCampsites([]);
+    setSelectedSites([]);
+    setStartDate('');
+    setEndDate('');
+    setHighestStepReached(2);
   }, []);
 
   const confirmCampgroundSelection = useCallback(() => {
@@ -193,11 +198,15 @@ export const New = () => {
 
   const clearSiteSelection = useCallback(() => {
     setSelectedSites([]);
+    setStartDate('');
+    setEndDate('');
+    setHighestStepReached(3);
   }, []);
 
   const clearDatesSelection = useCallback(() => {
     setStartDate('');
     setEndDate('');
+    setHighestStepReached(4);
   }, []);
 
   const continueToDates = useCallback(() => {
