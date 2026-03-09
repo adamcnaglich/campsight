@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, Fragment } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useRef, Fragment, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CampgroundSearchResult,
@@ -28,6 +28,7 @@ const STEPS = [
 
 export const New = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -226,6 +227,14 @@ export const New = () => {
     setHighestStepReached(1);
     goToStep(1);
   }, [goToStep]);
+
+  useEffect(() => {
+    const state = location.state as { resetNewWatch?: boolean } | null;
+    if (state?.resetNewWatch) {
+      handleStartOver();
+      navigate('/new', { replace: true, state: {} });
+    }
+  }, [location.state, handleStartOver, navigate]);
 
   const handleConfirm = useCallback(() => {
     formRef.current?.requestSubmit();
