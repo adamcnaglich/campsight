@@ -147,6 +147,7 @@ export const MapView = ({
                 position={{ lat: marker.lat, lng: marker.lng }}
                 title={marker.label}
                 onClick={() => handleClick(marker.id)}
+                zIndex={isSelected ? 1000 : 1}
               >
                 <div
                   className={styles.markerDot}
