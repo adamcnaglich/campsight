@@ -3,6 +3,7 @@ import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { log } from '../lib/logger';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { sendAccessApprovedEmail } from '../services/access-request-email';
 
 function getAllowedEmails(): string[] | null {
   let raw = process.env.ADMIN_ALLOWED_EMAILS;
@@ -73,6 +74,13 @@ export function approveAccess(req: Request, res: Response) {
     .run();
 
   log.auth.info({ userId: user.id, email: user.email }, 'User access approved via link');
+
+  sendAccessApprovedEmail({
+    userEmail: user.email,
+    displayName: user.displayName,
+  }).catch((err) =>
+    log.auth.error({ err, userId: user.id, email: user.email }, 'Access approved email to user failed')
+  );
 
   res.redirect(302, redirectUrl);
 }
