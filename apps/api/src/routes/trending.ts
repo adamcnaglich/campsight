@@ -6,7 +6,7 @@ const router = Router();
 
 const RECREATION_GOV_SEARCH = 'https://www.recreation.gov/api/search';
 const IP_API_BASE = 'http://ip-api.com/json';
-const DEFAULT_COORDS = { lat: 39.8283, lng: -98.5795 }; // geographic center of US
+const DEFAULT_COORDS = { lat: 42.3297, lng: -83.0425 }; // geographic center of US
 
 function getClientIp(req: Request): string {
   const forwarded = req.headers['x-forwarded-for'];
