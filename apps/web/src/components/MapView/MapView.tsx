@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import {
   APIProvider,
   Map,
@@ -24,6 +24,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 };
 const DEFAULT_ZOOM = 4;
+const LABEL_MIN_ZOOM = 15;
 
 function FitBounds({
   markers,
@@ -86,11 +87,36 @@ function FitBounds({
   return null;
 }
 
+function ZoomWatcher({
+  onZoomChange,
+}: {
+  onZoomChange: (zoom: number) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    const syncZoom = () => {
+      onZoomChange(map.getZoom() ?? DEFAULT_ZOOM);
+    };
+
+    syncZoom();
+    const listener = map.addListener('zoom_changed', syncZoom);
+    return () => listener.remove();
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
 export const MapView = ({
   markers,
   selectedIds = [],
   onMarkerClick,
 }: MapViewProps) => {
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const showMarkerLabels = zoom >= LABEL_MIN_ZOOM;
+
   const handleClick = useCallback(
     (id: string) => {
       onMarkerClick?.(id);
@@ -139,6 +165,7 @@ export const MapView = ({
           className={styles.map}
         >
           <FitBounds markers={markers} selectedIds={selectedIds} />
+          <ZoomWatcher onZoomChange={setZoom} />
           {markers.map((marker) => {
             const isSelected = selectedIds.includes(marker.id);
             return (
@@ -149,10 +176,20 @@ export const MapView = ({
                 onClick={() => handleClick(marker.id)}
                 zIndex={isSelected ? 1000 : 1}
               >
-                <div
-                  className={styles.markerDot}
-                  data-selected={isSelected || undefined}
-                />
+                <div className={styles.marker}>
+                  {showMarkerLabels && marker.label ? (
+                    <div
+                      className={styles.markerLabel}
+                      data-selected={isSelected || undefined}
+                    >
+                      {marker.label}
+                    </div>
+                  ) : null}
+                  <div
+                    className={styles.markerDot}
+                    data-selected={isSelected || undefined}
+                  />
+                </div>
               </AdvancedMarker>
             );
           })}
