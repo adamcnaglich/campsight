@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import classNames from 'classnames';
-import { MountainSnow, TentTree, X } from 'lucide-react';
+import { Loader2, MountainSnow, TentTree, X } from 'lucide-react';
 import { SuggestionResult } from '@campsight/shared';
 import { api } from '../../../lib/api';
 import { Text } from '../../../components/Text';
@@ -23,6 +23,8 @@ export interface SearchProps {
     campgroundName: string,
     options?: SelectCampgroundOptions,
   ) => void;
+  noResultsMessage?: string | null;
+  searchingRecArea?: boolean;
 }
 
 const DEBOUNCE_MS = 300;
@@ -42,6 +44,8 @@ export const Search = ({
   onSearchQueryChange,
   onSearchForRecArea,
   onSelectCampground,
+  noResultsMessage,
+  searchingRecArea,
 }: SearchProps) => {
   const [suggestions, setSuggestions] = useState<SuggestionResult[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -153,29 +157,36 @@ export const Search = ({
               }}
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
-              placeholder="e.g. Yosemite, Glacier Point..."
+              placeholder="Enter a national park, campground, or location..."
               className={classNames(styles.input, {
                 [styles.inputWithClear]: searchQuery.trim().length > 0,
               })}
+              disabled={searchingRecArea}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               data-lpignore="true"
               data-form-type="other"
             />
-            {searchQuery.trim().length > 0 && (
-              <button
-                type="button"
-                className={styles.clearButton}
-                onClick={() => {
-                  onSearchQueryChange('');
-                  setHighlightedIndex(-1);
-                  inputRef.current?.focus();
-                }}
-                aria-label="Clear search"
-              >
-                <X size={18} />
-              </button>
+            {searchingRecArea ? (
+              <span className={styles.inputSpinner}>
+                <Loader2 size={18} className={styles.spinner} />
+              </span>
+            ) : (
+              searchQuery.trim().length > 0 && (
+                <button
+                  type="button"
+                  className={styles.clearButton}
+                  onClick={() => {
+                    onSearchQueryChange('');
+                    setHighlightedIndex(-1);
+                    inputRef.current?.focus();
+                  }}
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )
             )}
           </div>
         </div>
@@ -210,7 +221,8 @@ export const Search = ({
                         {s.entityType === 'campground'
                           ? 'Campground'
                           : 'Rec Area'}
-                        {s.stateCode && ` • ${s.stateCode}`}
+                        {(s.city || s.stateCode) &&
+                          ` • ${[s.city, s.stateCode].filter(Boolean).join(', ')}`}
                       </span>
                     </span>
                   </button>
@@ -220,6 +232,14 @@ export const Search = ({
           </ul>
         )}
       </div>
+
+      {noResultsMessage && !searchingRecArea && (
+        <div className={styles.noResults}>
+          <Text variant="body-sm" as="p">
+            {noResultsMessage}
+          </Text>
+        </div>
+      )}
 
       <div className={styles.trendingSection}>
         <Text variant="h3" className={styles.trendingHeading}>

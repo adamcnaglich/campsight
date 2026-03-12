@@ -137,6 +137,7 @@ export interface SuggestionResult {
   entityId: string;
   name: string;
   stateCode: string;
+  city?: string;
 }
 
 export interface CampgroundSearchResult {

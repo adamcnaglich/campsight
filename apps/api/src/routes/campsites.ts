@@ -27,17 +27,30 @@ router.get('/suggest', async (req, res: Response) => {
   }
 
   try {
-    const response = await axios.get(`${RECREATION_GOV_BASE}/search/suggest`, {
-      params: { q: query.trim(), geocoder: true },
-    });
+    const trimmed = query.trim();
+
+    const searchParams = new URLSearchParams();
+    searchParams.set('q', trimmed);
+    searchParams.append('fq', 'entity_type:campground');
+    searchParams.append('fq', 'entity_type:recarea');
+    searchParams.set('size', '5');
+    searchParams.set('sort', 'score');
+
+    const [suggestRes, searchRes] = await Promise.all([
+      axios.get(`${RECREATION_GOV_BASE}/search/suggest`, {
+        params: { q: trimmed, geocoder: true },
+      }),
+      axios
+        .get(`${RECREATION_GOV_BASE}/search?${searchParams.toString()}`)
+        .catch(() => null),
+    ]);
 
     const inventory: Record<string, unknown>[] =
-      response.data?.inventory_suggestions ?? [];
+      suggestRes.data?.inventory_suggestions ?? [];
 
-    const results: SuggestionResult[] = inventory
+    const inventoryResults: SuggestionResult[] = inventory
       .filter(
-        (s) =>
-          s.entity_type === 'recarea' || s.entity_type === 'campground',
+        (s) => s.entity_type === 'recarea' || s.entity_type === 'campground',
       )
       .map((s) => ({
         entityType: String(s.entity_type) as 'recarea' | 'campground',
@@ -46,7 +59,30 @@ router.get('/suggest', async (req, res: Response) => {
         stateCode: String(s.state_code ?? ''),
       }));
 
-    res.json({ data: results });
+    const searchRaw: Record<string, unknown>[] = searchRes?.data?.results ?? [];
+
+    const searchResults: SuggestionResult[] = searchRaw
+      .filter(
+        (s) => s.entity_type === 'campground' || s.entity_type === 'recarea',
+      )
+      .map((s) => ({
+        entityType: String(s.entity_type) as 'recarea' | 'campground',
+        entityId: String(s.entity_id),
+        name: String(s.name ?? ''),
+        stateCode: String(s.state_code ?? ''),
+        city: s.city ? String(s.city) : undefined,
+      }));
+
+    const seen = new Set(inventoryResults.map((r) => r.entityId));
+    const merged = [...inventoryResults];
+    for (const r of searchResults) {
+      if (!seen.has(r.entityId)) {
+        seen.add(r.entityId);
+        merged.push(r);
+      }
+    }
+
+    res.json({ data: merged.slice(0, 10) });
   } catch (error) {
     log.campsites.error({ err: error, query }, 'Failed to fetch suggestions');
     res.status(502).json({ error: { message: 'Failed to fetch suggestions' } });
@@ -61,7 +97,9 @@ router.get('/facility/:facilityId', async (req, res: Response) => {
 
   if (!apiKey) {
     log.campsites.error('RIDB_API_KEY is not configured');
-    return res.status(500).json({ error: { message: 'RIDB API key not configured' } });
+    return res
+      .status(500)
+      .json({ error: { message: 'RIDB API key not configured' } });
   }
 
   try {
@@ -83,7 +121,10 @@ router.get('/facility/:facilityId', async (req, res: Response) => {
           (recAreaResponse.data as Record<string, unknown>).RecAreaName ?? '',
         );
       } catch {
-        log.campsites.warn({ facilityId, parentRecAreaId }, 'Failed to fetch parent rec area name');
+        log.campsites.warn(
+          { facilityId, parentRecAreaId },
+          'Failed to fetch parent rec area name',
+        );
       }
     }
 
@@ -94,11 +135,19 @@ router.get('/facility/:facilityId', async (req, res: Response) => {
       parentRecAreaName,
     };
 
-    log.campsites.info({ facilityId, parentRecAreaId, parentRecAreaName }, 'Facility detail fetched');
+    log.campsites.info(
+      { facilityId, parentRecAreaId, parentRecAreaName },
+      'Facility detail fetched',
+    );
     res.json({ data: result });
   } catch (error) {
-    log.campsites.error({ err: error, facilityId }, 'Failed to fetch facility detail');
-    res.status(502).json({ error: { message: 'Failed to fetch facility detail' } });
+    log.campsites.error(
+      { err: error, facilityId },
+      'Failed to fetch facility detail',
+    );
+    res
+      .status(502)
+      .json({ error: { message: 'Failed to fetch facility detail' } });
   }
 });
 
@@ -111,7 +160,9 @@ router.get('/search', async (req, res: Response) => {
 
   if (!recAreaId && !facilityId) {
     return res.status(400).json({
-      error: { message: 'Query parameter "recAreaId" or "facilityId" is required' },
+      error: {
+        message: 'Query parameter "recAreaId" or "facilityId" is required',
+      },
     });
   }
 
@@ -175,9 +226,9 @@ router.get('/search', async (req, res: Response) => {
       params.append('fq', 'campsite_type_of_use:Day');
       params.append('fq', 'campsite_type_of_use:na');
 
-      const response = await axios.get(
-        `${RECREATION_GOV_BASE}/search?${params.toString()}`,
-      );
+      const searchUrl = `${RECREATION_GOV_BASE}/search?${params.toString()}`;
+      console.log('[RecGov API]', searchUrl);
+      const response = await axios.get(searchUrl);
 
       const raw: Record<string, unknown>[] = response.data?.results ?? [];
 

@@ -49,6 +49,8 @@ export const New = () => {
   );
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [noResultsMessage, setNoResultsMessage] = useState<string | null>(null);
+  const [searchingRecArea, setSearchingRecArea] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const goToStep = useCallback((step: number) => {
@@ -69,6 +71,9 @@ export const New = () => {
       setStartDate('');
       setEndDate('');
       setHighestStepReached(1);
+      setNoResultsMessage(null);
+      setSearchingRecArea(true);
+      const showLoaderUntil = Date.now() + 600;
       try {
         const results = await api.get<CampgroundSearchResult[]>(
           `/api/campsites/search?recAreaId=${encodeURIComponent(recAreaId)}`,
@@ -76,9 +81,19 @@ export const New = () => {
         setSearchResults(results);
         if (results.length > 0) {
           goToStep(2);
+        } else {
+          setNoResultsMessage(
+            `No campgrounds found in "${displayName}". Try searching for a specific campground instead.`,
+          );
         }
       } catch (err) {
         console.error('Search failed:', err);
+      } finally {
+        const remaining = showLoaderUntil - Date.now();
+        if (remaining > 0) {
+          await new Promise((r) => setTimeout(r, remaining));
+        }
+        setSearchingRecArea(false);
       }
     },
     [goToStep],
@@ -138,6 +153,7 @@ export const New = () => {
       setSelectedSites([]);
       setStartDate('');
       setEndDate('');
+      setNoResultsMessage(null);
       setHighestStepReached(1);
 
       const preselected: CampgroundSearchResult = {
@@ -224,6 +240,11 @@ export const New = () => {
     goToStep(1);
   }, [goToStep]);
 
+  const handleSearchQueryChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    setNoResultsMessage(null);
+  }, []);
+
   const handleStartOver = useCallback(() => {
     setSearchQuery('');
     setSelectedSearchName('');
@@ -233,6 +254,7 @@ export const New = () => {
     setSelectedSites([]);
     setStartDate('');
     setEndDate('');
+    setNoResultsMessage(null);
     setHighestStepReached(1);
     goToStep(1);
   }, [goToStep]);
@@ -394,9 +416,11 @@ export const New = () => {
           {currentStep === 1 && (
             <Search
               searchQuery={searchQuery}
-              onSearchQueryChange={setSearchQuery}
+              onSearchQueryChange={handleSearchQueryChange}
               onSearchForRecArea={searchForRecArea}
               onSelectCampground={handleSelectCampground}
+              noResultsMessage={noResultsMessage}
+              searchingRecArea={searchingRecArea}
             />
           )}
 
