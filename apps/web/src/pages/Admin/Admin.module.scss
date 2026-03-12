@@ -210,6 +210,26 @@
 
 // ─── Activity Tab ─────────────────────────────────────────────────────────────
 
+.activityToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.activityFilterLabel {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.activityFilterSelect {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
 .activityList {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -263,6 +283,12 @@
   font-size: 13px;
   color: var(--color-text-secondary);
   margin-top: 4px;
+}
+
+.activityEmpty {
+  padding: 20px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 // ─── Scheduler Tab ────────────────────────────────────────────────────────────

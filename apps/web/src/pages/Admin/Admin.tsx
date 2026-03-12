@@ -53,6 +53,13 @@ interface Activity {
   details: string;
 }
 
+type ActivityFilter =
+  | 'all'
+  | 'scheduler'
+  | 'watches'
+  | 'users'
+  | 'notifications';
+
 interface SchedulerStatus {
   isRunning: boolean;
   isCheckInProgress: boolean;
@@ -62,7 +69,13 @@ interface SchedulerStatus {
   lastRunError: string | null;
 }
 
-type Tab = 'overview' | 'users' | 'watches' | 'activity' | 'scheduler' | 'email';
+type Tab =
+  | 'overview'
+  | 'users'
+  | 'watches'
+  | 'activity'
+  | 'scheduler'
+  | 'email';
 
 export const Admin = () => {
   useDocumentTitle('Admin');
@@ -244,7 +257,7 @@ const UsersTab = () => {
   const handleDeleteUser = (user: User) => {
     if (
       !window.confirm(
-        `Delete ${user.email}? This will permanently remove the user and all their watches and data.`
+        `Delete ${user.email}? This will permanently remove the user and all their watches and data.`,
       )
     ) {
       return;
@@ -314,9 +327,14 @@ const UsersTab = () => {
                     size="small"
                     onClick={() => handleDeleteUser(user)}
                     disabled={isCurrentUser || deleteUserMutation.isPending}
-                    title={isCurrentUser ? 'You cannot delete your own account' : undefined}
+                    title={
+                      isCurrentUser
+                        ? 'You cannot delete your own account'
+                        : undefined
+                    }
                   >
-                    {deleteUserMutation.isPending && deleteUserMutation.variables === user.id
+                    {deleteUserMutation.isPending &&
+                    deleteUserMutation.variables === user.id
                       ? 'Deleting...'
                       : 'Delete'}
                   </Button>
@@ -373,7 +391,11 @@ const WatchesTab = () => {
             <tr key={watch.id}>
               <td>{watch.id}</td>
               <td className={styles.userEmail}>{watch.userEmail}</td>
-              <td>{watch.sites?.map((s: { campsiteName: string }) => s.campsiteName).join(', ') || '—'}</td>
+              <td>
+                {watch.sites
+                  ?.map((s: { campsiteName: string }) => s.campsiteName)
+                  .join(', ') || '—'}
+              </td>
               <td>{watch.campgroundName}</td>
               <td className={styles.dates}>
                 {watch.startDate} → {watch.endDate}
@@ -398,6 +420,7 @@ const WatchesTab = () => {
 };
 
 const ActivityTab = () => {
+  const [filter, setFilter] = useState<ActivityFilter>('all');
   const {
     data: activities,
     isLoading,
@@ -422,72 +445,106 @@ const ActivityTab = () => {
     );
   if (!activities) return null;
 
+  const filteredActivities = activities.filter((activity) => {
+    if (filter === 'all') return true;
+    if (filter === 'scheduler') {
+      return (
+        activity.type === 'scheduler_run' || activity.type === 'scheduler_event'
+      );
+    }
+    if (filter === 'watches') return activity.type === 'watch_created';
+    if (filter === 'users') return activity.type === 'user_registered';
+    if (filter === 'notifications')
+      return activity.type === 'notification_sent';
+    return true;
+  });
+
   return (
-    <div className={styles.activityList}>
-      {activities.map((activity, idx) => {
-        const details = JSON.parse(activity.details);
-        return (
-          <div key={idx} className={styles.activityItem}>
-            <div className={styles.activityTime}>
-              {new Date(activity.timestamp).toLocaleString()}
-            </div>
-            <div className={styles.activityContent}>
-              <span className={styles.activityType}>
-                {activity.type === 'watch_created' && '📍 Watch Created'}
-                {activity.type === 'user_registered' && '👤 User Registered'}
-                {activity.type === 'notification_sent' &&
-                  '📧 Notification Sent'}
-                {activity.type === 'scheduler_run' && (
-                  <>
-                    ⏱ Scheduler Run (
-                    {details.status === 'success' ? '✓ Success' : '✗ Error'})
-                  </>
-                )}
-                {activity.type === 'scheduler_event' && (
-                  <>
-                    🧭 Scheduler Event ({details.eventType || 'event'})
-                  </>
-                )}
-              </span>
-              {activity.userEmail && (
-                <span className={styles.activityUser}>
-                  {activity.userEmail}
+    <>
+      <div className={styles.activityToolbar}>
+        <label className={styles.activityFilterLabel} htmlFor="activity-filter">
+          Filter:
+        </label>
+        <select
+          id="activity-filter"
+          className={styles.activityFilterSelect}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as ActivityFilter)}
+        >
+          <option value="all">All Activity</option>
+          <option value="scheduler">Scheduler</option>
+          <option value="watches">Watches</option>
+          <option value="users">Users</option>
+          <option value="notifications">Notifications</option>
+        </select>
+      </div>
+      <div className={styles.activityList}>
+        {filteredActivities.map((activity, idx) => {
+          const details = JSON.parse(activity.details);
+          return (
+            <div key={idx} className={styles.activityItem}>
+              <div className={styles.activityTime}>
+                {new Date(activity.timestamp).toLocaleString()}
+              </div>
+              <div className={styles.activityContent}>
+                <span className={styles.activityType}>
+                  {activity.type === 'watch_created' && '📍 Watch Created'}
+                  {activity.type === 'user_registered' && '👤 User Registered'}
+                  {activity.type === 'notification_sent' &&
+                    '📧 Notification Sent'}
+                  {activity.type === 'scheduler_run' && (
+                    <>
+                      ⏱ Scheduler Run (
+                      {details.status === 'success' ? '✓ Success' : '✗ Error'})
+                    </>
+                  )}
+                  {activity.type === 'scheduler_event' && (
+                    <>🧭 Scheduler Event ({details.eventType || 'event'})</>
+                  )}
                 </span>
-              )}
-              <div className={styles.activityDetails}>
-                {activity.type === 'watch_created' && (
-                  <>
-                    {details.campgroundName}
-                  </>
+                {activity.userEmail && (
+                  <span className={styles.activityUser}>
+                    {activity.userEmail}
+                  </span>
                 )}
-                {activity.type === 'user_registered' && (
-                  <>Display name: {details.displayName || 'Not set'}</>
-                )}
-                {activity.type === 'notification_sent' && (
-                  <>
-                    Channel: {details.channel}, Watch ID: {details.watchId}
-                  </>
-                )}
-                {activity.type === 'scheduler_run' && (
-                  <>
-                    {details.groupsChecked != null
-                      ? `${details.groupsChecked} watch groups checked`
-                      : ''}
-                    {details.errorMessage && ` — ${details.errorMessage}`}
-                  </>
-                )}
-                {activity.type === 'scheduler_event' && (
-                  <>
-                    {details.message}
-                    {details.metadata && ` — ${details.metadata}`}
-                  </>
-                )}
+                <div className={styles.activityDetails}>
+                  {activity.type === 'watch_created' && (
+                    <>{details.campgroundName}</>
+                  )}
+                  {activity.type === 'user_registered' && (
+                    <>Display name: {details.displayName || 'Not set'}</>
+                  )}
+                  {activity.type === 'notification_sent' && (
+                    <>
+                      Channel: {details.channel}, Watch ID: {details.watchId}
+                    </>
+                  )}
+                  {activity.type === 'scheduler_run' && (
+                    <>
+                      {details.groupsChecked != null
+                        ? `${details.groupsChecked} watch groups checked`
+                        : ''}
+                      {details.errorMessage && ` — ${details.errorMessage}`}
+                    </>
+                  )}
+                  {activity.type === 'scheduler_event' && (
+                    <>
+                      {details.message}
+                      {details.metadata && ` — ${details.metadata}`}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
+          );
+        })}
+        {filteredActivities.length === 0 && (
+          <div className={styles.activityEmpty}>
+            No activity for this filter yet.
           </div>
-        );
-      })}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -511,8 +568,8 @@ const EmailTab = () => {
             <span className={styles.infoValue}>{user?.email ?? '—'}</span>
           </div>
           <p className={styles.emailDescription}>
-            Sends a test email to verify that notification delivery is configured correctly
-            (Resend API key and from-address).
+            Sends a test email to verify that notification delivery is
+            configured correctly (Resend API key and from-address).
           </p>
         </div>
         <div className={styles.schedulerActions}>
@@ -525,7 +582,9 @@ const EmailTab = () => {
             {sendTestMutation.isPending ? 'Sending...' : 'Send test email'}
           </Button>
           {sendTestMutation.isSuccess && (
-            <span className={styles.statusSuccess}>✓ Test email sent. Check your inbox.</span>
+            <span className={styles.statusSuccess}>
+              ✓ Test email sent. Check your inbox.
+            </span>
           )}
           {sendTestMutation.isError && (
             <span className={styles.statusError}>
