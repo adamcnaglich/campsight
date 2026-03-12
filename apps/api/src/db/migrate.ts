@@ -38,6 +38,16 @@ export function runMigrations() {
     )
   `);
 
+  db.run(sql`
+    CREATE TABLE IF NOT EXISTS scheduler_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      occurred_at TEXT NOT NULL DEFAULT (datetime('now')),
+      event_type TEXT NOT NULL,
+      message TEXT NOT NULL,
+      metadata TEXT
+    )
+  `);
+
   // --- Multi-site migration ---
   // Detect whether the old single-site schema is in place
   const hasOldSchema = db.get<{ cnt: number }>(sql`
@@ -71,6 +81,7 @@ export function runMigrations() {
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_availability_watch_site_id ON availability_snapshots(watch_site_id)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications_log(user_id)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_scheduler_runs_finished_at ON scheduler_runs(finished_at)`);
+  db.run(sql`CREATE INDEX IF NOT EXISTS idx_scheduler_events_occurred_at ON scheduler_events(occurred_at)`);
 
   log.db.info('Migrations complete');
 }

@@ -1,12 +1,19 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
-import { fetchAvailability, diffAvailability } from './availability';
+import { fetchAvailability, diffAvailability, isRateLimitedError } from './availability';
 import { sendAvailabilityNotification } from './notification';
 import { AvailabilityMap } from '@campsight/shared';
 import { log } from '../lib/logger';
+import { logSchedulerEvent } from './scheduler-events';
 
 const CRON_SCHEDULE = process.env.CHECK_INTERVAL || '*/15 * * * *'; // every 15 min
+const REQUEST_DELAY_MS = Math.max(0, Number(process.env.SCHEDULER_REQUEST_DELAY_MS || 1000));
+const MAX_GROUPS_PER_CYCLE = Math.max(0, Number(process.env.SCHEDULER_MAX_GROUPS_PER_CYCLE || 0));
+const RATE_LIMIT_COOLDOWN_MS = Math.max(
+  0,
+  Number(process.env.SCHEDULER_RATE_LIMIT_COOLDOWN_MS || 5 * 60 * 1000),
+);
 
 // Scheduler state
 let schedulerTask: ScheduledTask | null = null;
@@ -15,6 +22,7 @@ let lastRunTime: Date | null = null;
 let lastRunStatus: 'success' | 'error' | null = null;
 let lastRunError: string | null = null;
 let isCheckInProgress = false;
+let cooldownUntil: Date | null = null;
 
 interface WatchSiteEntry {
   watchSiteId: number;
@@ -30,6 +38,14 @@ interface SiteGroup {
   startDate: string;
   endDate: string;
   entries: WatchSiteEntry[];
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isCooldownActive(): boolean {
+  return cooldownUntil !== null && cooldownUntil.getTime() > Date.now();
 }
 
 /**
@@ -61,7 +77,12 @@ function groupActiveWatchSites(): SiteGroup[] {
           entries: [],
         });
       }
-      groups.get(key)!.entries.push({
+      const groupedSite = groups.get(key);
+      if (!groupedSite) {
+        continue;
+      }
+
+      groupedSite.entries.push({
         watchSiteId: site.id,
         watchId: watch.id,
         userId: watch.userId,
@@ -130,13 +151,46 @@ async function runCheck() {
     return;
   }
 
+  if (isCooldownActive()) {
+    const activeCooldownUntil = cooldownUntil;
+    if (!activeCooldownUntil) {
+      return;
+    }
+
+    const remainingMs = activeCooldownUntil.getTime() - Date.now();
+    lastRunTime = new Date();
+    lastRunStatus = 'error';
+    lastRunError = `Rate-limit cooldown active for ${Math.ceil(remainingMs / 1000)}s`;
+    log.scheduler.warn(
+      { cooldownUntil: activeCooldownUntil.toISOString(), remainingMs },
+      'Skipping check cycle during rate-limit cooldown',
+    );
+    logSchedulerEvent({
+      eventType: 'rate_limit_cooldown_skip',
+      message: 'Check cycle skipped during active rate-limit cooldown',
+      metadata: {
+        cooldownUntil: activeCooldownUntil.toISOString(),
+        remainingMs,
+      },
+    });
+    db.insert(schema.schedulerRuns).values({
+      status: 'error',
+      errorMessage: lastRunError,
+      groupsChecked: 0,
+    }).run();
+    return;
+  }
+
   isCheckInProgress = true;
   lastRunTime = new Date();
   lastRunStatus = null;
   lastRunError = null;
 
   try {
-    const groups = groupActiveWatchSites();
+    const allGroups = groupActiveWatchSites();
+    const groups = MAX_GROUPS_PER_CYCLE > 0
+      ? allGroups.slice(0, MAX_GROUPS_PER_CYCLE)
+      : allGroups;
 
     if (groups.length === 0) {
       log.scheduler.debug('No active watches to check');
@@ -148,7 +202,34 @@ async function runCheck() {
       return;
     }
 
-    log.scheduler.info({ groupCount: groups.length }, 'Starting check cycle');
+    if (MAX_GROUPS_PER_CYCLE > 0 && allGroups.length > groups.length) {
+      log.scheduler.info(
+        { totalGroups: allGroups.length, cappedGroups: groups.length },
+        'Applying per-cycle group cap',
+      );
+      logSchedulerEvent({
+        eventType: 'cycle_cap_applied',
+        message: 'Per-cycle group cap applied',
+        metadata: {
+          totalGroups: allGroups.length,
+          cappedGroups: groups.length,
+          maxGroupsPerCycle: MAX_GROUPS_PER_CYCLE,
+        },
+      });
+    }
+
+    log.scheduler.info(
+      { groupCount: groups.length, requestDelayMs: REQUEST_DELAY_MS },
+      'Starting check cycle',
+    );
+    logSchedulerEvent({
+      eventType: 'check_cycle_started',
+      message: 'Starting check cycle',
+      metadata: {
+        groupCount: groups.length,
+        requestDelayMs: REQUEST_DELAY_MS,
+      },
+    });
 
     // Collect newly available sites per watch so we can send one notification per watch
     const watchNotifications = new Map<number, {
@@ -156,6 +237,8 @@ async function runCheck() {
       campgroundName: string;
       sites: Array<{ campsiteId: string; campsiteName: string; newlyAvailableDates: string[] }>;
     }>();
+    let groupsChecked = 0;
+    let cycleErrorMessage: string | null = null;
 
     for (const group of groups) {
       try {
@@ -180,14 +263,17 @@ async function runCheck() {
               'New availability detected',
             );
 
-            if (!watchNotifications.has(entry.watchId)) {
-              watchNotifications.set(entry.watchId, {
+            let watchNotification = watchNotifications.get(entry.watchId);
+            if (!watchNotification) {
+              watchNotification = {
                 userId: entry.userId,
                 campgroundName: entry.campgroundName,
                 sites: [],
-              });
+              };
+              watchNotifications.set(entry.watchId, watchNotification);
             }
-            watchNotifications.get(entry.watchId)!.sites.push({
+
+            watchNotification.sites.push({
               campsiteId: entry.campsiteId,
               campsiteName: entry.campsiteName,
               newlyAvailableDates: newlyAvailable,
@@ -195,8 +281,32 @@ async function runCheck() {
           }
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        groupsChecked += 1;
+        await sleep(REQUEST_DELAY_MS);
       } catch (error) {
+        if (isRateLimitedError(error)) {
+          cooldownUntil = new Date(Date.now() + RATE_LIMIT_COOLDOWN_MS);
+          cycleErrorMessage = `Rate limited by availability API; entering cooldown until ${cooldownUntil.toISOString()}`;
+          log.scheduler.warn(
+            {
+              campsiteId: group.campsiteId,
+              cooldownMs: RATE_LIMIT_COOLDOWN_MS,
+              cooldownUntil: cooldownUntil.toISOString(),
+            },
+            'Rate limit hit, ending check cycle early',
+          );
+          logSchedulerEvent({
+            eventType: 'rate_limit_cooldown_started',
+            message: 'Rate limit hit; ending cycle and entering cooldown',
+            metadata: {
+              campsiteId: group.campsiteId,
+              cooldownMs: RATE_LIMIT_COOLDOWN_MS,
+              cooldownUntil: cooldownUntil.toISOString(),
+            },
+          });
+          break;
+        }
+
         log.scheduler.error(
           { err: error, campsiteId: group.campsiteId },
           'Error checking campsite availability',
@@ -221,12 +331,22 @@ async function runCheck() {
       }
     }
 
-    log.scheduler.info('Check cycle complete');
-    lastRunStatus = 'success';
-    db.insert(schema.schedulerRuns).values({
-      status: 'success',
-      groupsChecked: groups.length,
-    }).run();
+    if (cycleErrorMessage) {
+      lastRunStatus = 'error';
+      lastRunError = cycleErrorMessage;
+      db.insert(schema.schedulerRuns).values({
+        status: 'error',
+        errorMessage: cycleErrorMessage,
+        groupsChecked,
+      }).run();
+    } else {
+      log.scheduler.info('Check cycle complete');
+      lastRunStatus = 'success';
+      db.insert(schema.schedulerRuns).values({
+        status: 'success',
+        groupsChecked,
+      }).run();
+    }
   } catch (error) {
     log.scheduler.error({ err: error }, 'Unhandled error in check cycle');
     lastRunStatus = 'error';
@@ -308,6 +428,9 @@ export function getSchedulerStatus() {
     isRunning: isSchedulerRunning,
     isCheckInProgress,
     schedule: CRON_SCHEDULE,
+    requestDelayMs: REQUEST_DELAY_MS,
+    maxGroupsPerCycle: MAX_GROUPS_PER_CYCLE === 0 ? null : MAX_GROUPS_PER_CYCLE,
+    cooldownUntil: cooldownUntil?.toISOString() || null,
     lastRunTime: lastRunTime?.toISOString() || null,
     lastRunStatus,
     lastRunError,

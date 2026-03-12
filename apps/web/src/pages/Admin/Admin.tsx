@@ -45,7 +45,8 @@ interface Activity {
     | 'watch_created'
     | 'user_registered'
     | 'notification_sent'
-    | 'scheduler_run';
+    | 'scheduler_run'
+    | 'scheduler_event';
   timestamp: string;
   userId: string;
   userEmail: string;
@@ -442,6 +443,11 @@ const ActivityTab = () => {
                     {details.status === 'success' ? '✓ Success' : '✗ Error'})
                   </>
                 )}
+                {activity.type === 'scheduler_event' && (
+                  <>
+                    🧭 Scheduler Event ({details.eventType || 'event'})
+                  </>
+                )}
               </span>
               {activity.userEmail && (
                 <span className={styles.activityUser}>
@@ -468,6 +474,12 @@ const ActivityTab = () => {
                       ? `${details.groupsChecked} watch groups checked`
                       : ''}
                     {details.errorMessage && ` — ${details.errorMessage}`}
+                  </>
+                )}
+                {activity.type === 'scheduler_event' && (
+                  <>
+                    {details.message}
+                    {details.metadata && ` — ${details.metadata}`}
                   </>
                 )}
               </div>

@@ -524,12 +524,31 @@ router.get('/activity', async (req, res: Response) => {
       .limit(limit)
       .all();
 
+    // Get recent scheduler internal events (retries, cooldowns, caps)
+    const recentSchedulerEvents = db
+      .select({
+        type: sql<string>`'scheduler_event'`,
+        timestamp: schema.schedulerEvents.occurredAt,
+        userId: sql<string>`''`,
+        userEmail: sql<string>`'System'`,
+        details: sql<string>`json_object(
+          'eventType', ${schema.schedulerEvents.eventType},
+          'message', ${schema.schedulerEvents.message},
+          'metadata', ${schema.schedulerEvents.metadata}
+        )`,
+      })
+      .from(schema.schedulerEvents)
+      .orderBy(desc(schema.schedulerEvents.occurredAt))
+      .limit(limit)
+      .all();
+
     // Combine and sort by timestamp
     const allActivity = [
       ...recentWatches,
       ...recentUsers,
       ...recentNotifications,
       ...recentSchedulerRuns,
+      ...recentSchedulerEvents,
     ].sort((a, b) => {
       return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
     }).slice(0, limit);

@@ -78,6 +78,18 @@ export const schedulerRuns = sqliteTable('scheduler_runs', {
   groupsChecked: integer('groups_checked'),
 });
 
+// ─── Scheduler Events ──────────────────────────────────────────────────────────
+
+export const schedulerEvents = sqliteTable('scheduler_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  occurredAt: text('occurred_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  eventType: text('event_type').notNull(),
+  message: text('message').notNull(),
+  metadata: text('metadata'),
+});
+
 // ─── Notification Log ──────────────────────────────────────────────────────────
 
 export const notificationsLog = sqliteTable('notifications_log', {
