@@ -30,12 +30,23 @@ function isLocalIp(ip: string): boolean {
   );
 }
 
-async function coordsFromIp(
-  ip: string,
-): Promise<{ lat: number; lng: number; source: string }> {
+interface GeoResult {
+  lat: number;
+  lng: number;
+  regionName: string;
+  source: string;
+}
+
+const DEFAULT_GEO: Omit<GeoResult, 'source'> = {
+  lat: DEFAULT_COORDS.lat,
+  lng: DEFAULT_COORDS.lng,
+  regionName: 'Michigan',
+};
+
+async function geoFromIp(ip: string): Promise<GeoResult> {
   if (isLocalIp(ip)) {
-    log.trending.debug({ ip }, 'Local IP detected, using default coords');
-    return { ...DEFAULT_COORDS, source: 'default:local-ip' };
+    log.available.debug({ ip }, 'Local IP detected, using default coords');
+    return { ...DEFAULT_GEO, source: 'default:local-ip' };
   }
   const cleanIp = ip.replace(/^::ffff:/, '');
   try {
@@ -44,57 +55,68 @@ async function coordsFromIp(
       message?: string;
       lat?: number;
       lon?: number;
+      regionName?: string;
     }>(`${IP_API_BASE}/${cleanIp}`, { timeout: 3000 });
 
     const { data } = response;
 
     if (data.status === 'fail') {
-      log.trending.warn(
+      log.available.warn(
         { ip: cleanIp, message: data.message },
         'ip-api.com returned a failure response',
       );
-      return { ...DEFAULT_COORDS, source: 'default:ip-api-error' };
+      return { ...DEFAULT_GEO, source: 'default:ip-api-error' };
     }
 
-    if (data.lat && data.lon) {
-      log.trending.debug(
-        { ip: cleanIp, lat: data.lat, lng: data.lon },
+    if (data.lat && data.lon && data.regionName) {
+      log.available.debug(
+        {
+          ip: cleanIp,
+          lat: data.lat,
+          lng: data.lon,
+          regionName: data.regionName,
+        },
         'IP geolocation resolved',
       );
-      return { lat: data.lat, lng: data.lon, source: 'ip-api' };
+      return {
+        lat: data.lat,
+        lng: data.lon,
+        regionName: data.regionName,
+        source: 'ip-api',
+      };
     }
 
-    log.trending.warn(
+    log.available.warn(
       { ip: cleanIp, data },
-      'ip-api.com returned no coordinates',
+      'ip-api.com returned incomplete data',
     );
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const status = err.response?.status;
       if (status === 429) {
-        log.trending.error(
+        log.available.error(
           { ip: cleanIp, status },
           'ip-api.com rate limit hit (429) — falling back to default coords',
         );
       } else if (err.code === 'ECONNABORTED') {
-        log.trending.warn(
+        log.available.warn(
           { ip: cleanIp },
           'ip-api.com request timed out — falling back to default coords',
         );
       } else {
-        log.trending.warn(
+        log.available.warn(
           { ip: cleanIp, status, code: err.code, message: err.message },
           'ip-api.com request failed — falling back to default coords',
         );
       }
     } else {
-      log.trending.warn(
+      log.available.warn(
         { ip: cleanIp, err },
         'Unexpected error during IP geolocation — falling back to default coords',
       );
     }
   }
-  return { ...DEFAULT_COORDS, source: 'default:fallback' };
+  return { ...DEFAULT_GEO, source: 'default:fallback' };
 }
 
 function toDateString(year: number, month: number, day: number): string {
@@ -116,7 +138,7 @@ function getUpcomingMonthDates(): { start_date: string; end_date: string } {
 }
 
 /**
- * GET /api/trending
+ * GET /api/available
  *
  * Returns available campgrounds near the requester's location (resolved
  * from their IP address) for the upcoming month via Recreation.gov.
@@ -126,13 +148,13 @@ router.get('/', async (req: Request, res: Response) => {
   res.set('Cache-Control', 'no-store');
 
   const ip = getClientIp(req);
-  log.trending.debug(
+  log.available.debug(
     { ip, forwardedFor: req.headers['x-forwarded-for'] },
-    'Trending request received',
+    'Available request received',
   );
 
   try {
-    const { lat, lng, source: geoSource } = await coordsFromIp(ip);
+    const { lat, lng, regionName, source: geoSource } = await geoFromIp(ip);
     const { start_date, end_date } = getUpcomingMonthDates();
 
     const params = new URLSearchParams({
@@ -141,35 +163,38 @@ router.get('/', async (req: Request, res: Response) => {
       sort: 'available',
       size: '9',
       start: '0',
-      radius: '500',
-      include_partially_available: 'false',
+      include_partially_available: 'true',
       include_notreservable: 'false',
       include_unavailable: 'false',
-      lat: String(lat),
-      lng: String(lng),
+      location: regionName,
     });
     params.append('fq', 'campsite_type_of_use:Overnight');
     params.append('fq', 'campsite_type_of_use:na');
     params.append('fq', 'entity_type:campground');
+
+    log.available.debug(
+      { url: `${RECREATION_GOV_SEARCH}?${params.toString()}` },
+      'Recreation.gov search URL',
+    );
 
     const { data } = await axios.get<{ results?: unknown[]; total?: number }>(
       `${RECREATION_GOV_SEARCH}?${params.toString()}`,
       { timeout: 8000 },
     );
 
-    log.trending.info(
-      { ip, lat, lng, geoSource, total: data.total },
-      'Trending campgrounds fetched',
+    log.available.info(
+      { ip, lat, lng, regionName, geoSource, total: data.total },
+      'Available campgrounds fetched',
     );
     res.json({ data: data.results ?? [] });
   } catch (error) {
-    log.trending.error(
+    log.available.error(
       { err: error, ip },
-      'Failed to fetch trending campgrounds',
+      'Failed to fetch available campgrounds',
     );
     res
       .status(502)
-      .json({ error: { message: 'Failed to fetch trending campgrounds' } });
+      .json({ error: { message: 'Failed to fetch available campgrounds' } });
   }
 });
 

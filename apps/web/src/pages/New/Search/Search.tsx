@@ -55,9 +55,9 @@ export const Search = ({
   const suggestionsRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: trendingData, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending'],
-    queryFn: () => api.get<TrendingCampground[]>('/api/trending'),
+  const { data: availableData, isLoading: availableLoading } = useQuery({
+    queryKey: ['available'],
+    queryFn: () => api.get<TrendingCampground[]>('/api/available'),
     staleTime: 10 * 60 * 1000,
   });
 
@@ -245,7 +245,7 @@ export const Search = ({
         <Text variant="h3" className={styles.trendingHeading}>
           Available Campgrounds Nearby
         </Text>
-        {trendingLoading ? (
+        {availableLoading ? (
           <div className={styles.trendingGrid}>
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className={styles.trendingSkeleton} />
@@ -253,7 +253,7 @@ export const Search = ({
           </div>
         ) : (
           <div className={styles.trendingGrid}>
-            {(trendingData ?? []).map((site) => (
+            {(availableData ?? []).map((site) => (
               <CampgroundCard
                 key={site.entity_id}
                 as="button"
