@@ -1,232 +1,432 @@
-.hero {
-  position: relative;
-  min-height: 100vh;
+/* ─── Page shell ──────────────────────────────────────────────────────────── */
+
+.page {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
-.content {
+/* ─── Shared section helpers ──────────────────────────────────────────────── */
+
+.sectionInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.sectionHeading {
+  text-align: center;
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.sectionSub {
+  text-align: center;
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 560px;
+  margin: 12px auto 0;
+}
+
+/* ─── Hero ────────────────────────────────────────────────────────────────── */
+
+.hero {
   position: relative;
-  min-height: 90vh;
+  min-height: min(92vh, 820px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/hero.jpg');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 100px 24px 64px;
+  max-width: 760px;
+  animation: fadeUp 0.8s ease-out both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.heroHeading {
+  font-size: clamp(36px, 7vw, 64px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+  margin-bottom: 20px;
+}
+
+.heroAccent {
+  color: var(--color-primary-active);
+}
+
+.heroSub {
+  font-size: clamp(16px, 2.5vw, 19px);
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto 36px;
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+
+.heroOutlineBtn {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #fff !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.7) !important;
+  }
+}
+
+.heroStats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.heroStat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  text-align: center;
-  background-image:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%),
-    url('/hero.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
-.heading {
-  font-size: clamp(36px, 6vw, 64px);
+.heroStatValue {
+  font-size: 22px;
   font-weight: 800;
-  color: white;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-  line-height: 1.15;
-  margin-bottom: 40px;
-  letter-spacing: -0.02em;
+  color: #fff;
 }
 
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
+.heroStatLabel {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
-.learnMore {
-  position: relative;
+.heroStatDivider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Problem / Solution ──────────────────────────────────────────────────── */
+
+.problemSection {
+  padding: 80px 0;
   background: var(--color-surface);
-  padding: 80px 24px;
 }
 
-.learnMoreInner {
-  max-width: 640px;
+.problemGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 900px;
   margin: 0 auto;
-  text-align: center;
-
-  h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: var(--color-text);
-  }
-
-  p {
-    font-size: 17px;
-    color: var(--color-text-secondary);
-    line-height: 1.7;
-  }
 }
 
-.featuresSection {
-  padding: 80px 24px;
+.problemCard,
+.solutionCard {
+  padding: 36px 32px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+}
+
+.problemCard {
   background: var(--color-bg);
 }
 
-.featuresInner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 40px;
+.solutionCard {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary-light);
 }
 
-.feature {
-  text-align: center;
-  padding: 32px 24px;
+.problemTitle {
+  color: var(--color-danger);
+  margin-bottom: 12px;
+}
+
+.solutionTitle {
+  color: var(--color-primary);
+  margin-bottom: 12px;
+}
+
+.problemText,
+.solutionText {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ─── Features ────────────────────────────────────────────────────────────── */
+
+.featuresSection {
+  padding: 96px 0;
+  background: var(--color-bg);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 56px;
+}
+
+.featureCard {
+  padding: 32px 28px;
   background: var(--color-surface);
-  border-radius: 12px;
   border: 1px solid var(--color-border);
-  transition: transform 0.2s ease;
+  border-radius: 14px;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 
-  &:hover {
-    transform: translateY(-4px);
-  }
-
-  h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 12px;
+  h4 {
+    margin-bottom: 8px;
     color: var(--color-text);
   }
 
   p {
-    font-size: 15px;
+    font-size: 14.5px;
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.65;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .featureIcon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.howItWorks {
-  padding: 80px 24px;
+/* ─── How It Works ────────────────────────────────────────────────────────── */
+
+.howSection {
+  padding: 96px 0;
   background: var(--color-surface);
 }
 
-.howItWorksInner {
-  max-width: 1000px;
-  margin: 0 auto;
-
-  h2 {
-    font-size: 32px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 48px;
-    color: var(--color-text);
-  }
-}
-
-.steps {
+.timeline {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 32px;
+  margin-top: 64px;
 }
 
-.step {
+.timelineLine {
+  position: absolute;
+  top: 24px;
+  left: calc(12.5% + 16px);
+  right: calc(12.5% + 16px);
+  height: 2px;
+  background: var(--color-border);
+}
+
+.timelineStep {
   text-align: center;
+  position: relative;
 
   h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--color-text);
   }
 
   p {
     font-size: 14px;
     color: var(--color-text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
+    max-width: 220px;
+    margin: 0 auto;
   }
 }
 
-.stepNumber {
-  width: 56px;
-  height: 56px;
+.timelineDot {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--color-primary);
   color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 auto 16px;
+  margin: 0 auto 14px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 6px var(--color-surface);
 }
 
-.whySection {
-  padding: 80px 24px;
+.timelineNum {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* ─── Dashboard Preview ───────────────────────────────────────────────────── */
+
+.previewSection {
+  padding: 96px 0;
   background: var(--color-bg);
 }
 
-.whyInner {
-  max-width: 800px;
-  margin: 0 auto;
+.previewImageWrap {
+  margin-top: 48px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
 
-  h2 {
-    font-size: 32px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 32px;
-    color: var(--color-text);
+.previewImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ─── Why CampSight ───────────────────────────────────────────────────────── */
+
+.whySection {
+  padding: 96px 0;
+  background: var(--color-surface);
+}
+
+.whyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.whyItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+
+  h5 {
+    margin-bottom: 4px;
   }
 }
 
-.whyContent {
-  p {
-    font-size: 17px;
-    color: var(--color-text-secondary);
-    line-height: 1.7;
-    margin-bottom: 20px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
+.whyIcon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  margin-top: 2px;
 }
+
+.whyText {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+/* ─── CTA ─────────────────────────────────────────────────────────────────── */
 
 .ctaSection {
-  padding: 80px 24px;
+  padding: 96px 24px;
   background: linear-gradient(
     135deg,
     var(--color-primary) 0%,
     var(--color-primary-dark) 100%
   );
+  text-align: center;
 }
 
 .ctaInner {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  text-align: center;
-
-  h2 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: var(--color-on-primary);
-  }
-
-  p {
-    font-size: 18px;
-    color: var(--color-on-primary);
-    opacity: 0.9;
-    margin-bottom: 32px;
-  }
 }
 
-/* CTA section – inverted style (surface on primary gradient) */
-.ctaSectionBtn {
+.ctaIcon {
+  color: var(--color-on-primary);
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.ctaHeading {
+  color: var(--color-on-primary) !important;
+  font-size: clamp(24px, 4vw, 34px);
+  margin-bottom: 12px;
+}
+
+.ctaSub {
+  color: var(--color-on-primary) !important;
+  opacity: 0.9;
+  font-size: 17px;
+  margin-bottom: 32px;
+}
+
+.ctaBtn {
   background: var(--color-surface) !important;
   color: var(--color-primary) !important;
+  font-weight: 700;
 
   &:hover {
     background: var(--color-surface) !important;
@@ -235,107 +435,253 @@
   }
 }
 
-/* ─── Mobile ──────────────────────────────────────────────────── */
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
 
-@media (max-width: 480px) {
-  .content {
-    min-height: 80vh;
-    padding: 32px 16px;
-  }
+.footer {
+  padding: 32px 24px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
 
-  .heading {
-    margin-bottom: 28px;
-  }
+.footerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  .buttons {
-    flex-direction: column;
-    width: 100%;
-    padding: 0 16px;
-  }
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  .learnMore {
-    padding: 48px 16px;
-  }
+.footerLogo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
 
-  .learnMoreInner {
-    h2 {
-      font-size: 22px;
-    }
+.footerTagline {
+  color: var(--color-text-muted);
+}
 
-    p {
-      font-size: 15px;
-    }
-  }
+.footerLinks {
+  display: flex;
+  gap: 24px;
 
-  .featuresSection {
-    padding: 48px 16px;
-  }
+  a {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
 
-  .featuresInner {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .feature {
-    padding: 24px 20px;
-  }
-
-  .featureIcon {
-    font-size: 36px;
-    margin-bottom: 12px;
-  }
-
-  .howItWorks {
-    padding: 48px 16px;
-  }
-
-  .howItWorksInner {
-    h2 {
-      font-size: 24px;
-      margin-bottom: 32px;
+    &:hover {
+      color: var(--color-primary);
+      text-decoration: none;
     }
   }
+}
 
-  .steps {
-    grid-template-columns: 1fr;
-    gap: 24px;
+/* ─── Tablet landscape (≤ 1024px) ─────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .sectionInner {
+    padding: 0 20px;
   }
 
-  .stepNumber {
-    width: 44px;
-    height: 44px;
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .whyGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .timeline {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 32px;
+  }
+
+  .timelineLine {
+    display: none;
+  }
+}
+
+/* ─── Tablet portrait (≤ 768px) ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .heroContent {
+    padding: 88px 20px 56px;
+  }
+
+  .heroStats {
+    gap: 18px;
+  }
+
+  .heroStatValue {
     font-size: 20px;
   }
 
+  .problemSection {
+    padding: 64px 0;
+  }
+
+  .problemGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .problemCard,
+  .solutionCard {
+    padding: 28px 24px;
+  }
+
+  .featuresSection,
+  .howSection,
+  .previewSection,
   .whySection {
-    padding: 48px 16px;
+    padding: 72px 0;
   }
 
-  .whyInner {
-    h2 {
-      font-size: 24px;
-      margin-bottom: 24px;
-    }
+  .featuresGrid {
+    gap: 16px;
   }
 
-  .whyContent {
-    p {
-      font-size: 15px;
-    }
+  .featureCard {
+    padding: 24px 20px;
+  }
+
+  .previewImageWrap {
+    margin-top: 36px;
+    border-radius: 12px;
+  }
+
+  .whyGrid {
+    gap: 24px;
   }
 
   .ctaSection {
-    padding: 48px 16px;
+    padding: 72px 20px;
+  }
+}
+
+/* ─── Mobile (≤ 480px) ────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .sectionInner {
+    padding: 0 16px;
   }
 
-  .ctaInner {
-    h2 {
-      font-size: 24px;
-    }
+  .sectionSub {
+    font-size: 15px;
+  }
 
-    p {
-      font-size: 16px;
-      margin-bottom: 24px;
+  .hero {
+    min-height: 100svh;
+  }
+
+  .heroContent {
+    padding: 72px 16px 40px;
+  }
+
+  .heroBadge {
+    font-size: 12px;
+    padding: 5px 12px;
+    margin-bottom: 20px;
+  }
+
+  .heroSub {
+    margin-bottom: 28px;
+  }
+
+  .heroCtas {
+    flex-direction: column;
+    width: 100%;
+
+    > * {
+      width: 100%;
     }
+  }
+
+  .heroStats {
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .heroStatValue {
+    font-size: 17px;
+  }
+
+  .heroStatLabel {
+    font-size: 10px;
+  }
+
+  .heroStatDivider {
+    height: 24px;
+  }
+
+  .problemSection {
+    padding: 48px 0;
+  }
+
+  .featuresSection,
+  .howSection,
+  .previewSection,
+  .whySection {
+    padding: 56px 0;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .featureCard {
+    padding: 24px 20px;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  .timeline {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .timelineDot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .whyGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ctaSection {
+    padding: 56px 16px;
+  }
+
+  .previewImageWrap {
+    margin-top: 28px;
+    border-radius: 10px;
+  }
+
+  .footerInner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .footerBrand {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .footerLinks {
+    gap: 16px;
   }
 }
