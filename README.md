@@ -9,6 +9,7 @@
 [![Built with Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Built with TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Monorepo: Nx](https://img.shields.io/badge/Monorepo-Nx-143055?logo=nx&logoColor=white)](https://nx.dev/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f26f5b17-f927-493c-973f-bc3a0b0bcc50/deploy-status)](https://app.netlify.com/projects/camp-sight/deploys)
 
 ---
 
