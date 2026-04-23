@@ -61,58 +61,53 @@
 
 The home page explains the value proposition and guides users to get started.
 
-<!-- TODO: Add landing page screenshot -->
-<!-- ![Landing Page](docs/screenshots/landing.png) -->
+![Landing Page](docs/screenshots/landing.jpg)
 
 ### Dashboard
 
 Monitor all your active watches in one place. See which campsites you're tracking and their current availability status.
 
 **Empty State:**
+
 <!-- TODO: Add dashboard empty state screenshot -->
-<!-- ![Dashboard Empty State](docs/screenshots/dashboard-empty.png) -->
+
+![Dashboard Empty State](docs/screenshots/dashboard-empty.png)
 
 **With Active Watches:**
+
 <!-- TODO: Add dashboard with watches screenshot -->
-<!-- ![Dashboard with Watches](docs/screenshots/dashboard-with-watches.png) -->
+
+![Dashboard with Watches](docs/screenshots/dashboard-with-watches.png)
 
 ### New Watch Flow
 
 A guided 5-step process makes it easy to set up campsite monitoring:
 
 **Step 1 — Search for Recreation Areas or Campgrounds**
+
 <!-- TODO: Add search step screenshot -->
-<!-- ![Search Step](docs/screenshots/new-watch-search.png) -->
 
-**Step 2 — Browse Campgrounds**
+![Search Step](docs/screenshots/new-watch-search.png)
+
+**Step 2 — Browse Campgrounds and campsites on interactive map**
+
 <!-- TODO: Add campgrounds selection screenshot -->
-<!-- ![Campgrounds Step](docs/screenshots/new-watch-campgrounds.png) -->
 
-**Step 3 — Select Campsites on Interactive Map**
-<!-- TODO: Add campsites map screenshot -->
-<!-- ![Campsites Map Step](docs/screenshots/new-watch-campsites-map.png) -->
+![Campgrounds Step](docs/screenshots/new-watch-campgrounds.png)
 
-**Step 4 — Choose Your Dates**
+**Step 3 — Choose Your Dates**
+
 <!-- TODO: Add dates selection screenshot -->
-<!-- ![Dates Step](docs/screenshots/new-watch-dates.png) -->
 
-**Step 5 — Review and Confirm**
-<!-- TODO: Add review step screenshot -->
-<!-- ![Review Step](docs/screenshots/new-watch-review.png) -->
+![Dates Step](docs/screenshots/new-watch-dates.png)
 
 ### Watch Detail
 
 View detailed availability information and edit watch settings.
 
 <!-- TODO: Add watch detail screenshot -->
-<!-- ![Watch Detail](docs/screenshots/watch-detail.png) -->
 
-### Settings
-
-Manage your account and notification preferences.
-
-<!-- TODO: Add settings screenshot -->
-<!-- ![Settings](docs/screenshots/settings.png) -->
+![Watch Detail](docs/screenshots/watch-detail.png)
 
 ---
 
@@ -130,7 +125,7 @@ flowchart TB
     RecGov[Recreation.gov API]
     Resend[Resend Email]
     Scheduler[Cron Scheduler]
-    
+
     User -->|Google Sign-in| Firebase
     User -->|Interacts| Frontend
     Frontend -->|REST API| API
@@ -195,12 +190,12 @@ sequenceDiagram
     participant Scheduler
     participant RecGov as Recreation.gov
     participant Email as Resend
-    
+
     User->>Frontend: Create watch
     Frontend->>API: POST /api/watches
     API->>Database: Store watch
     API-->>Frontend: Success
-    
+
     loop Every 15 minutes
         Scheduler->>Database: Get active watches
         Scheduler->>RecGov: Check availability
@@ -271,23 +266,27 @@ campsight/
 ### Key Design Decisions
 
 **Why SQLite?**
+
 - Zero configuration for development
 - Sufficient for thousands of watches
 - Easy backup (single file)
 - Can migrate to PostgreSQL later if needed
 
 **Why Firebase Auth?**
+
 - Handles OAuth flow complexity
 - No password management needed
 - Built-in security features
 - Free tier is generous
 
 **Why Monorepo?**
+
 - Share types between frontend and backend
 - Single source of truth for validation schemas
 - Efficient caching and task orchestration with Nx
 
 **Why Email Notifications?**
+
 - Universal delivery (no app install required)
 - Works on all devices
 - Reliable delivery with Resend
@@ -300,16 +299,16 @@ All routes except `/health` require a Firebase Auth bearer token in the `Authori
 
 ### Endpoints
 
-| Method | Path | Description | Auth Required |
-|--------|------|-------------|---------------|
-| `GET` | `/health` | Health check endpoint | No |
-| `GET` | `/api/watches` | List user's active watches | Yes |
-| `POST` | `/api/watches` | Create a new watch | Yes |
-| `PATCH` | `/api/watches/:id` | Update watch (pause/resume, edit dates) | Yes |
-| `DELETE` | `/api/watches/:id` | Delete a watch | Yes |
-| `GET` | `/api/watches/:id/availability` | Get current availability for watch | Yes |
-| `GET` | `/api/campsites/search` | Search campgrounds/campsites | Yes |
-| `GET` | `/api/campsites/facility/:id` | Get facility details | Yes |
+| Method   | Path                            | Description                             | Auth Required |
+| -------- | ------------------------------- | --------------------------------------- | ------------- |
+| `GET`    | `/health`                       | Health check endpoint                   | No            |
+| `GET`    | `/api/watches`                  | List user's active watches              | Yes           |
+| `POST`   | `/api/watches`                  | Create a new watch                      | Yes           |
+| `PATCH`  | `/api/watches/:id`              | Update watch (pause/resume, edit dates) | Yes           |
+| `DELETE` | `/api/watches/:id`              | Delete a watch                          | Yes           |
+| `GET`    | `/api/watches/:id/availability` | Get current availability for watch      | Yes           |
+| `GET`    | `/api/campsites/search`         | Search campgrounds/campsites            | Yes           |
+| `GET`    | `/api/campsites/facility/:id`   | Get facility details                    | Yes           |
 
 ### Example Request
 
@@ -372,12 +371,14 @@ CampSight uses a split deployment strategy:
 ### Quick Deploy
 
 **Frontend (Netlify):**
+
 1. Connect your GitHub repository
 2. Build command: `npx nx build web`
 3. Publish directory: `dist/apps/web`
 4. Add environment variables for Firebase and API URL
 
 **Backend (Railway):**
+
 1. Connect your GitHub repository
 2. Railway auto-detects Node.js and uses `railway.toml`
 3. Mount a persistent volume at `/data` for SQLite
@@ -441,26 +442,31 @@ npx drizzle-kit studio
 ### Technical Challenges Solved
 
 **1. Efficient Availability Polling**
+
 - Implemented smart cron scheduling to balance API rate limits with timely notifications
 - Optimized database queries to handle hundreds of concurrent watches
 - Added configurable intervals for different environments
 
 **2. Type-Safe Monorepo**
+
 - Shared Zod schemas ensure consistent validation between frontend and backend
 - TypeScript types automatically generated from schemas
 - Nx caching dramatically speeds up builds
 
 **3. Authentication & Authorization**
+
 - Firebase Admin SDK validates tokens on the backend
 - Middleware automatically attaches user context to requests
 - Access control system for managing user onboarding
 
 **4. Production Logging**
+
 - Structured JSON logs in production for easy parsing
 - Pretty-printed logs in development for better DX
 - Automatic request logging with response times and user context
 
 **5. Interactive Map Integration**
+
 - React Google Maps integration for visual campsite selection
 - Custom markers and info windows for better UX
 - Fallback to list view when map is unavailable
@@ -509,6 +515,7 @@ To capture the screenshots for this README:
 5. **Uncomment the image tags** in this README
 
 **Screenshot tips:**
+
 - Use a campground everyone knows (Yosemite, Yellowstone, Grand Canyon)
 - Show the app with data loaded (not loading states)
 - Capture some interactions (e.g., hover states, selected items)
