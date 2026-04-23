@@ -89,13 +89,13 @@ A guided 5-step process makes it easy to set up campsite monitoring:
 
 ![Search Step](docs/screenshots/new-watch-search.png)
 
-**Step 2 — Browse Campgrounds and campsites on interactive map**
+**Step 2/3 — Browse Campgrounds and campsites on interactive map**
 
 <!-- TODO: Add campgrounds selection screenshot -->
 
 ![Campgrounds Step](docs/screenshots/new-watch-campgrounds.png)
 
-**Step 3 — Choose Your Dates**
+**Step 4 — Choose Your Dates**
 
 <!-- TODO: Add dates selection screenshot -->
 
