@@ -216,7 +216,7 @@ sequenceDiagram
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/areknow/campsight.git
 cd campsight
 
 # Install dependencies
