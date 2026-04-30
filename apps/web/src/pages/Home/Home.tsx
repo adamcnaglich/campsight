@@ -47,7 +47,7 @@ export const Home = () => {
           </h1>
           <p className={styles.heroSub}>
             CampSight watches Recreation.gov for you and sends instant alerts
-            when your dream campsites open up. Never miss a cancellation again.
+            when your dream campsites open up. Never miss a cancellation.
           </p>
           <div className={styles.heroCtas}>
             <Button
@@ -162,7 +162,8 @@ export const Home = () => {
               <Text variant="h4">15-Minute Checks</Text>
               <Text variant="body">
                 Availability is checked every 15 minutes, 24 hours a day. When a
-                cancellation happens, you'll know before most people even notice.
+                cancellation happens, you'll know before most people even
+                notice.
               </Text>
             </div>
             <div className={styles.featureCard}>
@@ -181,9 +182,9 @@ export const Home = () => {
               </div>
               <Text variant="h4">Interactive Maps</Text>
               <Text variant="body">
-                Explore campgrounds and individual campsites on Google Maps.
-                See exact locations, select sites visually, and plan your trip
-                with confidence.
+                Explore campgrounds and individual campsites on Google Maps. See
+                exact locations, select sites visually, and plan your trip with
+                confidence.
               </Text>
             </div>
             <div className={styles.featureCard}>
@@ -264,9 +265,9 @@ export const Home = () => {
             Find any campsite in seconds
           </Text>
           <p className={styles.sectionSub}>
-            Search thousands of campgrounds across Recreation.gov with
-            real-time autocomplete. Browse by recreation area, explore on the
-            map, and pick the exact sites you want.
+            Search thousands of campgrounds across Recreation.gov with real-time
+            autocomplete. Browse by recreation area, explore on the map, and
+            pick the exact sites you want.
           </p>
           <div className={styles.previewImageWrap}>
             <img
