@@ -164,52 +164,144 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ─── Problem / Solution ──────────────────────────────────────────────────── */
+/* ─── Insight Strip ───────────────────────────────────────────────────────── */
 
-.problemSection {
-  padding: 80px 0;
-  background: var(--color-surface);
+.insightSection {
+  padding: 40px 0;
+  background-color: var(--color-surface);
+  background-image: radial-gradient(
+    circle,
+    rgba(52, 211, 153, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.problemGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  max-width: 900px;
+.insightInner {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 48px;
 }
 
-.problemCard,
-.solutionCard {
-  padding: 36px 32px;
-  border-radius: 16px;
-  border: 1px solid var(--color-border);
+.insightLeft {
+  flex: 1;
+  min-width: 0;
 }
 
-.problemCard {
-  background: var(--color-bg);
-}
-
-.solutionCard {
+.insightPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
   background: var(--color-primary-bg);
-  border-color: var(--color-primary-light);
-}
-
-.problemTitle {
-  color: var(--color-danger);
-  margin-bottom: 12px;
-}
-
-.solutionTitle {
+  border: 1px solid var(--color-primary-light);
   color: var(--color-primary);
-  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
 }
 
-.problemText,
-.solutionText {
-  color: var(--color-text-secondary);
-  line-height: 1.7;
+.insightHeading {
+  font-size: clamp(20px, 2.8vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.insightBody {
   font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  max-width: 520px;
+  margin: 0;
+}
+
+.insightSignal {
+  flex-shrink: 0;
+}
+
+.signalCard {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  min-width: 188px;
+}
+
+.signalRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.signalLive {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+  animation: signalPulse 2s ease-in-out infinite;
+}
+
+@keyframes signalPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.signalLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.signalSub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0 0 12px 15px;
+  transition: color 0.3s ease;
+}
+
+.signalSubChecking {
+  color: var(--color-primary);
+}
+
+.signalPips {
+  display: flex;
+  gap: 5px;
+  padding-left: 15px;
+}
+
+.signalPip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background 0.4s ease;
+}
+
+.signalPipActive {
+  background: var(--color-primary);
+}
+
+.signalPipChecking {
+  animation: signalPulse 0.6s ease-in-out infinite alternate;
 }
 
 /* ─── Features ────────────────────────────────────────────────────────────── */
@@ -523,18 +615,12 @@
     font-size: 20px;
   }
 
-  .problemSection {
-    padding: 64px 0;
+  .insightInner {
+    gap: 32px;
   }
 
-  .problemGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .problemCard,
-  .solutionCard {
-    padding: 28px 24px;
+  .insightSignal {
+    display: none;
   }
 
   .featuresSection,
@@ -621,8 +707,12 @@
     height: 24px;
   }
 
-  .problemSection {
+  .insightSection {
     padding: 48px 0;
+  }
+
+  .insightInner {
+    padding: 0 16px;
   }
 
   .featuresSection,

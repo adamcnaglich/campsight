@@ -22,11 +22,14 @@ import { Text } from '../../components/Text';
 import { Button } from '../../components/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useCycleCountdown } from '../../hooks/useCycleCountdown';
 import styles from './Home.module.scss';
 
 export const Home = () => {
   const { resolvedTheme } = useTheme();
   useDocumentTitle('CampSight — Never Miss a Campsite Opening');
+
+  const { isChecking, countdownLabel, activePips } = useCycleCountdown(5);
 
   return (
     <div className={styles.page}>
@@ -94,30 +97,42 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* ── Problem / Solution ────────────────────────────────── */}
-      <section className={styles.problemSection}>
-        <div className={styles.sectionInner}>
-          <div className={styles.problemGrid}>
-            <div className={styles.problemCard}>
-              <Text variant="h3" className={styles.problemTitle}>
-                The problem
-              </Text>
-              <Text variant="body" className={styles.problemText}>
-                Popular campsites at national parks book up months in advance.
-                Cancellations happen daily — but those openings vanish within
-                minutes. Constantly refreshing Recreation.gov is exhausting and
-                unreliable.
-              </Text>
-            </div>
-            <div className={styles.solutionCard}>
-              <Text variant="h3" className={styles.solutionTitle}>
-                The solution
-              </Text>
-              <Text variant="body" className={styles.solutionText}>
-                CampSight monitors availability around the clock and notifies
-                you the moment a spot opens. Set it up once, then go about your
-                life — we'll handle the watching.
-              </Text>
+      {/* ── Insight Strip ─────────────────────────────────────── */}
+      <section className={styles.insightSection}>
+        <div className={styles.insightInner}>
+          <div className={styles.insightLeft}>
+            <span className={styles.insightPill}>
+              <Tent size={13} />
+              Built for Recreation.gov cancellations
+            </span>
+            <h2 className={styles.insightHeading}>
+              Popular campsites disappear fast
+            </h2>
+            <p className={styles.insightBody}>
+              CampSight monitors your trip in the background and alerts you when
+              a matching campsite opens. Stop refreshing and get back to
+              planning.
+            </p>
+          </div>
+          <div className={styles.insightSignal}>
+            <div className={styles.signalCard}>
+              <div className={styles.signalRow}>
+                <span className={styles.signalLive} />
+                <span className={styles.signalLabel}>Watching Yosemite</span>
+              </div>
+              <p
+                className={`${styles.signalSub} ${isChecking ? styles.signalSubChecking : ''}`}
+              >
+                {countdownLabel}
+              </p>
+              <div className={styles.signalPips}>
+                {Array.from({ length: 5 }, (_, i) => (
+                  <span
+                    key={i}
+                    className={`${styles.signalPip} ${i < activePips ? styles.signalPipActive : ''} ${isChecking ? styles.signalPipChecking : ''}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
