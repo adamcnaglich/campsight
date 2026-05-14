@@ -23,6 +23,7 @@ import { Button } from '../../components/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useCycleCountdown } from '../../hooks/useCycleCountdown';
+import artifactLogo from './artifact-logo.svg';
 import styles from './Home.module.scss';
 
 export const Home = () => {
@@ -399,14 +400,27 @@ export const Home = () => {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <span className={styles.footerLogo}>🏕️ CampSight</span>
-            <Text variant="body-sm" className={styles.footerTagline}>
-              Never miss a campsite opening.
-            </Text>
+            <a
+              href="https://artifactdesign.co/"
+              className={styles.footerLogoLink}
+              aria-label="Artifact Design"
+            >
+              <img
+                src={artifactLogo}
+                alt=""
+                className={styles.footerLogoImg}
+                width={108}
+                height={30}
+              />
+            </a>
+            <span className={styles.footerCopyright}>
+              © {new Date().getFullYear()} Artifact Design LLC. All rights reserved.
+            </span>
           </div>
           <div className={styles.footerLinks}>
+            <Link to="/privacy">Privacy</Link>
+            <span className={styles.footerSeparator} aria-hidden="true">•</span>
             <Link to="/terms">Terms</Link>
-            <Link to="/login">Sign In</Link>
           </div>
         </div>
       </footer>

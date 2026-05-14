@@ -549,19 +549,26 @@
   gap: 12px;
 }
 
-.footerLogo {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text);
+.footerLogoLink {
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
-.footerTagline {
+.footerLogoImg {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
+.footerCopyright {
+  font-size: 13px;
   color: var(--color-text-muted);
 }
 
 .footerLinks {
   display: flex;
-  gap: 24px;
+  align-items: center;
+  gap: 12px;
 
   a {
     font-size: 14px;
@@ -573,6 +580,12 @@
       text-decoration: none;
     }
   }
+}
+
+.footerSeparator {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  user-select: none;
 }
 
 /* ─── Tablet landscape (≤ 1024px) ─────────────────────────────────────────── */
