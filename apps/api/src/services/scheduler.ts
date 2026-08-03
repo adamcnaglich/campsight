@@ -49,9 +49,22 @@ function isCooldownActive(): boolean {
 }
 
 /**
- * Group active watch sites by campsiteId + date range to avoid duplicate API calls.
+ * A watch is expired once its inclusive end date has passed, and can never
+ * notify again. Watch dates are campground-local while the server runs on UTC,
+ * so keep checking for a full day past the end date rather than risk dropping a
+ * watch that is still current in the user's own timezone.
  */
-function groupActiveWatchSites(): SiteGroup[] {
+function isExpiredWatch(endDate: string, now = new Date()): boolean {
+  const cutoff = new Date(now);
+  cutoff.setUTCDate(cutoff.getUTCDate() - 1);
+  return endDate < cutoff.toISOString().slice(0, 10);
+}
+
+/**
+ * Group active, unexpired watch sites by campsiteId + date range to avoid
+ * duplicate API calls.
+ */
+function groupActiveWatchSites(): { groups: SiteGroup[]; expiredWatches: number } {
   const activeWatches = db
     .select()
     .from(schema.watches)
@@ -59,8 +72,14 @@ function groupActiveWatchSites(): SiteGroup[] {
     .all();
 
   const groups = new Map<string, SiteGroup>();
+  let expiredWatches = 0;
 
   for (const watch of activeWatches) {
+    if (isExpiredWatch(watch.endDate)) {
+      expiredWatches += 1;
+      continue;
+    }
+
     const sites = db
       .select()
       .from(schema.watchSites)
@@ -93,7 +112,7 @@ function groupActiveWatchSites(): SiteGroup[] {
     }
   }
 
-  return Array.from(groups.values());
+  return { groups: Array.from(groups.values()), expiredWatches };
 }
 
 /**
@@ -187,10 +206,19 @@ async function runCheck() {
   lastRunError = null;
 
   try {
-    const allGroups = groupActiveWatchSites();
+    const { groups: allGroups, expiredWatches } = groupActiveWatchSites();
     const groups = MAX_GROUPS_PER_CYCLE > 0
       ? allGroups.slice(0, MAX_GROUPS_PER_CYCLE)
       : allGroups;
+
+    if (expiredWatches > 0) {
+      log.scheduler.info({ expiredWatches }, 'Skipping watches past their end date');
+      logSchedulerEvent({
+        eventType: 'expired_watches_skipped',
+        message: 'Skipped watches past their end date',
+        metadata: { expiredWatches },
+      });
+    }
 
     if (groups.length === 0) {
       log.scheduler.debug('No active watches to check');
