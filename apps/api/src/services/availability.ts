@@ -14,6 +14,19 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * recreation.gov treats end_date as exclusive: [start, end) returns the nights
+ * start..end-1. Watch dates are inclusive on both ends (a single-night watch has
+ * startDate === endDate), so shift the end forward a day. Passing an equal
+ * start/end makes the API reject the request as a 400 with a misleading
+ * "The dates you entered don't match our format" message.
+ */
+function toExclusiveEndDate(endDate: string): string {
+  const date = new Date(`${endDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
 function getHttpStatus(error: unknown): number | undefined {
   if (!axios.isAxiosError(error)) return undefined;
   return error.response?.status;
@@ -83,7 +96,7 @@ export async function fetchAvailability(
       const response = await axios.get(url, {
         params: {
           start_date: `${startDate}T00:00:00Z`,
-          end_date: `${endDate}T00:00:00Z`,
+          end_date: `${toExclusiveEndDate(endDate)}T00:00:00Z`,
         },
         headers: {
           'User-Agent': 'CampSight/1.0',
