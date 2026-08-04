@@ -12,7 +12,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 export const logger = pino({
   level: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
   ...(isProduction
-    ? {}
+    ? {
+        // Log platforms derive severity from a string `level`. Pino's default
+        // numeric levels (50 = error) aren't recognized, so without this every
+        // line — warnings and errors included — is ingested as "info".
+        formatters: {
+          level: (label: string) => ({ level: label }),
+        },
+      }
     : {
         transport: {
           target: 'pino-pretty',
