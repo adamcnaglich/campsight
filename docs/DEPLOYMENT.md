@@ -142,7 +142,7 @@ This saves build minutes and speeds up deployments for backend-only changes.
    RESEND_FROM_EMAIL=noreply@yourdomain.com
    RIDB_API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    
-   CHECK_INTERVAL=*/15 * * * *
+   CHECK_INTERVAL=*/10 * * * *
    LOG_LEVEL=info
    ```
    

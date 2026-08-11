@@ -74,7 +74,27 @@ export function runMigrations() {
   // Existing users (no token) keep access; new users get token and approved=0
   db.run(sql`UPDATE users SET approved = 1 WHERE approval_token IS NULL AND approved = 0`);
 
+  // Records which (watch site, date) pairs the user has already been emailed
+  // about, so a site that flickers unavailable and back does not re-alert.
+  db.run(sql`
+    CREATE TABLE IF NOT EXISTS notified_dates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      watch_site_id INTEGER NOT NULL REFERENCES watch_sites(id) ON DELETE CASCADE,
+      date TEXT NOT NULL,
+      notified_at TEXT NOT NULL DEFAULT (datetime('now')),
+      miss_count INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+
+  // Snapshots are now upserted per (site, date) rather than deleted and
+  // rewritten wholesale, which needs a unique index to conflict against. Older
+  // databases should already hold at most one row per pair, but dedupe first so
+  // the index cannot fail to build on a database that drifted.
+  dedupeAvailabilitySnapshots();
+
   // Indexes
+  db.run(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_availability_site_date ON availability_snapshots(watch_site_id, date)`);
+  db.run(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_notified_dates_site_date ON notified_dates(watch_site_id, date)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_user_id ON watches(user_id)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_active ON watches(is_active)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watch_sites_watch_id ON watch_sites(watch_id)`);
@@ -84,6 +104,40 @@ export function runMigrations() {
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_scheduler_events_occurred_at ON scheduler_events(occurred_at)`);
 
   log.db.info('Migrations complete');
+}
+
+/**
+ * Collapse any duplicate (watch_site_id, date) snapshot rows down to the most
+ * recently captured one, so the unique index can be built.
+ */
+function dedupeAvailabilitySnapshots() {
+  const duplicates = db.get<{ cnt: number }>(sql`
+    SELECT COUNT(*) as cnt FROM (
+      SELECT watch_site_id, date FROM availability_snapshots
+      GROUP BY watch_site_id, date HAVING COUNT(*) > 1
+    )
+  `);
+
+  if (!duplicates || duplicates.cnt === 0) {
+    return;
+  }
+
+  db.run(sql`
+    DELETE FROM availability_snapshots
+    WHERE id NOT IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+          PARTITION BY watch_site_id, date ORDER BY captured_at DESC, id DESC
+        ) AS rn
+        FROM availability_snapshots
+      ) WHERE rn = 1
+    )
+  `);
+
+  log.db.info(
+    { duplicatePairs: duplicates.cnt },
+    'Deduped availability snapshots before unique index'
+  );
 }
 
 /**

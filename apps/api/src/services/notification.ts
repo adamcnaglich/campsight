@@ -7,6 +7,7 @@ import { log } from '../lib/logger';
 const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
 
 interface SiteAvailability {
+  watchSiteId: number;
   campsiteId: string;
   campsiteName: string;
   newlyAvailableDates: string[];
@@ -52,10 +53,14 @@ function buildSiteHtml(site: SiteAvailability): string {
 /**
  * Pluggable notification service.
  * Currently implements email via Resend. Designed to add push later.
+ *
+ * Returns whether the notification was delivered. The caller uses this to decide
+ * whether to record the dates as notified — a false return leaves them eligible
+ * to alert again on the next cycle.
  */
 export async function sendAvailabilityNotification(
   payload: NotificationPayload
-): Promise<void> {
+): Promise<boolean> {
   const { userId, watchId, campgroundName, sites } = payload;
 
   const user = db
@@ -66,13 +71,13 @@ export async function sendAvailabilityNotification(
 
   if (!user) {
     log.notify.error({ userId }, 'User not found for notification');
-    return;
+    return false;
   }
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     log.notify.warn('RESEND_API_KEY not set, skipping email');
-    return;
+    return false;
   }
 
   const resend = new Resend(resendKey);
@@ -109,7 +114,13 @@ export async function sendAvailabilityNotification(
     });
 
     log.notify.info(
-      { userId, watchId, email: user.email, siteCount },
+      {
+        userId,
+        watchId,
+        email: user.email,
+        siteCount,
+        dates: sites.flatMap((site) => site.newlyAvailableDates),
+      },
       'Availability notification email sent',
     );
 
@@ -121,8 +132,11 @@ export async function sendAvailabilityNotification(
         payload: JSON.stringify(payload),
       })
       .run();
+
+    return true;
   } catch (error) {
     log.notify.error({ err: error, userId, watchId }, 'Failed to send notification email');
+    return false;
   }
 }
 

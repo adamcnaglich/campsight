@@ -2,6 +2,7 @@ import {
   sqliteTable,
   text,
   integer,
+  uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
 
 // ─── Users ─────────────────────────────────────────────────────────────────────
@@ -54,17 +55,55 @@ export const watchSites = sqliteTable('watch_sites', {
 
 // ─── Availability Snapshots ────────────────────────────────────────────────────
 
-export const availabilitySnapshots = sqliteTable('availability_snapshots', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  watchSiteId: integer('watch_site_id')
-    .notNull()
-    .references(() => watchSites.id, { onDelete: 'cascade' }),
-  date: text('date').notNull(), // YYYY-MM-DD
-  status: text('status').notNull(),
-  capturedAt: text('captured_at')
-    .notNull()
-    .$defaultFn(() => new Date().toISOString()),
-});
+export const availabilitySnapshots = sqliteTable(
+  'availability_snapshots',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    watchSiteId: integer('watch_site_id')
+      .notNull()
+      .references(() => watchSites.id, { onDelete: 'cascade' }),
+    date: text('date').notNull(), // YYYY-MM-DD
+    status: text('status').notNull(),
+    capturedAt: text('captured_at')
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+  },
+  (table) => ({
+    siteDate: uniqueIndex('idx_availability_site_date').on(
+      table.watchSiteId,
+      table.date
+    ),
+  })
+);
+
+// ─── Notified Dates ────────────────────────────────────────────────────────────
+
+// One row per (watch site, date) we have already emailed about. Availability
+// snapshots record what recreation.gov last said; these record what the user has
+// already been told, so a site that flickers out and back does not re-alert.
+export const notifiedDates = sqliteTable(
+  'notified_dates',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    watchSiteId: integer('watch_site_id')
+      .notNull()
+      .references(() => watchSites.id, { onDelete: 'cascade' }),
+    date: text('date').notNull(), // YYYY-MM-DD
+    notifiedAt: text('notified_at')
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    // Consecutive checks that saw this date as explicitly unavailable. The mark
+    // is dropped once this crosses the threshold, so a genuine reopening later
+    // can alert again.
+    missCount: integer('miss_count').notNull().default(0),
+  },
+  (table) => ({
+    siteDate: uniqueIndex('idx_notified_dates_site_date').on(
+      table.watchSiteId,
+      table.date
+    ),
+  })
+);
 
 // ─── Scheduler Runs ────────────────────────────────────────────────────────────
 

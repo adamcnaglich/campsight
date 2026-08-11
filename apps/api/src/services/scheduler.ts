@@ -1,18 +1,25 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { db, schema } from '../db';
-import { eq } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import { fetchAvailability, diffAvailability, isRateLimitedError } from './availability';
 import { sendAvailabilityNotification } from './notification';
 import { AvailabilityMap } from '@campsight/shared';
 import { log } from '../lib/logger';
 import { logSchedulerEvent } from './scheduler-events';
 
-const CRON_SCHEDULE = process.env.CHECK_INTERVAL || '*/15 * * * *'; // every 15 min
+const CRON_SCHEDULE = process.env.CHECK_INTERVAL || '*/10 * * * *'; // every 10 min
 const REQUEST_DELAY_MS = Math.max(0, Number(process.env.SCHEDULER_REQUEST_DELAY_MS || 1000));
 const MAX_GROUPS_PER_CYCLE = Math.max(0, Number(process.env.SCHEDULER_MAX_GROUPS_PER_CYCLE || 0));
 const RATE_LIMIT_COOLDOWN_MS = Math.max(
   0,
   Number(process.env.SCHEDULER_RATE_LIMIT_COOLDOWN_MS || 5 * 60 * 1000),
+);
+// How many consecutive checks must see an already-notified date as explicitly
+// unavailable before we forget having notified it. Alerts are never delayed by
+// this: it only governs how soon the same date may alert a second time.
+const NOTIFY_CLEAR_AFTER_MISSES = Math.max(
+  1,
+  Number(process.env.SCHEDULER_NOTIFY_CLEAR_AFTER_MISSES || 3),
 );
 
 // Scheduler state
@@ -139,26 +146,123 @@ function getLatestSnapshot(watchSiteId: number): AvailabilityMap {
 }
 
 /**
- * Store new availability data as snapshots for a watch site.
+ * Merge new availability data into the snapshots for a watch site.
+ *
+ * Deliberately an upsert rather than a delete-and-rewrite: a date missing from
+ * a response means recreation.gov told us nothing about it, not that it became
+ * unavailable. Dropping such dates would make the next response that does
+ * include them look like fresh availability.
  */
 function storeSnapshots(watchSiteId: number, availability: AvailabilityMap) {
   const now = new Date().toISOString();
-  const values = Object.entries(availability).map(([date, status]) => ({
-    watchSiteId,
-    date,
-    status,
-    capturedAt: now,
-  }));
 
-  if (values.length > 0) {
-    db.delete(schema.availabilitySnapshots)
-      .where(eq(schema.availabilitySnapshots.watchSiteId, watchSiteId))
+  for (const [date, status] of Object.entries(availability)) {
+    db.insert(schema.availabilitySnapshots)
+      .values({ watchSiteId, date, status, capturedAt: now })
+      .onConflictDoUpdate({
+        target: [
+          schema.availabilitySnapshots.watchSiteId,
+          schema.availabilitySnapshots.date,
+        ],
+        set: { status, capturedAt: now },
+      })
       .run();
+  }
+}
 
-    for (const val of values) {
-      db.insert(schema.availabilitySnapshots).values(val).run();
+/**
+ * Dates already emailed for this watch site, mapped to their current miss count.
+ */
+function getNotifiedDates(watchSiteId: number): Map<string, number> {
+  const rows = db
+    .select()
+    .from(schema.notifiedDates)
+    .where(eq(schema.notifiedDates.watchSiteId, watchSiteId))
+    .all();
+
+  return new Map(rows.map((row) => [row.date, row.missCount]));
+}
+
+/**
+ * Record that these dates have been emailed. Called only after the email
+ * actually sends, so a delivery failure leaves the dates eligible to retry.
+ */
+function markNotified(watchSiteId: number, dates: string[]) {
+  const now = new Date().toISOString();
+
+  for (const date of dates) {
+    db.insert(schema.notifiedDates)
+      .values({ watchSiteId, date, notifiedAt: now, missCount: 0 })
+      .onConflictDoUpdate({
+        target: [schema.notifiedDates.watchSiteId, schema.notifiedDates.date],
+        set: { notifiedAt: now, missCount: 0 },
+      })
+      .run();
+  }
+}
+
+/**
+ * Age out notified marks so a date that genuinely reopens later can alert again.
+ *
+ * Only an explicit non-Available reading counts as a miss. A date absent from
+ * the response is unknown rather than unavailable, and clearing on absence would
+ * let a truncated payload resurrect the duplicate this is meant to prevent.
+ */
+function reconcileNotifiedDates(
+  watchSiteId: number,
+  current: AvailabilityMap,
+  notified: Map<string, number>,
+): string[] {
+  const cleared: string[] = [];
+
+  for (const [date, missCount] of notified) {
+    const status = current[date];
+    if (status === undefined) {
+      continue;
+    }
+
+    const where = and(
+      eq(schema.notifiedDates.watchSiteId, watchSiteId),
+      eq(schema.notifiedDates.date, date),
+    );
+
+    if (status === 'Available') {
+      if (missCount !== 0) {
+        db.update(schema.notifiedDates).set({ missCount: 0 }).where(where).run();
+      }
+      continue;
+    }
+
+    const nextMissCount = missCount + 1;
+    if (nextMissCount >= NOTIFY_CLEAR_AFTER_MISSES) {
+      db.delete(schema.notifiedDates).where(where).run();
+      cleared.push(date);
+    } else {
+      db.update(schema.notifiedDates)
+        .set({ missCount: nextMissCount })
+        .where(where)
+        .run();
     }
   }
+
+  return cleared;
+}
+
+/**
+ * Drop snapshot and notified rows for dates that have passed. Uses the same
+ * one-day grace as isExpiredWatch since watch dates are campground-local.
+ */
+function prunePastDates() {
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - 1);
+  const cutoffDate = cutoff.toISOString().slice(0, 10);
+
+  db.delete(schema.availabilitySnapshots)
+    .where(lt(schema.availabilitySnapshots.date, cutoffDate))
+    .run();
+  db.delete(schema.notifiedDates)
+    .where(lt(schema.notifiedDates.date, cutoffDate))
+    .run();
 }
 
 /**
@@ -206,6 +310,8 @@ async function runCheck() {
   lastRunError = null;
 
   try {
+    prunePastDates();
+
     const { groups: allGroups, expiredWatches } = groupActiveWatchSites();
     const groups = MAX_GROUPS_PER_CYCLE > 0
       ? allGroups.slice(0, MAX_GROUPS_PER_CYCLE)
@@ -263,7 +369,12 @@ async function runCheck() {
     const watchNotifications = new Map<number, {
       userId: string;
       campgroundName: string;
-      sites: Array<{ campsiteId: string; campsiteName: string; newlyAvailableDates: string[] }>;
+      sites: Array<{
+        watchSiteId: number;
+        campsiteId: string;
+        campsiteName: string;
+        newlyAvailableDates: string[];
+      }>;
     }>();
     let groupsChecked = 0;
     let cycleErrorMessage: string | null = null;
@@ -285,28 +396,78 @@ async function runCheck() {
 
           storeSnapshots(entry.watchSiteId, currentAvailability);
 
-          if (newlyAvailable.length > 0) {
+          const notified = getNotifiedDates(entry.watchSiteId);
+          const cleared = reconcileNotifiedDates(
+            entry.watchSiteId,
+            currentAvailability,
+            notified,
+          );
+
+          if (cleared.length > 0) {
             log.scheduler.info(
-              { watchSiteId: entry.watchSiteId, watchId: entry.watchId, userId: entry.userId, newDates: newlyAvailable.length },
-              'New availability detected',
+              { watchSiteId: entry.watchSiteId, watchId: entry.watchId, cleared },
+              'Cleared notified dates after sustained unavailability',
             );
+          }
 
-            let watchNotification = watchNotifications.get(entry.watchId);
-            if (!watchNotification) {
-              watchNotification = {
-                userId: entry.userId,
-                campgroundName: entry.campgroundName,
-                sites: [],
-              };
-              watchNotifications.set(entry.watchId, watchNotification);
-            }
+          if (newlyAvailable.length === 0) {
+            continue;
+          }
 
-            watchNotification.sites.push({
+          // Dates the user has already been emailed about are suppressed here.
+          // The site flickering unavailable and back re-enters this branch, but
+          // must not produce a second email for the same dates.
+          const toNotify = newlyAvailable.filter((date) => !notified.has(date));
+          const suppressed = newlyAvailable.filter((date) => notified.has(date));
+
+          log.scheduler.info(
+            {
+              watchSiteId: entry.watchSiteId,
+              watchId: entry.watchId,
+              userId: entry.userId,
               campsiteId: entry.campsiteId,
-              campsiteName: entry.campsiteName,
-              newlyAvailableDates: newlyAvailable,
+              newDates: toNotify,
+              suppressedDates: suppressed,
+              previousStatuses: newlyAvailable.map(
+                (date) => previousAvailability[date] ?? 'unknown',
+              ),
+            },
+            'New availability detected',
+          );
+
+          if (suppressed.length > 0) {
+            logSchedulerEvent({
+              eventType: 'duplicate_notification_suppressed',
+              message: 'Suppressed dates already notified for this site',
+              metadata: {
+                watchSiteId: entry.watchSiteId,
+                watchId: entry.watchId,
+                campsiteId: entry.campsiteId,
+                suppressedDates: suppressed,
+              },
             });
           }
+
+          if (toNotify.length === 0) {
+            continue;
+          }
+
+          let watchNotification = watchNotifications.get(entry.watchId);
+          if (!watchNotification) {
+            watchNotification = {
+              userId: entry.userId,
+              campgroundName: entry.campgroundName,
+              sites: [],
+            };
+            watchNotifications.set(entry.watchId, watchNotification);
+          }
+
+          watchNotification.sites.push({
+            watchSiteId: entry.watchSiteId,
+            campsiteId: entry.campsiteId,
+            campsiteName: entry.campsiteName,
+            newlyAvailableDates: toNotify,
+          });
         }
 
         groupsChecked += 1;
@@ -342,15 +503,23 @@ async function runCheck() {
       }
     }
 
-    // Send one notification per watch with all newly available sites
+    // Send one notification per watch with all newly available sites. Dates are
+    // marked notified only on a successful send, so a failed email is retried on
+    // the next cycle rather than silently swallowed.
     for (const [watchId, notification] of watchNotifications) {
       try {
-        await sendAvailabilityNotification({
+        const sent = await sendAvailabilityNotification({
           userId: notification.userId,
           watchId,
           campgroundName: notification.campgroundName,
           sites: notification.sites,
         });
+
+        if (sent) {
+          for (const site of notification.sites) {
+            markNotified(site.watchSiteId, site.newlyAvailableDates);
+          }
+        }
       } catch (error) {
         log.scheduler.error(
           { err: error, watchId },

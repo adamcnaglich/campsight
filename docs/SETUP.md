@@ -72,7 +72,8 @@ Edit `.env` and fill in your values. See the [Environment Variables](#environmen
 | `RIDB_API_KEY` | Yes | Recreation.gov RIDB API key | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
 | `DATABASE_PATH` | No | Path to SQLite database file | `./data/campsight.db` (default) |
 | `CORS_ORIGIN` | No | Frontend URL for CORS | `http://localhost:4200` (default) |
-| `CHECK_INTERVAL` | No | Cron expression for availability checks | `*/15 * * * *` (default: every 15 min) |
+| `CHECK_INTERVAL` | No | Cron expression for availability checks | `*/10 * * * *` (default: every 10 min) |
+| `SCHEDULER_NOTIFY_CLEAR_AFTER_MISSES` | No | Consecutive unavailable checks before a notified date may alert again | `3` (default) |
 | `LOG_LEVEL` | No | Log level: `debug`, `info`, `warn`, `error`, `fatal` | `debug` (dev), `info` (prod) |
 | `PORT` | No | API server port | `3333` (default) |
 | `NODE_ENV` | No | Environment mode | `development` or `production` |
@@ -241,7 +242,7 @@ PORT=3334 npx nx serve api
 ### RIDB API Rate Limits
 
 The Recreation.gov API has rate limits. If you're hitting limits during development:
-- Increase the `CHECK_INTERVAL` to check less frequently
+- Lengthen the `CHECK_INTERVAL` to check less frequently
 - Add caching to reduce API calls
 - Use mock data for testing
 
