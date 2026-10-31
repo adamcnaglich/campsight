@@ -49,7 +49,7 @@ The compose file uses `build: .`, so it has to be deployed from the repository r
 
 ### Updating
 
-New commits on `main` are picked up by rebuilding: open the stack, click **Pull and redeploy**, and turn on **Re-pull image and redeploy**. To force a clean rebuild from a shell on the host, point compose at a checkout of this repo:
+New commits on `main` are picked up by rebuilding: open the stack and click **Pull and redeploy**. Leave **Re-pull image and redeploy** off; the image is built here, not pulled, and that toggle makes Portainer look for `campsight:latest` on Docker Hub (the compose file sets `pull_policy: build` so it is harmless if left on). To force a clean rebuild from a shell on the host, point compose at a checkout of this repo:
 
 ```bash
 docker compose --env-file stack.env build --no-cache

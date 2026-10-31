@@ -15,6 +15,9 @@ services:
   campsight:
     build: .
     image: campsight:latest
+    # Always build, never try to pull campsight:latest from a registry. Keeps
+    # Portainer's "Re-pull image and redeploy" from failing on a built image.
+    pull_policy: build
     container_name: campsight
     restart: unless-stopped
     ports:
