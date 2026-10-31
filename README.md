@@ -38,20 +38,22 @@ This is a fork of [areknow/campsight](https://github.com/areknow/campsight) trim
 
 ## Deploy with Portainer
 
-The stack builds the image on your Docker host straight from this repo's `main` branch, so there is nothing to publish first. The first deploy takes a few minutes while Nx compiles both apps.
+Portainer clones this repo and builds the image on your Docker host, so there is nothing to publish first. The first deploy takes a few minutes while Nx compiles both apps.
 
 1. In Portainer go to **Stacks → Add stack** and name it `campsight`.
-2. Pick **Web editor** and paste [`docker-compose.yml`](docker-compose.yml).
+2. Pick **Repository**, set the URL to `https://github.com/adamcnaglich/campsight`, reference `refs/heads/main`, compose path `docker-compose.yml`.
 3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `NOTIFY_EMAIL`, `RESEND_API_KEY` and `RIDB_API_KEY` by hand.
 4. **Deploy the stack**, then open `http://<host>:3333`.
 
+The compose file uses `build: .`, so it has to be deployed from the repository rather than pasted into the web editor, unless a `campsight:latest` image already exists on the host.
+
 ### Updating
 
-New commits on `main` are picked up by rebuilding. In Portainer, open the stack, click **Update the stack** and turn on **Re-pull image and redeploy**. From a shell on the host:
+New commits on `main` are picked up by rebuilding: open the stack, click **Pull and redeploy**, and turn on **Re-pull image and redeploy**. To force a clean rebuild from a shell on the host, point compose at a checkout of this repo:
 
 ```bash
-docker compose -f docker-compose.yml --env-file stack.env build --pull
-docker compose -f docker-compose.yml --env-file stack.env up -d
+docker compose --env-file stack.env build --no-cache
+docker compose --env-file stack.env up -d
 ```
 
 ### Data
@@ -207,7 +209,7 @@ campsight/
 │   └── shared/         # Zod schemas and types shared by both apps
 ├── docs/               # Screenshots and the local setup guide
 ├── Dockerfile          # Two-stage image: build with Nx, run with 13 packages
-├── docker-compose.yml  # Portainer stack, builds from this repo
+├── docker-compose.yml  # Portainer stack (Repository deploy, builds from .)
 └── stack.env.example   # Stack environment variables
 ```
 

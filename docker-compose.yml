@@ -3,15 +3,17 @@
 # Single container: Express serves the API and the built web app on one port,
 # SQLite lives on the `campsight-data` volume. No sign-in; keep it LAN-only.
 #
-# The image is built on the Docker host straight from the GitHub repo, so the
-# stack needs no registry. First deploy takes a few minutes while Nx builds.
+# Deploy it from Portainer with the Repository method (this repo's URL, compose
+# path docker-compose.yml): Portainer clones the repo and builds the image on
+# the Docker host, so no registry is needed. The first deploy takes a few
+# minutes while Nx compiles both apps. Docker needs BuildKit (Docker 23+).
 #
 # Stack environment variables (Portainer → Stacks → Environment variables, or
 # "Load variables from .env file" with stack.env): see stack.env.example.
 
 services:
   campsight:
-    build: https://github.com/adamcnaglich/campsight.git#main
+    build: .
     image: campsight:latest
     container_name: campsight
     restart: unless-stopped

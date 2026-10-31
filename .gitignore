@@ -53,6 +53,3 @@ data/
 .env
 .env.local
 .env.*.local
-
-# Firebase service account
-service-account.json
