@@ -5,7 +5,7 @@ How to run CampSight from source. For running it on your network, see [Deploy wi
 ## Prerequisites
 
 - Node.js 22 or newer
-- A [Resend](https://resend.com) account (free tier is plenty)
+- An SMTP account for alert emails (iCloud Mail with an app-specific password works)
 - A [RIDB](https://ridb.recreation.gov) API key (free)
 - Optional: a Google Maps JavaScript API key for the campsite map
 
@@ -18,7 +18,7 @@ npm install
 cp .env.example .env
 ```
 
-Fill in `NOTIFY_EMAIL`, `RESEND_API_KEY` and `RIDB_API_KEY` in `.env`. Everything else has a working default. The full list is in the [Configuration](../README.md#configuration) table.
+Fill in `NOTIFY_EMAIL`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` in `.env`. Everything else has a working default. The full list is in the [Configuration](../README.md#configuration) table.
 
 ## Run
 
@@ -83,6 +83,6 @@ rm -f data/campsight.db*
 npx nx serve api
 ```
 
-**No alert emails.** The scheduler logs `NOTIFY_EMAIL not set` or `RESEND_API_KEY not set` when either is missing. Use the admin panel's Email tab to send a test message.
+**No alert emails.** The scheduler logs `NOTIFY_EMAIL not set` or `SMTP_HOST not set` when either is missing. Use the admin panel's Email tab to send a test message.
 
 **Recreation.gov rate limits.** Lengthen `CHECK_INTERVAL` or raise `SCHEDULER_REQUEST_DELAY_MS`. The scheduler backs off on its own for `SCHEDULER_RATE_LIMIT_COOLDOWN_MS` after a 429.

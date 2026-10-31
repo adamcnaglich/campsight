@@ -42,7 +42,7 @@ Portainer clones this repo and builds the image on your Docker host, so there is
 
 1. In Portainer go to **Stacks → Add stack** and name it `campsight`.
 2. Pick **Repository**, set the URL to `https://github.com/adamcnaglich/campsight`, reference `refs/heads/main`, compose path `docker-compose.yml`.
-3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `NOTIFY_EMAIL`, `RESEND_API_KEY` and `RIDB_API_KEY` by hand.
+3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `NOTIFY_EMAIL`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` by hand.
 4. **Deploy the stack**, then open `http://<host>:3333`.
 
 The compose file uses `build: .`, so it has to be deployed from the repository rather than pasted into the web editor, unless a `campsight:latest` image already exists on the host.
@@ -77,9 +77,13 @@ Set these as stack environment variables in Portainer (or in `.env` for local de
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `NOTIFY_EMAIL` | Yes | | Address that receives availability alerts |
-| `RESEND_API_KEY` | Yes | | [Resend](https://resend.com) API key for sending email |
+| `SMTP_HOST` | Yes | | SMTP server for alert emails, e.g. `smtp.mail.me.com` for iCloud |
+| `SMTP_USER` | Yes | | SMTP login, e.g. your Apple ID address |
+| `SMTP_PASS` | Yes | | SMTP password; iCloud needs an app-specific password |
 | `RIDB_API_KEY` | Yes | | [RIDB](https://ridb.recreation.gov) key, used for campground details |
-| `RESEND_FROM_EMAIL` | No | `CampSight <onboarding@resend.dev>` | Sender address; use a verified domain for real use |
+| `SMTP_PORT` | No | `587` | `587` uses STARTTLS, `465` implicit TLS |
+| `SMTP_FROM` | No | `CampSight <SMTP_USER>` | Sender address; must be one your mail provider lets `SMTP_USER` send as |
+| `SMTP_SECURE` | No | by port | `true` or `false` to override the TLS choice |
 | `GOOGLE_MAPS_API_KEY` | No | | Google Maps JavaScript key for the campsite map. Without it the list view is used |
 | `HOME_REGION` | No | `Michigan` | State shown in the "available near you" strip. On a LAN the client IP can't be geolocated, so this is used for every request |
 | `CHECK_INTERVAL` | No | `*/15 * * * *` | Cron expression for availability checks |
@@ -98,7 +102,7 @@ Set these as stack environment variables in Portainer (or in `.env` for local de
 - **5-step wizard** for campsite selection: search, campground, campsites, dates, review
 - **Interactive map** of campsites when a Google Maps key is set, list view otherwise
 - **Scheduled monitoring** polls Recreation.gov every 15 minutes (configurable)
-- **Email alerts** the first time a watched date turns available, with duplicate suppression
+- **Email alerts** over plain SMTP the first time a watched date turns available, with duplicate suppression
 - **Multi-site watches** track several campsites in one watch
 - **Dashboard** to pause, resume, edit or delete watches
 - **Admin panel** with scheduler controls, run history and a test-email button
@@ -123,7 +127,7 @@ flowchart TB
     App[Express: API + web app]
     SQLite[(SQLite on /data)]
     RecGov[Recreation.gov API]
-    Resend[Resend Email]
+    Mail[SMTP server]
     Scheduler[Cron Scheduler]
 
     User -->|HTTP :3333| App
@@ -131,7 +135,7 @@ flowchart TB
     App -->|Search / details| RecGov
     Scheduler -->|Every 15 min| App
     App -->|Availability| RecGov
-    App -->|Alert to NOTIFY_EMAIL| Resend
+    App -->|Alert to NOTIFY_EMAIL| Mail
 ```
 
 1. You search for a recreation area or campground and pick campsites and dates.
@@ -147,7 +151,7 @@ sequenceDiagram
     participant DB as SQLite
     participant Scheduler
     participant RecGov as Recreation.gov
-    participant Email as Resend
+    participant Email as SMTP
 
     User->>App: POST /api/watches
     App->>DB: Store watch
@@ -172,7 +176,7 @@ Requires Node 22 or newer.
 
 ```bash
 npm install
-cp .env.example .env     # fill in NOTIFY_EMAIL, RESEND_API_KEY, RIDB_API_KEY
+cp .env.example .env     # fill in NOTIFY_EMAIL, SMTP_*, RIDB_API_KEY
 
 npx nx serve api         # http://localhost:3333
 npx nx serve web         # http://localhost:4200, proxies /api to 3333
@@ -215,7 +219,7 @@ campsight/
 
 **Frontend:** React 19, Vite, TypeScript, SCSS modules, TanStack Query, React Router, Lucide icons, `@vis.gl/react-google-maps`.
 
-**Backend:** Express, TypeScript, better-sqlite3 + Drizzle ORM, Pino logging, Helmet, node-cron, Resend.
+**Backend:** Express, TypeScript, better-sqlite3 + Drizzle ORM, Pino logging, Helmet, node-cron, nodemailer.
 
 **Why SQLite:** zero configuration, one file to back up, plenty for a household's worth of watches.
 
@@ -245,7 +249,7 @@ No authentication. Every request runs as the local user.
 | `GET` | `/api/admin/activity` | Recent activity feed |
 | `GET` | `/api/admin/scheduler/status` | Scheduler state |
 | `POST` | `/api/admin/scheduler/{start,stop,restart,trigger}` | Scheduler controls |
-| `POST` | `/api/admin/notifications/test` | Send a test email to `NOTIFY_EMAIL` |
+| `POST` | `/api/admin/notifications/test` | Send a test email to `NOTIFY_EMAIL` over SMTP |
 
 ```bash
 curl http://localhost:3333/api/watches

@@ -1,10 +1,83 @@
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { format, parseISO } from 'date-fns';
 import { db, schema } from '../db';
 import { eq } from 'drizzle-orm';
 import { log } from '../lib/logger';
 
 const DETAIL_PAGE = 'https://www.recreation.gov/camping/campsites';
+
+// ─── SMTP ──────────────────────────────────────────────────────────────────────
+
+interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  from: string;
+}
+
+/**
+ * Read SMTP settings from the environment. Returns null when SMTP_HOST is
+ * unset, which the callers treat as "email is off".
+ *
+ *   SMTP_HOST    e.g. smtp.mail.me.com
+ *   SMTP_PORT    default 587 (STARTTLS); 465 switches to implicit TLS
+ *   SMTP_SECURE  "true" / "false" to override the port-based TLS choice
+ *   SMTP_USER    login, also the default sender address
+ *   SMTP_PASS    password or app-specific password
+ *   SMTP_FROM    sender, default "CampSight <SMTP_USER>"
+ */
+export function getSmtpConfig(): SmtpConfig | null {
+  const host = process.env.SMTP_HOST?.trim();
+  if (!host) return null;
+
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const secureEnv = process.env.SMTP_SECURE?.trim().toLowerCase();
+  const secure = secureEnv ? secureEnv === 'true' : port === 465;
+  const user = process.env.SMTP_USER?.trim() || '';
+  const pass = process.env.SMTP_PASS || '';
+  const from =
+    process.env.SMTP_FROM?.trim() ||
+    (user ? `CampSight <${user}>` : `CampSight <campsight@${host}>`);
+
+  return { host, port, secure, user, pass, from };
+}
+
+let transporter: Transporter | null = null;
+let transporterKey = '';
+
+function getTransporter(cfg: SmtpConfig): Transporter {
+  const key = `${cfg.host}:${cfg.port}:${cfg.secure}:${cfg.user}`;
+  if (!transporter || transporterKey !== key) {
+    transporter = nodemailer.createTransport({
+      host: cfg.host,
+      port: cfg.port,
+      secure: cfg.secure,
+      auth: cfg.user ? { user: cfg.user, pass: cfg.pass } : undefined,
+    });
+    transporterKey = key;
+  }
+  return transporter;
+}
+
+interface MailMessage {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+/** Send one message over SMTP. Throws when SMTP is not configured. */
+export async function sendMail(message: MailMessage): Promise<void> {
+  const cfg = getSmtpConfig();
+  if (!cfg) {
+    throw new Error('SMTP_HOST is not configured');
+  }
+  await getTransporter(cfg).sendMail({ from: cfg.from, ...message });
+}
+
+// ─── Messages ──────────────────────────────────────────────────────────────────
 
 interface SiteAvailability {
   watchSiteId: number;
@@ -51,8 +124,7 @@ function buildSiteHtml(site: SiteAvailability): string {
 }
 
 /**
- * Pluggable notification service.
- * Currently implements email via Resend. Designed to add push later.
+ * Pluggable notification service. Currently email over SMTP.
  *
  * Returns whether the notification was delivered. The caller uses this to decide
  * whether to record the dates as notified — a false return leaves them eligible
@@ -79,14 +151,10 @@ export async function sendAvailabilityNotification(
     return false;
   }
 
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    log.notify.warn('RESEND_API_KEY not set, skipping email');
+  if (!getSmtpConfig()) {
+    log.notify.warn('SMTP_HOST not set, skipping email');
     return false;
   }
-
-  const resend = new Resend(resendKey);
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'CampSight <noreply@campsight.app>';
 
   const siteCount = sites.length;
   const subject = siteCount === 1
@@ -100,8 +168,7 @@ export async function sendAvailabilityNotification(
   const siteSections = sites.map(buildSiteHtml).join('');
 
   try {
-    await resend.emails.send({
-      from: fromEmail,
+    await sendMail({
       to: user.email,
       subject,
       html: `
@@ -146,21 +213,16 @@ export async function sendAvailabilityNotification(
 }
 
 /**
- * Send a test notification email to the given address (e.g. admin testing).
+ * Send a test notification email to the given address (admin panel).
  * Does not write to notifications_log.
  */
 export async function sendTestNotificationEmail(to: string): Promise<void> {
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    log.notify.warn('RESEND_API_KEY not set, cannot send test email');
-    throw new Error('RESEND_API_KEY is not configured');
+  if (!getSmtpConfig()) {
+    log.notify.warn('SMTP_HOST not set, cannot send test email');
+    throw new Error('SMTP_HOST is not configured');
   }
 
-  const resend = new Resend(resendKey);
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'CampSight <noreply@campsight.app>';
-
-  await resend.emails.send({
-    from: fromEmail,
+  await sendMail({
     to,
     subject: 'CampSight — Test notification',
     html: `

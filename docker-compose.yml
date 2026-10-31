@@ -22,9 +22,15 @@ services:
     environment:
       # Where availability alerts are sent
       NOTIFY_EMAIL: ${NOTIFY_EMAIL:?NOTIFY_EMAIL is required}
-      # Resend (https://resend.com) delivers the alert emails
-      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-CampSight <onboarding@resend.dev>}
+      # SMTP server that delivers the alert emails
+      # (iCloud: smtp.mail.me.com, port 587, Apple ID + app-specific password)
+      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:?SMTP_USER is required}
+      SMTP_PASS: ${SMTP_PASS:?SMTP_PASS is required}
+      # Optional: sender address (defaults to "CampSight <SMTP_USER>") and TLS override
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
       # Recreation.gov RIDB key (https://ridb.recreation.gov), used for campground details
       RIDB_API_KEY: ${RIDB_API_KEY:?RIDB_API_KEY is required}
       # Optional: Google Maps JavaScript API key for the campsite map (list view works without it)

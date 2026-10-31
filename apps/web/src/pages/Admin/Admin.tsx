@@ -417,7 +417,7 @@ const EmailTab = () => {
           </div>
           <p className={styles.emailDescription}>
             Sends a test email to verify that notification delivery is
-            configured correctly (Resend API key and from-address).
+            configured correctly (SMTP host, login and from-address).
           </p>
         </div>
         <div className={styles.schedulerActions}>
