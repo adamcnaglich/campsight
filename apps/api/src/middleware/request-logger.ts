@@ -1,7 +1,7 @@
 import pinoHttp from 'pino-http';
 import { logger } from '../lib/logger';
 import type { Request, Response } from 'express';
-import type { AuthenticatedRequest } from './auth';
+import type { AuthenticatedRequest } from './local-user';
 
 /**
  * HTTP request logging middleware.

@@ -7,12 +7,11 @@ import {
 
 // ─── Users ─────────────────────────────────────────────────────────────────────
 
+// Single-user mode: one row with id 'local'. Email mirrors NOTIFY_EMAIL.
 export const users = sqliteTable('users', {
-  id: text('id').primaryKey(), // Firebase UID
+  id: text('id').primaryKey(),
   email: text('email').notNull(),
   displayName: text('display_name'),
-  approved: integer('approved', { mode: 'boolean' }).notNull().default(false),
-  approvalToken: text('approval_token'),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

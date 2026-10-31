@@ -13,22 +13,19 @@ import { sendTestNotificationEmail } from '../services/notification';
 
 const router = Router();
 
-/** Helper to extract admin user info set by admin auth middleware */
+/** Helper to extract the local user's email set by localUserMiddleware */
 function getAdminEmail(req: Request): string {
-  return (req as Request & { adminEmail: string }).adminEmail;
+  return (req as Request & { userEmail: string }).userEmail;
 }
 
 /**
- * GET /admin — Overview stats
+ * GET /api/admin — Overview stats
  */
 router.get('/', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
 
   try {
     const stats = {
-      users: {
-        total: db.select({ count: count() }).from(schema.users).get()?.count || 0,
-      },
       watches: {
         total: db.select({ count: count() }).from(schema.watches).get()?.count || 0,
         active: db
@@ -54,127 +51,7 @@ router.get('/', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/users — List all users with their watch counts
- */
-router.get('/users', async (req, res: Response) => {
-  const adminEmail = getAdminEmail(req);
-
-  try {
-    const users = db
-      .select({
-        id: schema.users.id,
-        email: schema.users.email,
-        displayName: schema.users.displayName,
-        approved: schema.users.approved,
-        createdAt: schema.users.createdAt,
-        updatedAt: schema.users.updatedAt,
-        watchCount: sql<number>`(SELECT COUNT(*) FROM ${schema.watches} WHERE ${schema.watches.userId} = ${schema.users.id})`,
-      })
-      .from(schema.users)
-      .orderBy(desc(schema.users.createdAt))
-      .all();
-
-    log.api.info({ adminEmail, count: users.length }, 'Admin listed all users');
-    res.json({ data: users });
-  } catch (error) {
-    log.api.error({ err: error, adminEmail }, 'Failed to list users');
-    res.status(500).json({ error: { message: 'Failed to list users' } });
-  }
-});
-
-/**
- * GET /admin/users/:id — Get detailed user info
- */
-router.get('/users/:id', async (req, res: Response) => {
-  const adminEmail = getAdminEmail(req);
-  const userId = req.params.id;
-
-  try {
-    const user = db
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.id, userId))
-      .get();
-
-    if (!user) {
-      return res.status(404).json({ error: { message: 'User not found' } });
-    }
-
-    const watches = db
-      .select()
-      .from(schema.watches)
-      .where(eq(schema.watches.userId, userId))
-      .orderBy(desc(schema.watches.createdAt))
-      .all();
-
-    const notifications = db
-      .select()
-      .from(schema.notificationsLog)
-      .where(eq(schema.notificationsLog.userId, userId))
-      .orderBy(desc(schema.notificationsLog.sentAt))
-      .all();
-
-    const watchesWithSites = watches.map((w) => {
-      const sites = db
-        .select()
-        .from(schema.watchSites)
-        .where(eq(schema.watchSites.watchId, w.id))
-        .all();
-      return {
-        ...w,
-        isActive: Boolean(w.isActive),
-        sites: sites.map((s) => ({ id: s.id, campsiteId: s.campsiteId, campsiteName: s.campsiteName, loop: s.loop })),
-      };
-    });
-
-    log.api.info({ adminEmail, userId }, 'Admin fetched user details');
-    res.json({
-      data: {
-        user,
-        watches: watchesWithSites,
-        notifications,
-      },
-    });
-  } catch (error) {
-    log.api.error({ err: error, adminEmail, userId }, 'Failed to fetch user details');
-    res.status(500).json({ error: { message: 'Failed to fetch user details' } });
-  }
-});
-
-/**
- * DELETE /admin/users/:id — Delete a user and all their data
- */
-router.delete('/users/:id', async (req, res: Response) => {
-  const adminEmail = getAdminEmail(req);
-  const userId = req.params.id;
-
-  try {
-    const user = db
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.id, userId))
-      .get();
-
-    if (!user) {
-      return res.status(404).json({ error: { message: 'User not found' } });
-    }
-
-    // Delete user (cascades to watches, snapshots, notifications)
-    db.delete(schema.users).where(eq(schema.users.id, userId)).run();
-
-    log.api.warn(
-      { adminEmail, userId, userEmail: user.email },
-      'Admin deleted user'
-    );
-    res.json({ data: { success: true } });
-  } catch (error) {
-    log.api.error({ err: error, adminEmail, userId }, 'Failed to delete user');
-    res.status(500).json({ error: { message: 'Failed to delete user' } });
-  }
-});
-
-/**
- * GET /admin/watches — List all watches across all users
+ * GET /api/admin/watches — List all watches across all users
  */
 router.get('/watches', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -220,7 +97,7 @@ router.get('/watches', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/watches/:id — Get detailed watch info with availability
+ * GET /api/admin/watches/:id — Get detailed watch info with availability
  */
 router.get('/watches/:id', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -287,7 +164,7 @@ router.get('/watches/:id', async (req, res: Response) => {
 });
 
 /**
- * DELETE /admin/watches/:id — Delete a watch (admin override)
+ * DELETE /api/admin/watches/:id — Delete a watch (admin override)
  */
 router.delete('/watches/:id', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -322,7 +199,7 @@ router.delete('/watches/:id', async (req, res: Response) => {
 });
 
 /**
- * PATCH /admin/watches/:id — Update watch (admin override)
+ * PATCH /api/admin/watches/:id — Update watch (admin override)
  */
 router.patch('/:id', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -362,7 +239,7 @@ router.patch('/:id', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/notifications — List all notifications
+ * GET /api/admin/notifications — List all notifications
  */
 router.get('/notifications', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -394,10 +271,16 @@ router.get('/notifications', async (req, res: Response) => {
 });
 
 /**
- * POST /admin/notifications/test — Send a test notification email to the logged-in admin
+ * POST /api/admin/notifications/test — Send a test notification email to NOTIFY_EMAIL
  */
 router.post('/notifications/test', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
+
+  if (!adminEmail) {
+    return res.status(400).json({
+      error: { message: 'NOTIFY_EMAIL is not set' },
+    });
+  }
 
   try {
     await sendTestNotificationEmail(adminEmail);
@@ -415,7 +298,7 @@ router.post('/notifications/test', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/snapshots — List availability snapshots (with pagination)
+ * GET /api/admin/snapshots — List availability snapshots (with pagination)
  */
 router.get('/snapshots', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -448,7 +331,7 @@ router.get('/snapshots', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/activity — Recent activity across the system
+ * GET /api/admin/activity — Recent activity across the system
  */
 router.get('/activity', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -562,7 +445,7 @@ router.get('/activity', async (req, res: Response) => {
 });
 
 /**
- * GET /admin/scheduler/status — Get scheduler status
+ * GET /api/admin/scheduler/status — Get scheduler status
  */
 router.get('/scheduler/status', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -578,7 +461,7 @@ router.get('/scheduler/status', async (req, res: Response) => {
 });
 
 /**
- * POST /admin/scheduler/start — Start the scheduler
+ * POST /api/admin/scheduler/start — Start the scheduler
  */
 router.post('/scheduler/start', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -595,7 +478,7 @@ router.post('/scheduler/start', async (req, res: Response) => {
 });
 
 /**
- * POST /admin/scheduler/stop — Stop the scheduler
+ * POST /api/admin/scheduler/stop — Stop the scheduler
  */
 router.post('/scheduler/stop', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -612,7 +495,7 @@ router.post('/scheduler/stop', async (req, res: Response) => {
 });
 
 /**
- * POST /admin/scheduler/restart — Restart the scheduler
+ * POST /api/admin/scheduler/restart — Restart the scheduler
  */
 router.post('/scheduler/restart', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
@@ -629,7 +512,7 @@ router.post('/scheduler/restart', async (req, res: Response) => {
 });
 
 /**
- * POST /admin/scheduler/trigger — Manually trigger a check cycle
+ * POST /api/admin/scheduler/trigger — Manually trigger a check cycle
  */
 router.post('/scheduler/trigger', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);

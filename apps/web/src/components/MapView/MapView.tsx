@@ -5,6 +5,7 @@ import {
   AdvancedMarker,
   useMap,
 } from '@vis.gl/react-google-maps';
+import { config } from '../../lib/config';
 import styles from './MapView.module.scss';
 
 export interface MapMarker {
@@ -20,7 +21,7 @@ export interface MapViewProps {
   onMarkerClick?: (id: string) => void;
 }
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
+const GOOGLE_MAPS_API_KEY = config.googleMapsApiKey;
 
 const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 };
 const DEFAULT_ZOOM = 4;
@@ -129,7 +130,7 @@ export const MapView = ({
       <div className={styles.placeholder}>
         <span className={styles.placeholderIcon}>🗺️</span>
         <p className={styles.placeholderText}>
-          Add VITE_GOOGLE_MAPS_API_KEY to enable maps
+          Set GOOGLE_MAPS_API_KEY to enable maps
         </p>
       </div>
     );

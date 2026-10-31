@@ -151,11 +151,6 @@
   }
 }
 
-.actionsCol {
-  width: 1%;
-  white-space: nowrap;
-}
-
 .userEmail {
   color: var(--color-link);
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
@@ -184,26 +179,6 @@
 }
 
 .badgeInactive {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-}
-
-.approvalBadge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.approvalApproved {
-  background: var(--color-success-strong-bg);
-  color: var(--color-success-strong-text);
-}
-
-.approvalPending {
   background: var(--color-bg-tertiary);
   color: var(--color-text-secondary);
 }

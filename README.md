@@ -1,527 +1,259 @@
 # CampSight
 
-**Never miss a campsite booking again.** Monitor Recreation.gov campsites in real-time and get notified the moment your dream spot becomes available.
+**Never miss a campsite booking again.** CampSight watches Recreation.gov for the sites and dates you care about and emails you the moment one opens up.
 
-<!-- TODO: Add landing page hero screenshot here -->
-<!-- ![CampSight Landing Page](docs/screenshots/landing.png) -->
+This is a fork of [areknow/campsight](https://github.com/areknow/campsight) trimmed for self-hosting on a home network: no Google sign-in, no access requests, one user, one container. Run it as a Portainer stack and keep it on the LAN.
 
 [![Built with React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
 [![Built with Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Built with TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Monorepo: Nx](https://img.shields.io/badge/Monorepo-Nx-143055?logo=nx&logoColor=white)](https://nx.dev/)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f26f5b17-f927-493c-973f-bc3a0b0bcc50/deploy-status)](https://app.netlify.com/projects/camp-sight/deploys)
-[![Railway](https://img.shields.io/badge/Railway-Deployed-success?logo=railway&logoColor=white)](https://railway.app)
 
 ---
 
 ## Table of Contents
 
+- [What changed from upstream](#what-changed-from-upstream)
+- [Deploy with Portainer](#deploy-with-portainer)
+- [Configuration](#configuration)
 - [Features](#features)
-- [Screenshots](#screenshots)
-- [Tech Stack](#tech-stack)
 - [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
+- [Local Development](#local-development)
 - [Architecture](#architecture)
 - [API Reference](#api-reference)
-- [Deployment](#deployment)
 - [License](#license)
+
+---
+
+## What changed from upstream
+
+- **No authentication.** Firebase and Google OAuth are gone. Every request runs as a single local user, and alerts go to `NOTIFY_EMAIL`. Anyone who can reach the port can use the app, so don't expose it beyond your network.
+- **No landing, login, terms or access-request pages.** `/` goes straight to the dashboard.
+- **One container.** Express serves the built web app alongside the API, replacing the Netlify + Railway split. The admin API moved from `/admin` to `/api/admin` so it doesn't collide with the admin page.
+- **Admin panel is open.** Scheduler controls, activity feed and a test-email button are available to everyone on the network. The Users tab was removed since there is only one user.
+- **Runtime config.** The Google Maps key is read from `GOOGLE_MAPS_API_KEY` when the page loads, so changing it is an env edit and a restart, not a rebuild.
+- **Single-user database.** The `users` table holds one row with id `local`. Its email mirrors `NOTIFY_EMAIL` on each boot.
+
+---
+
+## Deploy with Portainer
+
+The stack builds the image on your Docker host straight from this repo's `main` branch, so there is nothing to publish first. The first deploy takes a few minutes while Nx compiles both apps.
+
+1. In Portainer go to **Stacks → Add stack** and name it `campsight`.
+2. Pick **Web editor** and paste [`docker-compose.yml`](docker-compose.yml).
+3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `NOTIFY_EMAIL`, `RESEND_API_KEY` and `RIDB_API_KEY` by hand.
+4. **Deploy the stack**, then open `http://<host>:3333`.
+
+### Updating
+
+New commits on `main` are picked up by rebuilding. In Portainer, open the stack, click **Update the stack** and turn on **Re-pull image and redeploy**. From a shell on the host:
+
+```bash
+docker compose -f docker-compose.yml --env-file stack.env build --pull
+docker compose -f docker-compose.yml --env-file stack.env up -d
+```
+
+### Data
+
+SQLite lives on the `campsight-data` named volume at `/data/campsight.db`. To keep it in a host folder instead, replace the volume with a bind mount and `chown 1000:1000` that folder, since the container runs as the unprivileged `node` user.
+
+### Image
+
+The `Dockerfile` is a two-stage build: Nx compiles both apps, then a slim runtime image installs only the 13 packages the API bundle imports and serves the web build from `./public`. Build it anywhere with:
+
+```bash
+docker build -t campsight .
+```
+
+---
+
+## Configuration
+
+Set these as stack environment variables in Portainer (or in `.env` for local development).
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `NOTIFY_EMAIL` | Yes | | Address that receives availability alerts |
+| `RESEND_API_KEY` | Yes | | [Resend](https://resend.com) API key for sending email |
+| `RIDB_API_KEY` | Yes | | [RIDB](https://ridb.recreation.gov) key, used for campground details |
+| `RESEND_FROM_EMAIL` | No | `CampSight <onboarding@resend.dev>` | Sender address; use a verified domain for real use |
+| `GOOGLE_MAPS_API_KEY` | No | | Google Maps JavaScript key for the campsite map. Without it the list view is used |
+| `HOME_REGION` | No | `Michigan` | State shown in the "available near you" strip. On a LAN the client IP can't be geolocated, so this is used for every request |
+| `CHECK_INTERVAL` | No | `*/15 * * * *` | Cron expression for availability checks |
+| `CAMPSIGHT_PORT` | No | `3333` | Host port the stack publishes |
+| `LOG_LEVEL` | No | `info` | `debug`, `info`, `warn`, `error` or `fatal` |
+| `DATABASE_PATH` | No | `/data/campsight.db` | SQLite file location |
+| `SCHEDULER_REQUEST_DELAY_MS` | No | `1000` | Pause between Recreation.gov requests in a cycle |
+| `SCHEDULER_MAX_GROUPS_PER_CYCLE` | No | `0` | Cap on grouped campsite checks per cycle; `0` is unlimited |
+| `SCHEDULER_RATE_LIMIT_COOLDOWN_MS` | No | `300000` | Back-off after a 429 from Recreation.gov |
+| `SCHEDULER_NOTIFY_CLEAR_AFTER_MISSES` | No | `3` | Unavailable checks before a notified date may alert again |
 
 ---
 
 ## Features
 
-### Smart Campsite Monitoring
+- **5-step wizard** for campsite selection: search, campground, campsites, dates, review
+- **Interactive map** of campsites when a Google Maps key is set, list view otherwise
+- **Scheduled monitoring** polls Recreation.gov every 15 minutes (configurable)
+- **Email alerts** the first time a watched date turns available, with duplicate suppression
+- **Multi-site watches** track several campsites in one watch
+- **Dashboard** to pause, resume, edit or delete watches
+- **Admin panel** with scheduler controls, run history and a test-email button
 
-- **5-step wizard** for intuitive campsite selection
-- **Interactive map** to visualize and select specific campsites
-- **Real-time monitoring** checks availability every 15 minutes (configurable)
-- **Instant notifications** via email when sites become available
-- **Multi-site tracking** watch multiple campsites in a single search
-- **Date range flexibility** specify your exact camping dates
+### Screenshots
 
-### User Experience
+| Dashboard | New watch: search |
+| --- | --- |
+| ![Dashboard](docs/screenshots/dashboard-with-watches.png) | ![Search](docs/screenshots/new-watch-search.png) |
 
-- **Google OAuth** for secure, passwordless authentication
-- **Request/approval flow** for controlled access
-- **Responsive design** works seamlessly on desktop and mobile
-- **Dashboard** view all your active watches at a glance
-- **Watch management** easily pause, edit, or delete watches
-
-### Developer Features
-
-- **Full TypeScript** end-to-end type safety
-- **Monorepo architecture** shared types and schemas between frontend/backend
-- **Structured logging** production-ready with Pino
-- **Database ORM** type-safe queries with Drizzle
-- **Modern tooling** Vite for fast builds, TanStack Query for state management
-
----
-
-## Screenshots
-
-### Landing Page
-
-The home page explains the value proposition and guides users to get started.
-
-![Landing Page](docs/screenshots/landing.jpg)
-
-### Dashboard
-
-Monitor all your active watches in one place. See which campsites you're tracking and their current availability status.
-
-**Empty State:**
-
-<!-- TODO: Add dashboard empty state screenshot -->
-
-![Dashboard Empty State](docs/screenshots/dashboard-empty.png)
-
-**With Active Watches:**
-
-<!-- TODO: Add dashboard with watches screenshot -->
-
-![Dashboard with Watches](docs/screenshots/dashboard-with-watches.png)
-
-### New Watch Flow
-
-A guided 5-step process makes it easy to set up campsite monitoring:
-
-**Step 1 — Search for Recreation Areas or Campgrounds**
-
-<!-- TODO: Add search step screenshot -->
-
-![Search Step](docs/screenshots/new-watch-search.png)
-
-**Step 2/3 — Browse Campgrounds and campsites on interactive map**
-
-<!-- TODO: Add campgrounds selection screenshot -->
-
-![Campgrounds Step](docs/screenshots/new-watch-campgrounds.png)
-
-**Step 4 — Choose Your Dates**
-
-<!-- TODO: Add dates selection screenshot -->
-
-![Dates Step](docs/screenshots/new-watch-dates.png)
-
-### Watch Detail
-
-View detailed availability information and edit watch settings.
-
-<!-- TODO: Add watch detail screenshot -->
-
-![Watch Detail](docs/screenshots/watch-detail.png)
-
----
-
-## Tech Stack
-
-### Architecture Overview
-
-```mermaid
-flowchart TB
-    User[User]
-    Frontend[React SPA]
-    API[Express API]
-    Firebase[Firebase Auth]
-    SQLite[(SQLite DB)]
-    RecGov[Recreation.gov API]
-    Resend[Resend Email]
-    Scheduler[Cron Scheduler]
-
-    User -->|Google Sign-in| Firebase
-    User -->|Interacts| Frontend
-    Frontend -->|REST API| API
-    API -->|Validates| Firebase
-    API -->|Queries| SQLite
-    API -->|Fetches availability| RecGov
-    Scheduler -->|Every 15 min| API
-    API -->|Sends notifications| Resend
-```
-
-### Frontend
-
-- **React 19** — Latest features including automatic batching
-- **Vite** — Lightning-fast dev server and builds
-- **TypeScript** — Full type safety
-- **SCSS Modules** — Scoped styling with CSS preprocessing
-- **TanStack Query** — Server state management with caching
-- **React Router 7** — Client-side routing
-- **Lucide React** — Beautiful icon library
-- **React Google Maps** — Interactive map integration
-
-### Backend
-
-- **Express** — Fast, minimalist web framework
-- **TypeScript** — End-to-end type safety
-- **SQLite** — Lightweight embedded database
-- **better-sqlite3** — Synchronous SQLite bindings
-- **Drizzle ORM** — Type-safe SQL query builder
-- **Pino** — High-performance structured logging
-- **Helmet** — Security middleware
-- **node-cron** — Scheduled tasks for availability checks
-
-### Infrastructure & Services
-
-- **Firebase Authentication** — Google OAuth integration
-- **Resend** — Transactional email delivery
-- **Recreation.gov RIDB API** — Campsite data and availability
-- **Netlify** — Frontend hosting with CDN
-- **Railway** — Backend hosting with persistent volumes
-- **Nx** — Monorepo build system
+| New watch: campgrounds | Watch detail |
+| --- | --- |
+| ![Campgrounds](docs/screenshots/new-watch-campgrounds.png) | ![Watch detail](docs/screenshots/watch-detail.png) |
 
 ---
 
 ## How It Works
 
-1. **User searches** for a recreation area or specific campground
-2. **System fetches** available campgrounds from Recreation.gov API
-3. **User selects** campground, campsites, and date range through the wizard
-4. **Watch is created** and stored in the database
-5. **Cron scheduler** checks availability every 15 minutes (configurable)
-6. **When a site becomes available**, user receives an email notification
-7. **User books** the campsite on Recreation.gov
+```mermaid
+flowchart TB
+    User[Browser on the LAN]
+    App[Express: API + web app]
+    SQLite[(SQLite on /data)]
+    RecGov[Recreation.gov API]
+    Resend[Resend Email]
+    Scheduler[Cron Scheduler]
 
-### Data Flow
+    User -->|HTTP :3333| App
+    App -->|Queries| SQLite
+    App -->|Search / details| RecGov
+    Scheduler -->|Every 15 min| App
+    App -->|Availability| RecGov
+    App -->|Alert to NOTIFY_EMAIL| Resend
+```
+
+1. You search for a recreation area or campground and pick campsites and dates.
+2. The watch is stored in SQLite.
+3. The scheduler checks availability for every active watch on the cron interval.
+4. When a date flips to available, one email per watch goes to `NOTIFY_EMAIL`.
+5. You book it on Recreation.gov.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant Frontend
-    participant API
-    participant Database
+    participant App as API + SPA
+    participant DB as SQLite
     participant Scheduler
     participant RecGov as Recreation.gov
     participant Email as Resend
 
-    User->>Frontend: Create watch
-    Frontend->>API: POST /api/watches
-    API->>Database: Store watch
-    API-->>Frontend: Success
+    User->>App: POST /api/watches
+    App->>DB: Store watch
+    App-->>User: Created
 
-    loop Every 15 minutes
-        Scheduler->>Database: Get active watches
-        Scheduler->>RecGov: Check availability
-        alt Site available
-            Scheduler->>Database: Update watch
-            Scheduler->>Email: Send notification
-            Email-->>User: Email alert
+    loop Every CHECK_INTERVAL
+        Scheduler->>DB: Active watches
+        Scheduler->>RecGov: Availability per campsite
+        alt Newly available date
+            Scheduler->>DB: Snapshot + notified_dates
+            Scheduler->>Email: Send alert
+            Email-->>User: Email to NOTIFY_EMAIL
         end
     end
 ```
 
 ---
 
-## Getting Started
+## Local Development
 
-### Quick Start
+Requires Node 22 or newer.
 
 ```bash
-# Clone the repository
-git clone https://github.com/areknow/campsight.git
-cd campsight
-
-# Install dependencies
 npm install
+cp .env.example .env     # fill in NOTIFY_EMAIL, RESEND_API_KEY, RIDB_API_KEY
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your API keys (see SETUP.md for details)
-
-# Start the backend (http://localhost:3333)
-npx nx serve api
-
-# In another terminal, start the frontend (http://localhost:4200)
-npx nx serve web
+npx nx serve api         # http://localhost:3333
+npx nx serve web         # http://localhost:4200, proxies /api to 3333
 ```
 
-Visit http://localhost:4200 and sign in with Google to start monitoring campsites!
+To run the production bundle the way the container does:
 
-### Prerequisites
+```bash
+NODE_ENV=production npx nx run-many -t build -p api,web
+WEB_DIR=dist/apps/web node dist/apps/api/main.js
+```
 
-- Node.js 18+
-- Firebase project with Google Auth enabled
-- Resend account (free tier available)
-- Recreation.gov RIDB API key (free)
+Other commands:
 
-**Need detailed setup instructions?** See the [Setup Guide](docs/SETUP.md) for complete configuration steps.
+```bash
+npx nx run-many -t lint          # lint all projects
+npx tsc --noEmit -p apps/web/tsconfig.app.json
+npx tsc --noEmit -p apps/api/tsconfig.app.json
+npx drizzle-kit studio           # browse the SQLite database
+```
+
+Tables are created and migrated by the API on startup, so there is no separate migration step.
 
 ---
 
 ## Architecture
 
-### Monorepo Structure
-
 ```
 campsight/
 ├── apps/
-│   ├── web/          # React frontend (Vite)
-│   └── api/          # Express backend
+│   ├── web/            # React 19 + Vite SPA
+│   └── api/            # Express API, scheduler, serves the SPA in production
 ├── libs/
-│   └── shared/       # Shared types and Zod schemas
-├── docs/             # Documentation
-│   ├── screenshots/  # README screenshots
-│   ├── SETUP.md      # Detailed setup guide
-│   └── DEPLOYMENT.md # Deployment instructions
-└── data/             # SQLite database (local)
+│   └── shared/         # Zod schemas and types shared by both apps
+├── docs/               # Screenshots and the local setup guide
+├── Dockerfile          # Two-stage image: build with Nx, run with 13 packages
+├── docker-compose.yml  # Portainer stack, builds from this repo
+└── stack.env.example   # Stack environment variables
 ```
 
-### Key Design Decisions
+**Frontend:** React 19, Vite, TypeScript, SCSS modules, TanStack Query, React Router, Lucide icons, `@vis.gl/react-google-maps`.
 
-**Why SQLite?**
+**Backend:** Express, TypeScript, better-sqlite3 + Drizzle ORM, Pino logging, Helmet, node-cron, Resend.
 
-- Zero configuration for development
-- Sufficient for thousands of watches
-- Easy backup (single file)
-- Can migrate to PostgreSQL later if needed
-
-**Why Firebase Auth?**
-
-- Handles OAuth flow complexity
-- No password management needed
-- Built-in security features
-- Free tier is generous
-
-**Why Monorepo?**
-
-- Share types between frontend and backend
-- Single source of truth for validation schemas
-- Efficient caching and task orchestration with Nx
-
-**Why Email Notifications?**
-
-- Universal delivery (no app install required)
-- Works on all devices
-- Reliable delivery with Resend
+**Why SQLite:** zero configuration, one file to back up, plenty for a household's worth of watches.
 
 ---
 
 ## API Reference
 
-All routes except `/health` require a Firebase Auth bearer token in the `Authorization` header.
+No authentication. Every request runs as the local user.
 
-### Endpoints
-
-| Method   | Path                            | Description                             | Auth Required |
-| -------- | ------------------------------- | --------------------------------------- | ------------- |
-| `GET`    | `/health`                       | Health check endpoint                   | No            |
-| `GET`    | `/api/watches`                  | List user's active watches              | Yes           |
-| `POST`   | `/api/watches`                  | Create a new watch                      | Yes           |
-| `PATCH`  | `/api/watches/:id`              | Update watch (pause/resume, edit dates) | Yes           |
-| `DELETE` | `/api/watches/:id`              | Delete a watch                          | Yes           |
-| `GET`    | `/api/watches/:id/availability` | Get current availability for watch      | Yes           |
-| `GET`    | `/api/campsites/search`         | Search campgrounds/campsites            | Yes           |
-| `GET`    | `/api/campsites/facility/:id`   | Get facility details                    | Yes           |
-
-### Example Request
-
-```bash
-# Get all watches
-curl -H "Authorization: Bearer YOUR_FIREBASE_TOKEN" \
-  http://localhost:3333/api/watches
-```
-
-### Example Response
-
-```json
-[
-  {
-    "id": 1,
-    "userId": "firebase_user_id",
-    "campgroundName": "Upper Pines Campground",
-    "recAreaName": "Yosemite National Park",
-    "startDate": "2026-07-01",
-    "endDate": "2026-07-05",
-    "isActive": true,
-    "sites": [
-      {
-        "campsiteId": "12345",
-        "campsiteName": "Site 001",
-        "loop": "Upper Loop"
-      }
-    ],
-    "createdAt": "2026-04-20T10:30:00Z",
-    "updatedAt": "2026-04-20T10:30:00Z"
-  }
-]
-```
-
----
-
-## Deployment
-
-CampSight uses a split deployment strategy:
-
-- **Frontend (React SPA)** — Deployed to [Netlify](https://netlify.com)
-- **Backend (Express API)** — Deployed to [Railway](https://railway.app)
-
-### Deployment Architecture
-
-```
-┌─────────────────────┐         ┌─────────────────────┐
-│   Netlify (CDN)     │         │   Railway (API)     │
-│                     │         │                     │
-│   React SPA         │────────▶│   Express Server    │
-│   Static Assets     │  HTTPS  │   SQLite Database   │
-│                     │         │   Cron Scheduler    │
-└─────────────────────┘         └─────────────────────┘
-                                          │
-                                          ├────▶ Firebase Auth
-                                          ├────▶ Recreation.gov API
-                                          └────▶ Resend Email
-```
-
-### Quick Deploy
-
-**Frontend (Netlify):**
-
-1. Connect your GitHub repository
-2. Build command: `npx nx build web`
-3. Publish directory: `dist/apps/web`
-4. Add environment variables for Firebase and API URL
-
-**Backend (Railway):**
-
-1. Connect your GitHub repository
-2. Railway auto-detects Node.js and uses `railway.toml`
-3. Mount a persistent volume at `/data` for SQLite
-4. Add environment variables for Firebase, Resend, and RIDB API
-
-**For detailed deployment instructions**, see the [Deployment Guide](docs/DEPLOYMENT.md).
-
----
-
-## Development
-
-### Build Commands
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Health check |
+| `GET` | `/config.js` | Runtime config script loaded by the SPA |
+| `GET` | `/api/me` | The local user (`id`, `email`, `displayName`) |
+| `GET` | `/api/watches` | List watches |
+| `POST` | `/api/watches` | Create a watch |
+| `PATCH` | `/api/watches/:id` | Pause/resume or change dates |
+| `DELETE` | `/api/watches/:id` | Delete a watch |
+| `GET` | `/api/watches/:id/availability` | Latest availability per site |
+| `GET` | `/api/campsites/suggest?q=` | Search suggestions for rec areas and campgrounds |
+| `GET` | `/api/campsites/search?recAreaId=` | Campgrounds in a rec area |
+| `GET` | `/api/campsites/search?facilityId=` | Campsites in a campground |
+| `GET` | `/api/campsites/facility/:id` | Campground details (needs `RIDB_API_KEY`) |
+| `GET` | `/api/available` | Campgrounds with openings near `HOME_REGION` |
+| `GET` | `/api/admin` | Overview stats |
+| `GET` | `/api/admin/watches` | All watches |
+| `GET` | `/api/admin/activity` | Recent activity feed |
+| `GET` | `/api/admin/scheduler/status` | Scheduler state |
+| `POST` | `/api/admin/scheduler/{start,stop,restart,trigger}` | Scheduler controls |
+| `POST` | `/api/admin/notifications/test` | Send a test email to `NOTIFY_EMAIL` |
 
 ```bash
-# Build both apps
-npx nx run-many -t build
-
-# Build specific app
-npx nx build web
-npx nx build api
+curl http://localhost:3333/api/watches
 ```
-
-### Testing
-
-```bash
-# Run tests
-npx nx test web
-npx nx test api
-
-# Run with coverage
-npx nx test web --coverage
-```
-
-### Linting
-
-```bash
-# Lint all projects
-npx nx run-many -t lint
-
-# Auto-fix issues
-npx nx run-many -t lint -- --fix
-```
-
-### Database Management
-
-```bash
-# Generate migrations (after schema changes)
-npx drizzle-kit generate
-
-# Push schema to database
-npx drizzle-kit push
-
-# Open Drizzle Studio (visual database editor)
-npx drizzle-kit studio
-```
-
----
-
-## Project Highlights
-
-### Technical Challenges Solved
-
-**1. Efficient Availability Polling**
-
-- Implemented smart cron scheduling to balance API rate limits with timely notifications
-- Optimized database queries to handle hundreds of concurrent watches
-- Added configurable intervals for different environments
-
-**2. Type-Safe Monorepo**
-
-- Shared Zod schemas ensure consistent validation between frontend and backend
-- TypeScript types automatically generated from schemas
-- Nx caching dramatically speeds up builds
-
-**3. Authentication & Authorization**
-
-- Firebase Admin SDK validates tokens on the backend
-- Middleware automatically attaches user context to requests
-- Access control system for managing user onboarding
-
-**4. Production Logging**
-
-- Structured JSON logs in production for easy parsing
-- Pretty-printed logs in development for better DX
-- Automatic request logging with response times and user context
-
-**5. Interactive Map Integration**
-
-- React Google Maps integration for visual campsite selection
-- Custom markers and info windows for better UX
-- Fallback to list view when map is unavailable
-
-### What I'd Do Differently
-
-- **Add caching layer** for Recreation.gov API responses to reduce external calls
-- **Implement webhooks** instead of polling for real-time updates (if API supported)
-- **Add unit tests** for critical business logic (scheduler, availability checker)
-- **Migrate to PostgreSQL** for better concurrency and built-in replication
-- **Add rate limiting** on API endpoints to prevent abuse
-- **Implement SMS notifications** as an alternative to email
-
----
-
-## Contributing
-
-This is a personal project, but suggestions and feedback are welcome! Feel free to open an issue to discuss improvements or report bugs.
 
 ---
 
 ## License
 
 Private. All rights reserved.
-
----
-
-## Screenshots Guide
-
-To capture the screenshots for this README:
-
-1. **Run the app locally** with realistic data (create several sample watches)
-2. **Use consistent browser width** (1440px or 1920px recommended)
-3. **Capture clean screenshots** without browser UI if possible
-4. **Save to `docs/screenshots/`** with these filenames:
-   - `landing.png` — Landing page hero
-   - `dashboard-empty.png` — Empty state
-   - `dashboard-with-watches.png` — Dashboard with 3-4 watches
-   - `new-watch-search.png` — Search step
-   - `new-watch-campgrounds.png` — Campgrounds selection
-   - `new-watch-campsites-map.png` — Map view with campsites
-   - `new-watch-dates.png` — Date picker
-   - `new-watch-review.png` — Review step
-   - `watch-detail.png` — Watch detail page
-   - `settings.png` — Settings page
-5. **Uncomment the image tags** in this README
-
-**Screenshot tips:**
-
-- Use a campground everyone knows (Yosemite, Yellowstone, Grand Canyon)
-- Show the app with data loaded (not loading states)
-- Capture some interactions (e.g., hover states, selected items)
-- Consider adding light annotations (arrows, highlights) for key features
 
 ---
 

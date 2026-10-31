@@ -10,6 +10,12 @@ export default defineConfig(() => ({
   server: {
     port: 4200,
     host: 'localhost',
+    // Same paths the SPA uses in the container, forwarded to `nx serve api`
+    proxy: {
+      '/api': 'http://localhost:3333',
+      '/health': 'http://localhost:3333',
+      '/config.js': 'http://localhost:3333',
+    },
   },
   preview: {
     port: 4200,

@@ -3,7 +3,7 @@ import { z } from 'zod';
 // ─── User ──────────────────────────────────────────────────────────────────────
 
 export const userSchema = z.object({
-  id: z.string(), // Firebase UID
+  id: z.string(), // 'local' in single-user mode
   email: z.string().email(),
   displayName: z.string().nullable(),
   createdAt: z.string(),

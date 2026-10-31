@@ -65,13 +65,6 @@
   font-size: 15px;
 }
 
-.fieldValueMono {
-  font-size: 13px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  color: var(--color-text-secondary);
-  word-break: break-all;
-}
-
 .fieldDescription {
   font-size: 14px;
   color: var(--color-text-secondary);
@@ -145,12 +138,6 @@
   color: var(--color-text-secondary);
 }
 
-.signOutSection {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border);
-}
-
 /* ─── Responsive ──────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
@@ -174,9 +161,5 @@
 
   .section {
     padding: 14px;
-  }
-
-  .fieldValueMono {
-    font-size: 12px;
   }
 }

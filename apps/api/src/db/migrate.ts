@@ -68,12 +68,6 @@ export function runMigrations() {
   addColumnIfMissing('watch_sites', 'latitude', 'TEXT');
   addColumnIfMissing('watch_sites', 'longitude', 'TEXT');
 
-  // Access request: approved + approval_token on users
-  addColumnIfMissing('users', 'approved', 'INTEGER NOT NULL DEFAULT 0');
-  addColumnIfMissing('users', 'approval_token', 'TEXT');
-  // Existing users (no token) keep access; new users get token and approved=0
-  db.run(sql`UPDATE users SET approved = 1 WHERE approval_token IS NULL AND approved = 0`);
-
   // Records which (watch site, date) pairs the user has already been emailed
   // about, so a site that flickers unavailable and back does not re-alert.
   db.run(sql`

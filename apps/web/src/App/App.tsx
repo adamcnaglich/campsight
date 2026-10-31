@@ -1,116 +1,63 @@
+import { ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthContext } from '../context/AuthContext';
 import { Layout } from '../components/Layout';
-import { Loader } from '../components/Loader';
-import { Login } from '../pages/Login';
-import { Home } from '../pages/Home';
 import { Dashboard } from '../pages/Dashboard';
 import { New } from '../pages/New';
 import { WatchDetail } from '../pages/WatchDetail';
 import { Settings } from '../pages/Settings';
 import { Admin } from '../pages/Admin';
 import { DS } from '../pages/DS';
-import { Terms } from '../pages/Terms';
-import { Request as RequestAccessPage } from '../pages/Request';
-import { AccessApproved } from '../pages/AccessApproved/AccessApproved';
 
-const RequestRoute = () => {
-  const { user, loading, accessStatus } = useAuthContext();
-  if (loading) return <Loader />;
-  if (!user) return <Navigate to="/login" replace />;
-  if (accessStatus.approved === true)
-    return <Navigate to="/dashboard" replace />;
-  if (accessStatus.loading || accessStatus.approved === null) {
-    return <Loader />;
-  }
-  return <RequestAccessPage />;
-};
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, accessStatus } = useAuthContext();
-
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (accessStatus.loading || accessStatus.approved === null) {
-    return <Loader />;
-  }
-
-  if (accessStatus.approved === false) {
-    return <Navigate to="/request" replace />;
-  }
-
-  return <Layout>{children}</Layout>;
-};
+const Page = ({ children }: { children: ReactNode }) => (
+  <Layout>{children}</Layout>
+);
 
 export const App = () => {
-  const { user, loading } = useAuthContext();
-
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={
-          loading ? (
-            <Loader />
-          ) : user ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Login />
-          )
-        }
-      />
-      <Route path="/" element={<Home />} />
-      <Route path="/access-approved" element={<AccessApproved />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/ds" element={<DS />} />
-      <Route path="/request" element={<RequestRoute />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <Page>
             <Dashboard />
-          </ProtectedRoute>
+          </Page>
         }
       />
       <Route
         path="/new"
         element={
-          <ProtectedRoute>
+          <Page>
             <New />
-          </ProtectedRoute>
+          </Page>
         }
       />
       <Route
         path="/watch/:id"
         element={
-          <ProtectedRoute>
+          <Page>
             <WatchDetail />
-          </ProtectedRoute>
+          </Page>
         }
       />
       <Route
         path="/settings"
         element={
-          <ProtectedRoute>
+          <Page>
             <Settings />
-          </ProtectedRoute>
+          </Page>
         }
       />
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <Page>
             <Admin />
-          </ProtectedRoute>
+          </Page>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/ds" element={<DS />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };

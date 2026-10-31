@@ -1,9 +1,0 @@
-[build]
-  command = "npx nx build web"
-  publish = "dist/apps/web"
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/web/ libs/shared/"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

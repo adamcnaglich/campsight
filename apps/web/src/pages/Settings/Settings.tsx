@@ -1,7 +1,6 @@
-import { useAuthContext } from '../../context/AuthContext';
+import { useMe } from '../../hooks/useMe';
 import { useTheme, type ThemePreference } from '../../context/ThemeContext';
 import { Text } from '../../components/Text';
-import { Button } from '../../components/Button';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Settings.module.scss';
 
@@ -13,7 +12,7 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
 
 export const Settings = () => {
   useDocumentTitle('Settings');
-  const { user, signOut } = useAuthContext();
+  const { data: me } = useMe();
   const { preference, setPreference } = useTheme();
 
   return (
@@ -22,7 +21,7 @@ export const Settings = () => {
         Settings
       </Text>
       <Text variant="body-sm" className={styles.subtitle} as="p">
-        Manage your account and notification preferences.
+        Appearance and notification preferences.
       </Text>
 
       <div className={styles.section}>
@@ -53,47 +52,17 @@ export const Settings = () => {
 
       <div className={styles.section}>
         <Text variant="h2" className={styles.sectionTitle}>
-          Account
+          Notifications
         </Text>
         <div className={styles.field}>
           <label className={styles.fieldLabel}>Email</label>
           <Text variant="body" className={styles.fieldValue} as="p">
-            {user?.email || 'Not set'}
+            {me?.email || 'Not set'}
           </Text>
-        </div>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Display Name</label>
-          <Text variant="body" className={styles.fieldValue} as="p">
-            {user?.displayName || 'Not set'}
+          <Text variant="body-sm" className={styles.fieldDescription} as="p">
+            Alerts go here when a watched campsite opens up. Set with the{' '}
+            <code>NOTIFY_EMAIL</code> environment variable.
           </Text>
-        </div>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Account ID</label>
-          <Text variant="body" className={styles.fieldValueMono} as="p">
-            {user?.uid || 'N/A'}
-          </Text>
-        </div>
-      </div>
-
-      <div className={styles.section}>
-        <Text variant="h2" className={styles.sectionTitle}>
-          Notifications
-        </Text>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Email Notifications</label>
-          <Text variant="body" className={styles.fieldDescription} as="p">
-            You'll receive email alerts when watched campsites become available.
-            Notifications are sent to <strong>{user?.email}</strong>.
-          </Text>
-        </div>
-        <div className={styles.comingSoon}>
-          <span className={styles.comingSoonIcon}>📱</span>
-          <div>
-            <strong>Push Notifications</strong>
-            <Text variant="body" as="p">
-              iOS push notifications coming soon.
-            </Text>
-          </div>
         </div>
       </div>
 
@@ -109,12 +78,6 @@ export const Settings = () => {
         <Text variant="body-sm" className={styles.version} as="p">
           Version 1.0.0
         </Text>
-      </div>
-
-      <div className={styles.signOutSection}>
-        <Button variant="outline" level="danger" onClick={() => signOut()}>
-          Sign out
-        </Button>
       </div>
     </div>
   );

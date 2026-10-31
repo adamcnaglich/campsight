@@ -6,7 +6,10 @@ const router = Router();
 
 const RECREATION_GOV_SEARCH = 'https://www.recreation.gov/api/search';
 const IP_API_BASE = 'http://ip-api.com/json';
-const DEFAULT_COORDS = { lat: 42.3297, lng: -83.0425 }; // geographic center of US
+const DEFAULT_COORDS = { lat: 42.3297, lng: -83.0425 };
+// Region used when the client IP cannot be geolocated. On a LAN that is every
+// request, so this is effectively the home region for the "near you" strip.
+const HOME_REGION = (process.env.HOME_REGION || 'Michigan').trim();
 
 function getClientIp(req: Request): string {
   const forwarded = req.headers['x-forwarded-for'];
@@ -40,7 +43,7 @@ interface GeoResult {
 const DEFAULT_GEO: Omit<GeoResult, 'source'> = {
   lat: DEFAULT_COORDS.lat,
   lng: DEFAULT_COORDS.lng,
-  regionName: 'Michigan',
+  regionName: HOME_REGION,
 };
 
 async function geoFromIp(ip: string): Promise<GeoResult> {

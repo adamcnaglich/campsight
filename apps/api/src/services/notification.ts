@@ -74,6 +74,11 @@ export async function sendAvailabilityNotification(
     return false;
   }
 
+  if (!user.email) {
+    log.notify.warn({ userId, watchId }, 'NOTIFY_EMAIL not set, skipping email');
+    return false;
+  }
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     log.notify.warn('RESEND_API_KEY not set, skipping email');

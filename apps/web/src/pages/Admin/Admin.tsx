@@ -3,28 +3,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
-import { isAdmin } from '../../lib/admin';
-import { useAuthContext } from '../../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useMe } from '../../hooks/useMe';
 import { Text } from '../../components/Text';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Admin.module.scss';
 
 interface Stats {
-  users: { total: number };
   watches: { total: number; active: number };
   snapshots: { total: number };
   notifications: { total: number };
-}
-
-interface User {
-  id: string;
-  email: string;
-  displayName: string | null;
-  approved: boolean;
-  createdAt: string;
-  updatedAt: string;
-  watchCount: number;
 }
 
 interface Watch {
@@ -71,7 +58,6 @@ interface SchedulerStatus {
 
 type Tab =
   | 'overview'
-  | 'users'
   | 'watches'
   | 'activity'
   | 'scheduler'
@@ -79,12 +65,7 @@ type Tab =
 
 export const Admin = () => {
   useDocumentTitle('Admin');
-  const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
-
-  if (!isAdmin(user?.email)) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   return (
     <div className={styles.admin}>
@@ -105,14 +86,6 @@ export const Admin = () => {
           onClick={() => setActiveTab('overview')}
         >
           Overview
-        </button>
-        <button
-          className={classNames(styles.tab, {
-            [styles.tabActive]: activeTab === 'users',
-          })}
-          onClick={() => setActiveTab('users')}
-        >
-          Users
         </button>
         <button
           className={classNames(styles.tab, {
@@ -150,7 +123,6 @@ export const Admin = () => {
 
       <div className={styles.content}>
         {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'users' && <UsersTab />}
         {activeTab === 'watches' && <WatchesTab />}
         {activeTab === 'scheduler' && <SchedulerTab />}
         {activeTab === 'activity' && <ActivityTab />}
@@ -167,7 +139,7 @@ const OverviewTab = () => {
     error,
   } = useQuery<Stats>({
     queryKey: ['admin', 'overview'],
-    queryFn: () => api.get('/admin'),
+    queryFn: () => api.get('/api/admin'),
   });
 
   if (isLoading)
@@ -187,14 +159,6 @@ const OverviewTab = () => {
   return (
     <div className={styles.overview}>
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <Text variant="caption" className={styles.statLabel} as="h3">
-            Total Users
-          </Text>
-          <Text variant="h1" className={styles.statValue} as="p">
-            {stats.users.total}
-          </Text>
-        </div>
         <div className={styles.statCard}>
           <Text variant="caption" className={styles.statLabel} as="h3">
             Total Watches
@@ -232,122 +196,6 @@ const OverviewTab = () => {
   );
 };
 
-const UsersTab = () => {
-  const queryClient = useQueryClient();
-  const { user: currentUser } = useAuthContext();
-  const {
-    data: users,
-    isLoading,
-    error,
-  } = useQuery<User[]>({
-    queryKey: ['admin', 'users'],
-    queryFn: () => api.get('/admin/users'),
-  });
-
-  const deleteUserMutation = useMutation({
-    mutationFn: (userId: string) => api.delete(`/admin/users/${userId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'watches'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'activity'] });
-    },
-  });
-
-  const handleDeleteUser = (user: User) => {
-    if (
-      !window.confirm(
-        `Delete ${user.email}? This will permanently remove the user and all their watches and data.`,
-      )
-    ) {
-      return;
-    }
-    deleteUserMutation.mutate(user.id);
-  };
-
-  if (isLoading)
-    return (
-      <div className={styles.loading}>
-        <Text variant="body">Loading users...</Text>
-      </div>
-    );
-  if (error)
-    return (
-      <div className={styles.error}>
-        <Text variant="body">Failed to load users</Text>
-      </div>
-    );
-  if (!users) return null;
-
-  return (
-    <div className={styles.tableContainer}>
-      {deleteUserMutation.isError && (
-        <div className={styles.error} style={{ padding: 12, margin: 12 }}>
-          {deleteUserMutation.error instanceof Error
-            ? deleteUserMutation.error.message
-            : 'Failed to delete user'}
-        </div>
-      )}
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Display Name</th>
-            <th>Approval</th>
-            <th>Watches</th>
-            <th>Created</th>
-            <th>Last Active</th>
-            <th className={styles.actionsCol}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => {
-            const isCurrentUser = currentUser?.email === user.email;
-            return (
-              <tr key={user.id}>
-                <td>{user.email}</td>
-                <td>{user.displayName || '-'}</td>
-                <td>
-                  <span
-                    className={classNames(styles.approvalBadge, {
-                      [styles.approvalApproved]: user.approved,
-                      [styles.approvalPending]: !user.approved,
-                    })}
-                  >
-                    {user.approved ? 'Approved' : 'Pending'}
-                  </span>
-                </td>
-                <td>{user.watchCount}</td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td>{new Date(user.updatedAt).toLocaleDateString()}</td>
-                <td className={styles.actionsCol}>
-                  <Button
-                    variant="outline"
-                    level="danger"
-                    size="small"
-                    onClick={() => handleDeleteUser(user)}
-                    disabled={isCurrentUser || deleteUserMutation.isPending}
-                    title={
-                      isCurrentUser
-                        ? 'You cannot delete your own account'
-                        : undefined
-                    }
-                  >
-                    {deleteUserMutation.isPending &&
-                    deleteUserMutation.variables === user.id
-                      ? 'Deleting...'
-                      : 'Delete'}
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
 const WatchesTab = () => {
   const {
     data: watches,
@@ -355,7 +203,7 @@ const WatchesTab = () => {
     error,
   } = useQuery<Watch[]>({
     queryKey: ['admin', 'watches'],
-    queryFn: () => api.get('/admin/watches'),
+    queryFn: () => api.get('/api/admin/watches'),
   });
 
   if (isLoading)
@@ -427,7 +275,7 @@ const ActivityTab = () => {
     error,
   } = useQuery<Activity[]>({
     queryKey: ['admin', 'activity'],
-    queryFn: () => api.get('/admin/activity'),
+    queryFn: () => api.get('/api/admin/activity'),
     refetchInterval: 5000,
   });
 
@@ -549,9 +397,9 @@ const ActivityTab = () => {
 };
 
 const EmailTab = () => {
-  const { user } = useAuthContext();
+  const { data: me } = useMe();
   const sendTestMutation = useMutation({
-    mutationFn: () => api.post('/admin/notifications/test', {}),
+    mutationFn: () => api.post('/api/admin/notifications/test', {}),
   });
 
   return (
@@ -564,8 +412,8 @@ const EmailTab = () => {
         </div>
         <div className={styles.schedulerInfo}>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Send to (logged-in user):</span>
-            <span className={styles.infoValue}>{user?.email ?? '—'}</span>
+            <span className={styles.infoLabel}>Send to (NOTIFY_EMAIL):</span>
+            <span className={styles.infoValue}>{me?.email || '—'}</span>
           </div>
           <p className={styles.emailDescription}>
             Sends a test email to verify that notification delivery is
@@ -577,7 +425,7 @@ const EmailTab = () => {
             variant="primary"
             size="small"
             onClick={() => sendTestMutation.mutate()}
-            disabled={sendTestMutation.isPending || !user?.email}
+            disabled={sendTestMutation.isPending || !me?.email}
           >
             {sendTestMutation.isPending ? 'Sending...' : 'Send test email'}
           </Button>
@@ -608,12 +456,12 @@ const SchedulerTab = () => {
     error,
   } = useQuery<SchedulerStatus>({
     queryKey: ['admin', 'scheduler', 'status'],
-    queryFn: () => api.get('/admin/scheduler/status'),
+    queryFn: () => api.get('/api/admin/scheduler/status'),
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   const startMutation = useMutation({
-    mutationFn: () => api.post('/admin/scheduler/start', {}),
+    mutationFn: () => api.post('/api/admin/scheduler/start', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'scheduler', 'status'],
@@ -622,7 +470,7 @@ const SchedulerTab = () => {
   });
 
   const stopMutation = useMutation({
-    mutationFn: () => api.post('/admin/scheduler/stop', {}),
+    mutationFn: () => api.post('/api/admin/scheduler/stop', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'scheduler', 'status'],
@@ -631,7 +479,7 @@ const SchedulerTab = () => {
   });
 
   const restartMutation = useMutation({
-    mutationFn: () => api.post('/admin/scheduler/restart', {}),
+    mutationFn: () => api.post('/api/admin/scheduler/restart', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'scheduler', 'status'],
@@ -640,7 +488,7 @@ const SchedulerTab = () => {
   });
 
   const triggerMutation = useMutation({
-    mutationFn: () => api.post('/admin/scheduler/trigger', {}),
+    mutationFn: () => api.post('/api/admin/scheduler/trigger', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'scheduler', 'status'],

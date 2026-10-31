@@ -1,0 +1,39 @@
+# CampSight — Portainer stack
+#
+# Single container: Express serves the API and the built web app on one port,
+# SQLite lives on the `campsight-data` volume. No sign-in; keep it LAN-only.
+#
+# The image is built on the Docker host straight from the GitHub repo, so the
+# stack needs no registry. First deploy takes a few minutes while Nx builds.
+#
+# Stack environment variables (Portainer → Stacks → Environment variables, or
+# "Load variables from .env file" with stack.env): see stack.env.example.
+
+services:
+  campsight:
+    build: https://github.com/adamcnaglich/campsight.git#main
+    image: campsight:latest
+    container_name: campsight
+    restart: unless-stopped
+    ports:
+      - "${CAMPSIGHT_PORT:-3333}:3333"
+    environment:
+      # Where availability alerts are sent
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL:?NOTIFY_EMAIL is required}
+      # Resend (https://resend.com) delivers the alert emails
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-CampSight <onboarding@resend.dev>}
+      # Recreation.gov RIDB key (https://ridb.recreation.gov), used for campground details
+      RIDB_API_KEY: ${RIDB_API_KEY:?RIDB_API_KEY is required}
+      # Optional: Google Maps JavaScript API key for the campsite map (list view works without it)
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      # Optional: state shown in the "available near you" strip
+      HOME_REGION: ${HOME_REGION:-Michigan}
+      # Optional: how often to poll Recreation.gov (cron expression)
+      CHECK_INTERVAL: ${CHECK_INTERVAL:-*/15 * * * *}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - campsight-data:/data
+
+volumes:
+  campsight-data:
