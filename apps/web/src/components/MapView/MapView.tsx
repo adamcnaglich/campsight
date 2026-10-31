@@ -1,4 +1,12 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import {
+  Component,
+  useEffect,
+  useRef,
+  useCallback,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+} from 'react';
 import {
   APIProvider,
   Map,
@@ -110,7 +118,7 @@ function ZoomWatcher({
   return null;
 }
 
-export const MapView = ({
+const GoogleMapView = ({
   markers,
   selectedIds = [],
   onMarkerClick,
@@ -199,3 +207,44 @@ export const MapView = ({
     </div>
   );
 };
+
+/**
+ * Google Maps failures (bad key, API not enabled, billing off) can throw from
+ * inside the marker rendering, and without a boundary that unmounts the whole
+ * app. Catch them here and fall back to the same placeholder the no-key path
+ * shows, so the wizard keeps working from the list view.
+ */
+class MapErrorBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Map failed to render; showing list view instead', error, info);
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className={styles.placeholder}>
+          <span className={styles.placeholderIcon}>🗺️</span>
+          <p className={styles.placeholderText}>
+            Map unavailable. Check the Google Maps key in the browser console.
+          </p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export const MapView = (props: MapViewProps) => (
+  <MapErrorBoundary>
+    <GoogleMapView {...props} />
+  </MapErrorBoundary>
+);

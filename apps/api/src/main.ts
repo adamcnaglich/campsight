@@ -29,7 +29,13 @@ const app = express();
 // The SPA is served from this same process, so helmet's default CSP would
 // block its Google Fonts, inline theme script and Google Maps. This app is
 // meant for LAN access only, so CSP is off rather than enumerated.
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    // Browsers ignore COOP on plain http and log an error for it; this app is LAN http.
+    crossOriginOpenerPolicy: false,
+  }),
+);
 app.use(compression());
 // CORS only matters for the Vite dev server on another port; in the container
 // the SPA and API share an origin.
