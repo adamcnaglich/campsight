@@ -68,6 +68,8 @@ The `Dockerfile` is a two-stage build: Nx compiles both apps, then a slim runtim
 docker build -t campsight .
 ```
 
+To have GitHub build and publish the image instead, move [`docs/github/docker-workflow.yml`](docs/github/docker-workflow.yml) to `.github/workflows/docker.yml` (pushing a workflow file needs a token with the `workflow` scope) and point the compose file at `ghcr.io/adamcnaglich/campsight:latest`.
+
 ---
 
 ## Configuration
