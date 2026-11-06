@@ -54,7 +54,11 @@ services:
       CHECK_INTERVAL: ${CHECK_INTERVAL:-*/15 * * * *}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
-      - campsight-data:/data
+      # Where the SQLite database lives. Default: a Docker-managed volume.
+      # Set CAMPSIGHT_DATA to a host folder (e.g. /volume2/docker/campsight)
+      # to keep it alongside your other stacks' data; the folder must be
+      # writable by uid 1000, the user the container runs as.
+      - ${CAMPSIGHT_DATA:-campsight-data}:/data
 
 volumes:
   campsight-data:

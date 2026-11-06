@@ -60,7 +60,13 @@ docker compose --env-file stack.env up -d
 
 ### Data
 
-SQLite lives on the `campsight-data` named volume at `/data/campsight.db`. To keep it in a host folder instead, replace the volume with a bind mount and `chown 1000:1000` that folder, since the container runs as the unprivileged `node` user.
+SQLite lives at `/data/campsight.db` inside the container. By default `/data` is the Docker-managed volume `campsight-data`. To keep it in a host folder instead, next to your other stacks' data and inside whatever backs that folder up, set `CAMPSIGHT_DATA` to the folder's path, for example `/volume2/docker/campsight`. The folder must be writable by uid 1000, the unprivileged `node` user the container runs as:
+
+```bash
+docker run --rm --user root -v /volume2/docker/campsight:/d node:22-bookworm-slim chown 1000:1000 /d
+```
+
+To move an existing install, copy the database into the folder before switching the variable; the app reads whichever location `/data` points at and does not migrate between them.
 
 ### Image
 
@@ -107,6 +113,7 @@ Set these as stack environment variables in Portainer (or in `.env` for local de
 | `HOME_REGION` | No | `Michigan` | State shown in the "available near you" strip. On a LAN the client IP can't be geolocated, so this is used for every request |
 | `CHECK_INTERVAL` | No | `*/15 * * * *` | Cron expression for availability checks |
 | `CAMPSIGHT_PORT` | No | `3333` | Host port the stack publishes |
+| `CAMPSIGHT_DATA` | No | `campsight-data` volume | Host folder for the database, e.g. `/volume2/docker/campsight`; must be writable by uid 1000 |
 | `LOG_LEVEL` | No | `info` | `debug`, `info`, `warn`, `error` or `fatal` |
 | `DATABASE_PATH` | No | `/data/campsight.db` | SQLite file location |
 | `SCHEDULER_REQUEST_DELAY_MS` | No | `1000` | Pause between Recreation.gov requests in a cycle |
