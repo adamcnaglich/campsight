@@ -10,6 +10,7 @@ import { requestLogger } from './middleware/request-logger';
 import { runMigrations } from './db/migrate';
 import {
   AuthenticatedRequest,
+  isHttps,
   requireAdmin,
   requireAuth,
   sessionMiddleware,
@@ -52,6 +53,19 @@ if (process.env.CORS_ORIGIN) {
   app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 }
 app.use(express.json());
+
+// Visitors who reach us through Cloudflare over plain http are sent to https,
+// so a password or session cookie never crosses the internet in the clear.
+// Requests straight from the LAN carry no Cloudflare headers and stay on http.
+app.use((req, res, next) => {
+  const viaCloudflare = Boolean(
+    req.headers['cf-ray'] || req.headers['cf-connecting-ip'],
+  );
+  if (viaCloudflare && !isHttps(req) && req.headers.host) {
+    return res.redirect(308, `https://${req.headers.host}${req.originalUrl}`);
+  }
+  next();
+});
 
 // Request logging — placed after body parsing so it captures response times.
 app.use(requestLogger);
