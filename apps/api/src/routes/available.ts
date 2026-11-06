@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { log } from '../lib/logger';
+import { getClientIp } from '../middleware/auth';
 
 const router = Router();
 
@@ -11,25 +12,16 @@ const DEFAULT_COORDS = { lat: 42.3297, lng: -83.0425 };
 // request, so this is effectively the home region for the "near you" strip.
 const HOME_REGION = (process.env.HOME_REGION || 'Michigan').trim();
 
-function getClientIp(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    const ip = Array.isArray(forwarded)
-      ? forwarded[0]
-      : forwarded.split(',')[0];
-    return ip.trim();
-  }
-  return req.socket.remoteAddress ?? '';
-}
-
-function isLocalIp(ip: string): boolean {
+function isLocalIp(rawIp: string): boolean {
+  const ip = rawIp.replace(/^::ffff:/, '');
   return (
     !ip ||
     ip === '::1' ||
-    ip === '127.0.0.1' ||
-    ip.startsWith('::ffff:127.') ||
+    ip.startsWith('127.') ||
     ip.startsWith('192.168.') ||
-    ip.startsWith('10.')
+    ip.startsWith('10.') ||
+    // 172.16.0.0/12, which includes Docker's bridge networks
+    /^172\.(1[6-9]|2\d|3[01])\./.test(ip)
   );
 }
 

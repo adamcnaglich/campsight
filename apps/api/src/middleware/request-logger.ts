@@ -1,7 +1,7 @@
 import pinoHttp from 'pino-http';
 import { logger } from '../lib/logger';
 import type { Request, Response } from 'express';
-import type { AuthenticatedRequest } from './local-user';
+import type { AuthenticatedRequest } from './auth';
 
 /**
  * HTTP request logging middleware.
@@ -15,6 +15,11 @@ import type { AuthenticatedRequest } from './local-user';
  * Client errors (4xx) log at WARN level.
  * Server errors (5xx) log at ERROR level.
  */
+/** Invite links are one-time credentials; never write the token to the log. */
+function redactUrl(url: string | undefined): string {
+  return (url ?? '').replace(/(\/invite\/)[^/?#]+/, '$1[redacted]');
+}
+
 export const requestLogger = pinoHttp({
   logger,
 
@@ -45,7 +50,7 @@ export const requestLogger = pinoHttp({
   serializers: {
     req: (req: Request) => ({
       method: req.method,
-      url: req.url,
+      url: redactUrl(req.url),
       userAgent: req.headers?.['user-agent'],
     }),
     res: (res: Response) => ({
@@ -56,11 +61,11 @@ export const requestLogger = pinoHttp({
   // Customise the one-line message
   customSuccessMessage: (req, res) => {
     const r = req as Request;
-    return `${r.method} ${r.url} ${(res as Response).statusCode}`;
+    return `${r.method} ${redactUrl(r.url)} ${(res as Response).statusCode}`;
   },
   customErrorMessage: (req, _res, err) => {
     const r = req as Request;
-    return `${r.method} ${r.url} failed: ${err.message}`;
+    return `${r.method} ${redactUrl(r.url)} failed: ${err.message}`;
   },
 
   // Skip logging the health check to keep logs clean

@@ -9,9 +9,33 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import styles from './Admin.module.scss';
 
 interface Stats {
+  users: { total: number };
   watches: { total: number; active: number };
   snapshots: { total: number };
   notifications: { total: number };
+}
+
+interface AdminUser {
+  id: string;
+  email: string;
+  displayName: string | null;
+  isAdmin: boolean;
+  createdAt: string;
+  watchCount: number;
+}
+
+interface PendingInvite {
+  id: string;
+  email: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+interface CreatedInvite {
+  email: string;
+  link: string;
+  expiresAt: string;
+  emailed: boolean;
 }
 
 interface Watch {
@@ -58,6 +82,7 @@ interface SchedulerStatus {
 
 type Tab =
   | 'overview'
+  | 'users'
   | 'watches'
   | 'activity'
   | 'scheduler'
@@ -86,6 +111,14 @@ export const Admin = () => {
           onClick={() => setActiveTab('overview')}
         >
           Overview
+        </button>
+        <button
+          className={classNames(styles.tab, {
+            [styles.tabActive]: activeTab === 'users',
+          })}
+          onClick={() => setActiveTab('users')}
+        >
+          Users
         </button>
         <button
           className={classNames(styles.tab, {
@@ -123,6 +156,7 @@ export const Admin = () => {
 
       <div className={styles.content}>
         {activeTab === 'overview' && <OverviewTab />}
+        {activeTab === 'users' && <UsersTab />}
         {activeTab === 'watches' && <WatchesTab />}
         {activeTab === 'scheduler' && <SchedulerTab />}
         {activeTab === 'activity' && <ActivityTab />}
@@ -161,6 +195,14 @@ const OverviewTab = () => {
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <Text variant="caption" className={styles.statLabel} as="h3">
+            Users
+          </Text>
+          <Text variant="h1" className={styles.statValue} as="p">
+            {stats.users.total}
+          </Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text variant="caption" className={styles.statLabel} as="h3">
             Total Watches
           </Text>
           <Text variant="h1" className={styles.statValue} as="p">
@@ -192,6 +234,238 @@ const OverviewTab = () => {
           </Text>
         </div>
       </div>
+    </div>
+  );
+};
+
+const UsersTab = () => {
+  const queryClient = useQueryClient();
+  const { data: me } = useMe();
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [created, setCreated] = useState<CreatedInvite | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const users = useQuery<AdminUser[]>({
+    queryKey: ['admin', 'users'],
+    queryFn: () => api.get('/api/admin/users'),
+  });
+
+  const invites = useQuery<PendingInvite[]>({
+    queryKey: ['admin', 'invites'],
+    queryFn: () => api.get('/api/admin/invites'),
+  });
+
+  const createInvite = useMutation({
+    mutationFn: () =>
+      api.post<CreatedInvite>('/api/admin/invites', { email: inviteEmail }),
+    onSuccess: (invite) => {
+      setCreated(invite);
+      setCopied(false);
+      setInviteEmail('');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'invites'] });
+    },
+  });
+
+  const revokeInvite = useMutation({
+    mutationFn: (id: string) => api.delete(`/api/admin/invites/${id}`),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['admin', 'invites'] }),
+  });
+
+  const deleteUser = useMutation({
+    mutationFn: (id: string) => api.delete(`/api/admin/users/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overview'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'watches'] });
+    },
+  });
+
+  const handleDelete = (user: AdminUser) => {
+    if (
+      !window.confirm(
+        `Delete ${user.email}? This permanently removes the account and all of its watches.`,
+      )
+    ) {
+      return;
+    }
+    deleteUser.mutate(user.id);
+  };
+
+  const handleCopy = async () => {
+    if (!created) return;
+    try {
+      await navigator.clipboard.writeText(created.link);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className={styles.usersPanel}>
+      <div className={styles.schedulerCard}>
+        <div className={styles.schedulerHeader}>
+          <Text variant="h2" className={styles.schedulerTitle}>
+            Invite someone
+          </Text>
+        </div>
+        <p className={styles.emailDescription}>
+          Creates a one-time link, valid for 7 days, where they choose their
+          own password. It is emailed to them when SMTP is set up.
+        </p>
+        <form
+          className={styles.inviteForm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (inviteEmail && !createInvite.isPending) createInvite.mutate();
+          }}
+        >
+          <input
+            className={styles.inviteInput}
+            type="email"
+            placeholder="friend@example.com"
+            aria-label="Email to invite"
+            required
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+          />
+          <Button
+            type="submit"
+            variant="primary"
+            size="small"
+            disabled={createInvite.isPending}
+          >
+            {createInvite.isPending ? 'Inviting…' : 'Invite'}
+          </Button>
+        </form>
+        {createInvite.isError ? (
+          <span className={styles.statusError}>
+            {createInvite.error instanceof Error
+              ? createInvite.error.message
+              : 'Could not create the invite'}
+          </span>
+        ) : null}
+        {created ? (
+          <div className={styles.inviteResult}>
+            <span className={styles.statusSuccess}>
+              {created.emailed
+                ? `✓ Invite emailed to ${created.email}.`
+                : `✓ Invite created for ${created.email}. It was not emailed, so send them this link.`}
+            </span>
+            <code className={styles.inviteLink}>{created.link}</code>
+            <div>
+              <Button variant="outline" size="small" onClick={handleCopy}>
+                {copied ? 'Copied' : 'Copy link'}
+              </Button>
+            </div>
+            <span className={styles.emailDescription}>
+              This link is shown only once.
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      {invites.data && invites.data.length > 0 ? (
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Pending invite</th>
+                <th>Sent</th>
+                <th>Expires</th>
+                <th className={styles.actionsCol}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invites.data.map((invite) => (
+                <tr key={invite.id}>
+                  <td>{invite.email}</td>
+                  <td>{new Date(invite.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(invite.expiresAt).toLocaleDateString()}</td>
+                  <td className={styles.actionsCol}>
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => revokeInvite.mutate(invite.id)}
+                      disabled={revokeInvite.isPending}
+                    >
+                      Revoke
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {users.isLoading ? (
+        <div className={styles.loading}>
+          <Text variant="body">Loading users...</Text>
+        </div>
+      ) : users.isError || !users.data ? (
+        <div className={styles.error}>
+          <Text variant="body">Failed to load users</Text>
+        </div>
+      ) : (
+        <div className={styles.tableContainer}>
+          {deleteUser.isError ? (
+            <div className={styles.error} style={{ padding: 12, margin: 12 }}>
+              {deleteUser.error instanceof Error
+                ? deleteUser.error.message
+                : 'Failed to delete user'}
+            </div>
+          ) : null}
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Watches</th>
+                <th>Joined</th>
+                <th className={styles.actionsCol}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.data.map((user) => {
+                const isSelf = user.id === me?.id;
+                return (
+                  <tr key={user.id}>
+                    <td>{user.email}</td>
+                    <td>{user.displayName || '—'}</td>
+                    <td>
+                      <span
+                        className={classNames(styles.badge, {
+                          [styles.badgeActive]: user.isAdmin,
+                          [styles.badgeInactive]: !user.isAdmin,
+                        })}
+                      >
+                        {user.isAdmin ? 'Admin' : 'Member'}
+                      </span>
+                    </td>
+                    <td>{user.watchCount}</td>
+                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className={styles.actionsCol}>
+                      <Button
+                        variant="outline"
+                        level="danger"
+                        size="small"
+                        onClick={() => handleDelete(user)}
+                        disabled={isSelf || deleteUser.isPending}
+                        title={isSelf ? 'You cannot delete your own account' : undefined}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
@@ -412,7 +686,7 @@ const EmailTab = () => {
         </div>
         <div className={styles.schedulerInfo}>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Send to (NOTIFY_EMAIL):</span>
+            <span className={styles.infoLabel}>Send to (your account):</span>
             <span className={styles.infoValue}>{me?.email || '—'}</span>
           </div>
           <p className={styles.emailDescription}>

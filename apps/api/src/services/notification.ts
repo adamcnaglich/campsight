@@ -147,7 +147,7 @@ export async function sendAvailabilityNotification(
   }
 
   if (!user.email) {
-    log.notify.warn({ userId, watchId }, 'NOTIFY_EMAIL not set, skipping email');
+    log.notify.warn({ userId, watchId }, 'Account has no email address, skipping email');
     return false;
   }
 

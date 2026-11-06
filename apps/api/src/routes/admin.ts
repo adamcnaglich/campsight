@@ -9,13 +9,30 @@ import {
   restartScheduler,
   triggerManualCheck,
 } from '../services/scheduler';
-import { sendTestNotificationEmail } from '../services/notification';
+import {
+  getSmtpConfig,
+  sendMail,
+  sendTestNotificationEmail,
+} from '../services/notification';
+import { isHttps } from '../middleware/auth';
+import {
+  createInvite,
+  findUserByEmail,
+  isValidEmail,
+  listPendingInvites,
+  normalizeEmail,
+  revokeInvite,
+} from '../services/auth';
 
 const router = Router();
 
-/** Helper to extract the local user's email set by localUserMiddleware */
+/** The signed-in admin's email, set by the session middleware */
 function getAdminEmail(req: Request): string {
   return (req as Request & { userEmail: string }).userEmail;
+}
+
+function getAdminId(req: Request): string {
+  return (req as Request & { userId: string }).userId;
 }
 
 /**
@@ -26,6 +43,9 @@ router.get('/', async (req, res: Response) => {
 
   try {
     const stats = {
+      users: {
+        total: db.select({ count: count() }).from(schema.users).get()?.count || 0,
+      },
       watches: {
         total: db.select({ count: count() }).from(schema.watches).get()?.count || 0,
         active: db
@@ -47,6 +67,162 @@ router.get('/', async (req, res: Response) => {
   } catch (error) {
     log.api.error({ err: error, adminEmail }, 'Failed to fetch admin overview');
     res.status(500).json({ error: { message: 'Failed to fetch admin overview' } });
+  }
+});
+
+/**
+ * GET /api/admin/users — Accounts with their watch counts
+ */
+router.get('/users', async (req, res: Response) => {
+  const adminEmail = getAdminEmail(req);
+
+  try {
+    const users = db
+      .select({
+        id: schema.users.id,
+        email: schema.users.email,
+        displayName: schema.users.displayName,
+        isAdmin: schema.users.isAdmin,
+        createdAt: schema.users.createdAt,
+        watchCount: sql<number>`(SELECT COUNT(*) FROM ${schema.watches} WHERE ${schema.watches.userId} = ${schema.users.id})`,
+      })
+      .from(schema.users)
+      .orderBy(desc(schema.users.createdAt))
+      .all();
+
+    res.json({
+      data: users.map((u) => ({ ...u, isAdmin: Boolean(u.isAdmin) })),
+    });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail }, 'Failed to list users');
+    res.status(500).json({ error: { message: 'Failed to list users' } });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id — Remove an account and everything it owns
+ */
+router.delete('/users/:id', async (req, res: Response) => {
+  const adminEmail = getAdminEmail(req);
+  const userId = req.params.id;
+
+  if (userId === getAdminId(req)) {
+    return res.status(400).json({
+      error: { message: 'You cannot delete your own account' },
+    });
+  }
+
+  try {
+    const user = db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .get();
+
+    if (!user) {
+      return res.status(404).json({ error: { message: 'User not found' } });
+    }
+
+    // Cascades to sessions, watches, snapshots and notifications
+    db.delete(schema.users).where(eq(schema.users.id, userId)).run();
+
+    log.api.warn({ adminEmail, userId, userEmail: user.email }, 'Admin deleted user');
+    res.json({ data: { success: true } });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail, userId }, 'Failed to delete user');
+    res.status(500).json({ error: { message: 'Failed to delete user' } });
+  }
+});
+
+/**
+ * GET /api/admin/invites — Invite links that have not been used or expired
+ */
+router.get('/invites', async (req, res: Response) => {
+  try {
+    res.json({ data: listPendingInvites() });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail: getAdminEmail(req) }, 'Failed to list invites');
+    res.status(500).json({ error: { message: 'Failed to list invites' } });
+  }
+});
+
+/**
+ * POST /api/admin/invites — Create a one-time invite link for an email
+ *
+ * The link is returned once, here, and emailed when SMTP is configured. Only
+ * its hash is stored, so it cannot be shown again later.
+ */
+router.post('/invites', async (req, res: Response) => {
+  const adminEmail = getAdminEmail(req);
+  const email = normalizeEmail(String(req.body?.email ?? ''));
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: { message: 'Enter a valid email address' } });
+  }
+  if (findUserByEmail(email)) {
+    return res.status(409).json({
+      error: { message: 'That email already has an account' },
+    });
+  }
+
+  try {
+    const invite = createInvite(email, getAdminId(req));
+    const base = (
+      process.env.PUBLIC_URL ||
+      `${isHttps(req) ? 'https' : 'http'}://${req.headers.host}`
+    ).replace(/\/$/, '');
+    const link = `${base}/invite/${invite.token}`;
+
+    let emailed = false;
+    if (getSmtpConfig()) {
+      try {
+        await sendMail({
+          to: email,
+          subject: "You're invited to CampSight",
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+              <h1 style="color: #1a5632; font-size: 24px;">🏕️ You're invited to CampSight</h1>
+              <p style="font-size: 16px; color: #333;">
+                ${adminEmail} set you up with an account. CampSight watches
+                Recreation.gov campsites and emails you when one opens up.
+              </p>
+              <p style="font-size: 16px; color: #333;">
+                <a href="${link}" style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                  Choose your password
+                </a>
+              </p>
+              <p style="font-size: 14px; color: #64748b;">
+                The link works once and expires in 7 days. If the button doesn't work, copy this: ${link}
+              </p>
+            </div>
+          `,
+        });
+        emailed = true;
+      } catch (err) {
+        log.api.error({ err, adminEmail, email }, 'Invite created but the email failed to send');
+      }
+    }
+
+    log.api.info({ adminEmail, email, emailed }, 'Admin created invite');
+    res.status(201).json({
+      data: { email, link, expiresAt: invite.expiresAt, emailed },
+    });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail, email }, 'Failed to create invite');
+    res.status(500).json({ error: { message: 'Failed to create invite' } });
+  }
+});
+
+/**
+ * DELETE /api/admin/invites/:id — Revoke an unused invite
+ */
+router.delete('/invites/:id', async (req, res: Response) => {
+  try {
+    revokeInvite(req.params.id);
+    res.json({ data: { success: true } });
+  } catch (error) {
+    log.api.error({ err: error, adminEmail: getAdminEmail(req) }, 'Failed to revoke invite');
+    res.status(500).json({ error: { message: 'Failed to revoke invite' } });
   }
 });
 
@@ -271,14 +447,14 @@ router.get('/notifications', async (req, res: Response) => {
 });
 
 /**
- * POST /api/admin/notifications/test — Send a test notification email to NOTIFY_EMAIL
+ * POST /api/admin/notifications/test — Send a test notification email to the signed-in admin
  */
 router.post('/notifications/test', async (req, res: Response) => {
   const adminEmail = getAdminEmail(req);
 
   if (!adminEmail) {
     return res.status(400).json({
-      error: { message: 'NOTIFY_EMAIL is not set' },
+      error: { message: 'Your account has no email address' },
     });
   }
 

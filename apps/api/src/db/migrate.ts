@@ -68,6 +68,30 @@ export function runMigrations() {
   addColumnIfMissing('watch_sites', 'latitude', 'TEXT');
   addColumnIfMissing('watch_sites', 'longitude', 'TEXT');
 
+  // Accounts: password login, admin flag, sessions and invite links
+  addColumnIfMissing('users', 'password_hash', 'TEXT');
+  addColumnIfMissing('users', 'is_admin', 'INTEGER NOT NULL DEFAULT 0');
+
+  db.run(sql`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(sql`
+    CREATE TABLE IF NOT EXISTS invites (
+      token_hash TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      invited_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL,
+      used_at TEXT
+    )
+  `);
+
   // Records which (watch site, date) pairs the user has already been emailed
   // about, so a site that flickers unavailable and back does not re-alert.
   db.run(sql`
@@ -89,6 +113,13 @@ export function runMigrations() {
   // Indexes
   db.run(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_availability_site_date ON availability_snapshots(watch_site_id, date)`);
   db.run(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_notified_dates_site_date ON notified_dates(watch_site_id, date)`);
+  db.run(sql`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`);
+  // One account per address, whatever its capitalization.
+  try {
+    db.run(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_nocase ON users(email COLLATE NOCASE)`);
+  } catch (err) {
+    log.db.warn({ err }, 'Could not enforce unique user emails; duplicates exist');
+  }
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_user_id ON watches(user_id)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watches_active ON watches(is_active)`);
   db.run(sql`CREATE INDEX IF NOT EXISTS idx_watch_sites_watch_id ON watch_sites(watch_id)`);

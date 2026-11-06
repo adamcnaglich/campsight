@@ -37,7 +37,7 @@ export const Navbar = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/new', label: 'New Watch' },
-    { path: '/admin', label: 'Admin' },
+    ...(me?.isAdmin ? [{ path: '/admin', label: 'Admin' }] : []),
   ];
 
   const avatarInitial = me?.displayName?.[0] || me?.email?.[0] || '🏕️';

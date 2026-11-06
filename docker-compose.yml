@@ -1,7 +1,9 @@
 # CampSight — Portainer stack
 #
 # Single container: Express serves the API and the built web app on one port,
-# SQLite lives on the `campsight-data` volume. No sign-in; keep it LAN-only.
+# SQLite lives on the `campsight-data` volume. Sign-in is by email and password;
+# the admin account comes from ADMIN_EMAIL / ADMIN_PASSWORD, everyone else joins
+# through an invite link from the admin panel.
 #
 # Deploy it from Portainer with the Repository method (this repo's URL, compose
 # path docker-compose.yml): Portainer clones the repo and builds the image on
@@ -23,8 +25,16 @@ services:
     ports:
       - "${CAMPSIGHT_PORT:-3333}:3333"
     environment:
-      # Where availability alerts are sent
-      NOTIFY_EMAIL: ${NOTIFY_EMAIL:?NOTIFY_EMAIL is required}
+      # The admin account. Its email is the sign-in and where its alerts go.
+      # ADMIN_PASSWORD is applied on every start, so changing it here is also
+      # how you recover access.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      # Older installs: used as the admin email when ADMIN_EMAIL is unset
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
+      # Optional: public address for invite links, e.g. https://campsight.example.com
+      # (defaults to whatever address the admin is browsing from)
+      PUBLIC_URL: ${PUBLIC_URL:-}
       # SMTP server that delivers the alert emails
       # (iCloud: smtp.mail.me.com, port 587, Apple ID + app-specific password)
       SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required}

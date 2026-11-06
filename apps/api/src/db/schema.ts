@@ -7,17 +7,51 @@ import {
 
 // ─── Users ─────────────────────────────────────────────────────────────────────
 
-// Single-user mode: one row with id 'local'. Email mirrors NOTIFY_EMAIL.
+// Accounts. The first admin is bootstrapped from ADMIN_EMAIL / ADMIN_PASSWORD;
+// everyone else joins through an invite link. Email is both the login and the
+// address alerts are sent to.
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull(),
   displayName: text('display_name'),
+  passwordHash: text('password_hash'),
+  isAdmin: integer('is_admin', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
   updatedAt: text('updated_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Sessions ──────────────────────────────────────────────────────────────────
+
+// Server-side sessions. Only a SHA-256 of the cookie token is stored.
+export const sessions = sqliteTable('sessions', {
+  tokenHash: text('token_hash').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  expiresAt: text('expires_at').notNull(),
+});
+
+// ─── Invites ───────────────────────────────────────────────────────────────────
+
+// One-time links an admin hands out so someone can create their account.
+export const invites = sqliteTable('invites', {
+  tokenHash: text('token_hash').primaryKey(),
+  email: text('email').notNull(),
+  invitedBy: text('invited_by').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  expiresAt: text('expires_at').notNull(),
+  usedAt: text('used_at'),
 });
 
 // ─── Watches ───────────────────────────────────────────────────────────────────

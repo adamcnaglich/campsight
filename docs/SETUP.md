@@ -18,7 +18,7 @@ npm install
 cp .env.example .env
 ```
 
-Fill in `NOTIFY_EMAIL`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` in `.env`. Everything else has a working default. The full list is in the [Configuration](../README.md#configuration) table.
+Fill in `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` in `.env`. Everything else has a working default. The full list is in the [Configuration](../README.md#configuration) table.
 
 ## Run
 
@@ -27,7 +27,7 @@ npx nx serve api   # API on http://localhost:3333
 npx nx serve web   # Web app on http://localhost:4200
 ```
 
-The Vite dev server proxies `/api`, `/health` and `/config.js` to the API, so the web app talks to it the same way it does in the container. There is no sign-in; open http://localhost:4200 and you are on the dashboard.
+The Vite dev server proxies `/api`, `/health` and `/config.js` to the API, so the web app talks to it the same way it does in the container. Open http://localhost:4200 and sign in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Invite more accounts from Admin → Users.
 
 The API creates `data/campsight.db` and runs its migrations on first start.
 
@@ -58,15 +58,15 @@ docker build -t campsight .                        # build the container image
 apps/web/src
 ├── App/            # routes
 ├── components/     # UI building blocks (Navbar, MapView, DateRangePicker, …)
-├── pages/          # Dashboard, New (wizard), WatchDetail, Settings, Admin, DS
-├── hooks/          # useMe (local user), useDocumentTitle, useMediaQuery
+├── pages/          # Login, Invite, Dashboard, New (wizard), WatchDetail, Settings, Admin, DS
+├── hooks/          # useMe (signed-in account), useDocumentTitle, useMediaQuery
 └── lib/            # api client, runtime config, date helpers
 
 apps/api/src
 ├── main.ts         # Express app, static SPA, routes
-├── middleware/     # local-user (single-user mode), request logging
-├── routes/         # watches, campsites, available, admin
-├── services/       # scheduler, availability fetch/diff, notifications
+├── middleware/     # auth (sessions, requireAuth/requireAdmin), request logging
+├── routes/         # auth, watches, campsites, available, admin
+├── services/       # auth (passwords, sessions, invites), scheduler, availability, notifications
 └── db/             # Drizzle schema and startup migrations
 
 libs/shared/src     # Zod schemas and types used by both apps
@@ -83,6 +83,6 @@ rm -f data/campsight.db*
 npx nx serve api
 ```
 
-**No alert emails.** The scheduler logs `NOTIFY_EMAIL not set` or `SMTP_HOST not set` when either is missing. Use the admin panel's Email tab to send a test message.
+**No alert emails.** The scheduler logs `SMTP_HOST not set` when mail is not configured. Use the admin panel's Email tab to send a test message.
 
 **Recreation.gov rate limits.** Lengthen `CHECK_INTERVAL` or raise `SCHEDULER_REQUEST_DELAY_MS`. The scheduler backs off on its own for `SCHEDULER_RATE_LIMIT_COOLDOWN_MS` after a 429.

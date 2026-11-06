@@ -2,7 +2,7 @@
 
 **Never miss a campsite booking again.** CampSight watches Recreation.gov for the sites and dates you care about and emails you the moment one opens up.
 
-This is a fork of [areknow/campsight](https://github.com/areknow/campsight) trimmed for self-hosting on a home network: no Google sign-in, no access requests, one user, one container. Run it as a Portainer stack and keep it on the LAN.
+This is a fork of [areknow/campsight](https://github.com/areknow/campsight) reworked for self-hosting: no Google or Firebase, its own email-and-password accounts, invite-only sign-up, one container. Run it as a Portainer stack on your LAN, or put it behind a tunnel for friends and family.
 
 [![Built with React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
 [![Built with Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
@@ -15,6 +15,7 @@ This is a fork of [areknow/campsight](https://github.com/areknow/campsight) trim
 
 - [What changed from upstream](#what-changed-from-upstream)
 - [Deploy with Portainer](#deploy-with-portainer)
+- [Putting it on the internet](#putting-it-on-the-internet)
 - [Configuration](#configuration)
 - [Features](#features)
 - [How It Works](#how-it-works)
@@ -27,12 +28,13 @@ This is a fork of [areknow/campsight](https://github.com/areknow/campsight) trim
 
 ## What changed from upstream
 
-- **No authentication.** Firebase and Google OAuth are gone. Every request runs as a single local user, and alerts go to `NOTIFY_EMAIL`. Anyone who can reach the port can use the app, so don't expose it beyond your network.
-- **No landing, login, terms or access-request pages.** `/` goes straight to the dashboard.
+- **Its own accounts instead of Google.** Firebase and Google OAuth are gone. People sign in with an email and password; passwords are hashed with scrypt and sessions live server-side behind an HTTP-only cookie. Each account sees only its own watches and gets alerts at its own address.
+- **Invite-only.** There is no public sign-up. The admin (created from `ADMIN_EMAIL` and `ADMIN_PASSWORD`) invites people from the admin panel; each gets a one-time link, valid 7 days, to choose a password.
+- **No landing, terms or access-request pages.** `/` goes to the dashboard, or to sign-in when signed out.
 - **One container.** Express serves the built web app alongside the API, replacing the Netlify + Railway split. The admin API moved from `/admin` to `/api/admin` so it doesn't collide with the admin page.
-- **Admin panel is open.** Scheduler controls, activity feed and a test-email button are available to everyone on the network. The Users tab was removed since there is only one user.
+- **Admin panel is admin-only.** Users and invites, scheduler controls, activity feed and a test-email button.
 - **Runtime config.** The Google Maps key is read from `GOOGLE_MAPS_API_KEY` when the page loads, so changing it is an env edit and a restart, not a rebuild.
-- **Single-user database.** The `users` table holds one row with id `local`. Its email mirrors `NOTIFY_EMAIL` on each boot.
+- **Upgrades in place.** A database from the earlier single-user version keeps working: its one user becomes the admin and keeps its watches.
 
 ---
 
@@ -42,8 +44,8 @@ Portainer clones this repo and builds the image on your Docker host, so there is
 
 1. In Portainer go to **Stacks → Add stack** and name it `campsight`.
 2. Pick **Repository**, set the URL to `https://github.com/adamcnaglich/campsight`, reference `refs/heads/main`, compose path `docker-compose.yml`.
-3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `NOTIFY_EMAIL`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` by hand.
-4. **Deploy the stack**, then open `http://<host>:3333`.
+3. Under **Environment variables**, click **Load variables from .env file** and upload a copy of [`stack.env.example`](stack.env.example) with your values, or add `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `RIDB_API_KEY` by hand.
+4. **Deploy the stack**, then open `http://<host>:3333` and sign in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
 
 The compose file uses `build: .`, so it has to be deployed from the repository rather than pasted into the web editor, unless a `campsight:latest` image already exists on the host.
 
@@ -72,13 +74,28 @@ To have GitHub build and publish the image instead, move [`docs/github/docker-wo
 
 ---
 
+## Putting it on the internet
+
+The login makes this safe to do, in this order:
+
+1. Deploy a version with accounts, sign in as the admin, and confirm a signed-out browser only sees the sign-in page.
+2. Route a public hostname to port 3333. With Cloudflare Tunnel that is a public hostname on the tunnel pointing at `http://localhost:3333`; the cookie is marked `Secure` automatically when the request arrived over HTTPS.
+3. Add the new address to your Google Maps key's allowed referrers, and set `PUBLIC_URL` if you want invite links to use it even when you create them from the LAN address.
+
+Sign-ins are throttled per address and per email (10 failures locks for 15 minutes). For a second lock in front of the app, a Cloudflare Access policy on the hostname works without any changes here.
+
+---
+
 ## Configuration
 
 Set these as stack environment variables in Portainer (or in `.env` for local development).
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `NOTIFY_EMAIL` | Yes | | Address that receives availability alerts |
+| `ADMIN_EMAIL` | Yes | | The admin's sign-in email, also where the admin's alerts go |
+| `ADMIN_PASSWORD` | Yes | | The admin's password, at least 8 characters. Applied on every start, so changing it here is also the recovery path |
+| `PUBLIC_URL` | No | request address | Address used in invite links, e.g. `https://campsight.example.com` |
+| `NOTIFY_EMAIL` | No | | Older installs only: used as the admin email when `ADMIN_EMAIL` is unset |
 | `SMTP_HOST` | Yes | | SMTP server for alert emails, e.g. `smtp.mail.me.com` for iCloud |
 | `SMTP_USER` | Yes | | SMTP login, e.g. your Apple ID address |
 | `SMTP_PASS` | Yes | | SMTP password; iCloud needs an app-specific password |
@@ -104,10 +121,11 @@ Set these as stack environment variables in Portainer (or in `.env` for local de
 - **5-step wizard** for campsite selection: search, campground, campsites, dates, review
 - **Interactive map** of campsites when a Google Maps key is set, list view otherwise
 - **Scheduled monitoring** polls Recreation.gov every 15 minutes (configurable)
-- **Email alerts** over plain SMTP the first time a watched date turns available, with duplicate suppression
+- **Email alerts** over plain SMTP to each account's own address the first time a watched date turns available, with duplicate suppression
+- **Accounts and invites** so friends and family can keep their own watches
 - **Multi-site watches** track several campsites in one watch
 - **Dashboard** to pause, resume, edit or delete watches
-- **Admin panel** with scheduler controls, run history and a test-email button
+- **Admin panel** with users and invites, scheduler controls, run history and a test-email button
 
 ### Screenshots
 
@@ -125,7 +143,7 @@ Set these as stack environment variables in Portainer (or in `.env` for local de
 
 ```mermaid
 flowchart TB
-    User[Browser on the LAN]
+    User[Browser, signed in]
     App[Express: API + web app]
     SQLite[(SQLite on /data)]
     RecGov[Recreation.gov API]
@@ -137,13 +155,13 @@ flowchart TB
     App -->|Search / details| RecGov
     Scheduler -->|Every 15 min| App
     App -->|Availability| RecGov
-    App -->|Alert to NOTIFY_EMAIL| Mail
+    App -->|Alert to the watch owner| Mail
 ```
 
 1. You search for a recreation area or campground and pick campsites and dates.
 2. The watch is stored in SQLite.
 3. The scheduler checks availability for every active watch on the cron interval.
-4. When a date flips to available, one email per watch goes to `NOTIFY_EMAIL`.
+4. When a date flips to available, one email per watch goes to the account that owns it.
 5. You book it on Recreation.gov.
 
 ```mermaid
@@ -165,7 +183,7 @@ sequenceDiagram
         alt Newly available date
             Scheduler->>DB: Snapshot + notified_dates
             Scheduler->>Email: Send alert
-            Email-->>User: Email to NOTIFY_EMAIL
+            Email-->>User: Email to the watch owner
         end
     end
 ```
@@ -178,7 +196,7 @@ Requires Node 22 or newer.
 
 ```bash
 npm install
-cp .env.example .env     # fill in NOTIFY_EMAIL, SMTP_*, RIDB_API_KEY
+cp .env.example .env     # fill in ADMIN_EMAIL, ADMIN_PASSWORD, SMTP_*, RIDB_API_KEY
 
 npx nx serve api         # http://localhost:3333
 npx nx serve web         # http://localhost:4200, proxies /api to 3333
@@ -229,13 +247,18 @@ campsight/
 
 ## API Reference
 
-No authentication. Every request runs as the local user.
+Everything under `/api` needs a signed-in session cookie, except `/api/auth/*`. Routes under `/api/admin` also need the admin flag. `/health`, `/config.js` and the static app are public.
 
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/health` | Health check |
 | `GET` | `/config.js` | Runtime config script loaded by the SPA |
-| `GET` | `/api/me` | The local user (`id`, `email`, `displayName`) |
+| `POST` | `/api/auth/login` | Sign in with `email` and `password`; sets the session cookie. Locks after 10 failures in 15 minutes |
+| `POST` | `/api/auth/logout` | End this session |
+| `GET` | `/api/auth/invite/:token` | Which email an invite link is for |
+| `POST` | `/api/auth/invite/:token` | Create the account (`displayName`, `password`) and sign in |
+| `POST` | `/api/auth/password` | Change your own password; other sessions are signed out |
+| `GET` | `/api/me` | The signed-in account (`id`, `email`, `displayName`, `isAdmin`) |
 | `GET` | `/api/watches` | List watches |
 | `POST` | `/api/watches` | Create a watch |
 | `PATCH` | `/api/watches/:id` | Pause/resume or change dates |
@@ -247,14 +270,20 @@ No authentication. Every request runs as the local user.
 | `GET` | `/api/campsites/facility/:id` | Campground details (needs `RIDB_API_KEY`) |
 | `GET` | `/api/available` | Campgrounds with openings near `HOME_REGION` |
 | `GET` | `/api/admin` | Overview stats |
+| `GET` | `/api/admin/users` | Accounts with watch counts |
+| `DELETE` | `/api/admin/users/:id` | Remove an account and its watches |
+| `GET` `POST` | `/api/admin/invites` | List pending invites, or create one for an `email` |
+| `DELETE` | `/api/admin/invites/:id` | Revoke an unused invite |
 | `GET` | `/api/admin/watches` | All watches |
 | `GET` | `/api/admin/activity` | Recent activity feed |
 | `GET` | `/api/admin/scheduler/status` | Scheduler state |
 | `POST` | `/api/admin/scheduler/{start,stop,restart,trigger}` | Scheduler controls |
-| `POST` | `/api/admin/notifications/test` | Send a test email to `NOTIFY_EMAIL` over SMTP |
+| `POST` | `/api/admin/notifications/test` | Send a test email to your own address over SMTP |
 
 ```bash
-curl http://localhost:3333/api/watches
+curl -c jar -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","password":"..."}' http://localhost:3333/api/auth/login
+curl -b jar http://localhost:3333/api/watches
 ```
 
 ---
