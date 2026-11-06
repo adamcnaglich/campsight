@@ -43,6 +43,7 @@
   font-size: 15px;
   color: var(--color-text-secondary);
   line-height: 1.5;
+  text-wrap: balance;
 }
 
 .form {
@@ -105,6 +106,7 @@
   font-size: 13px;
   color: var(--color-text-secondary);
   text-align: center;
+  text-wrap: balance;
 
   a {
     color: var(--color-primary);
